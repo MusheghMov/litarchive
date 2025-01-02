@@ -24,7 +24,7 @@ export default forwardRef(function BookCard(
       className="group relative flex !h-min w-full cursor-pointer flex-col space-y-1 justify-self-center overflow-hidden rounded-md border border-foreground/20 bg-card-foreground/5 hover:border-primary/60"
       ref={ref}
       onClick={() => {
-        if (book?.userReadingProgress?.length === 0) {
+        if (!book?.userReadingProgress) {
           router.push(`/books/${book.id}?page=${1}`);
         } else {
           return router.push(

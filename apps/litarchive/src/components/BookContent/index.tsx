@@ -22,7 +22,8 @@ export default function BookContent({
 
   return (
     <div className="flex h-full w-full flex-col items-center">
-      {book?.userReadingProgress[0]?.lastPageNumber ? (
+      {book?.userReadingProgress &&
+      book?.userReadingProgress[0]?.lastPageNumber ? (
         <Progress
           className="absolute top-0 h-1 rounded-[0]"
           value={
