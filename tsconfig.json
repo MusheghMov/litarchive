@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@repo/*": ["packages/*"],
+      "@apps/*": ["apps/*"]
+    },
+    "composite": true
+  }
+}

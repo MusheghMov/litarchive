@@ -1,0 +1,1 @@
+ALTER TABLE userLikedBooks ADD `created_at` text DEFAULT 'CURRENT_TIMESTAMP';
