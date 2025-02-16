@@ -34,6 +34,8 @@ export default function FavoriteButton({
         return;
       }
       setIsBookLiked(true);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       await honoClient.books["like"].$post(
         {
           query: {
@@ -53,6 +55,8 @@ export default function FavoriteButton({
         return;
       }
       setIsBookLiked(false);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       await honoClient.books["dislike"].$post(
         {
           query: {

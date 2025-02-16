@@ -61,7 +61,7 @@ export default function BooksPage() {
   }, [entry, hasNextPage, fetchNextPage]);
 
   return (
-    <div className="flex w-full flex-col gap-6 px-4 md:px-8 lg:max-w-[80%] lg:p-0">
+    <div className="flex w-full flex-col gap-6 px-4 md:px-8 lg:max-w-[1000px] lg:p-0">
       <Input
         {...register("search")}
         className="w-full sm:w-[400px]"
@@ -73,7 +73,7 @@ export default function BooksPage() {
         </div>
       )}
       <div className="flex flex-row flex-wrap">
-        <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {infiniteData?.pages.map((page, index) => (
             <React.Fragment key={index}>
               {page.map((book, i) => {
@@ -83,6 +83,8 @@ export default function BooksPage() {
                       key={book.id}
                       ref={ref}
                       book={book}
+                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                      // @ts-ignore
                       isLiked={book?.userLikedBooks?.length > 0}
                     />
                   );
@@ -92,6 +94,8 @@ export default function BooksPage() {
                   <BookCard
                     key={book.id}
                     book={book}
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
                     isLiked={book?.userLikedBooks?.length > 0}
                   />
                 );

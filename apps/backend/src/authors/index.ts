@@ -1,26 +1,40 @@
-import { Hono } from "hono";
-import { z } from "zod";
-import { zValidator } from "@hono/zod-validator";
 import { connectToDB } from "@repo/db";
+import { z, createRoute } from "@hono/zod-openapi";
+import { createRouter } from "../lib/create-app";
 
-type Bindings = {
-  DATABASE_URL: string;
-  DATABASE_AUTH_TOKEN: string;
-};
+const router = createRouter();
 
-const app = new Hono<{ Bindings: Bindings }>();
-
-const authorsApp = app
-  .get(
-    "/",
-    zValidator(
-      "query",
-      z
-        .object({
+const authorsRoute = router
+  .openapi(
+    createRoute({
+      method: "get",
+      path: "/",
+      request: {
+        query: z.object({
           search: z.string().optional(),
-        })
-        .optional(),
-    ),
+        }),
+      },
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: z.array(
+                z.object({
+                  name: z.string().nullable(),
+                  id: z.number(),
+                  imageUrl: z.string().nullable(),
+                  color: z.string().nullable(),
+                  bio: z.string().nullable(),
+                  birthDate: z.string().nullable(),
+                  deathDate: z.string().nullable(),
+                }),
+              ),
+            },
+          },
+          description: "Retrive authors",
+        },
+      },
+    }),
     async (c) => {
       const search = c.req.query("search") || "";
       const db = connectToDB({
@@ -34,26 +48,45 @@ const authorsApp = app
       return c.json(res);
     },
   )
-  .get(
-    "/:authorId",
-    zValidator(
-      "param",
-      z.object({
-        authorId: z.string(),
-      }),
-    ),
+  .openapi(
+    createRoute({
+      method: "get",
+      path: "/:authorId",
+      request: {
+        params: z.object({
+          authorId: z.string(),
+        }),
+      },
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                name: z.string().nullable(),
+                id: z.number(),
+                imageUrl: z.string().nullable(),
+                color: z.string().nullable(),
+                bio: z.string().nullable(),
+                birthDate: z.string().nullable(),
+                deathDate: z.string().nullable(),
+              }),
+            },
+          },
+          description: "Retrive author",
+        },
+      },
+    }),
     async (c) => {
       const authorId = +c.req.param("authorId");
       const db = connectToDB({
         url: c.env.DATABASE_URL,
         authoToken: c.env.DATABASE_AUTH_TOKEN,
       });
-      const res = await db.query.authors.findMany({
-        limit: 1,
+      const res = await db.query.authors.findFirst({
         where: (auhtors, { eq, and }) => and(eq(auhtors.id, authorId)),
       });
-      return c.json(res[0]);
+      return c.json(res);
     },
   );
 
-export default authorsApp;
+export default authorsRoute;

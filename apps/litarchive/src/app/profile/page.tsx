@@ -7,6 +7,8 @@ export default async function ProfilePage() {
   let favoriteBooks;
 
   try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const favoriteBooksJson = await honoClient.books["favorites"].$post(
       {},
       {
