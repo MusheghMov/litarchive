@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -17,9 +18,9 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@repo/*": ["../../packages/*"],
       "@apps/*": ["../../apps/*"]
     },
     "target": "ES2017"

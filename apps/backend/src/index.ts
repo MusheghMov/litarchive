@@ -1,24 +1,34 @@
-import { Hono } from "hono";
 import authorsApp from "./authors";
-import articlesApp from "./articles";
-import booksApp from "./books";
+import articlesRoute from "./articles";
+import booksRoute from "./books";
 import userApp from "./user";
-import { cors } from "hono/cors";
-export const app = new Hono();
+import { apiReference } from "@scalar/hono-api-reference";
+import createApp from "./lib/create-app";
+
+const app = createApp();
 
 //this must be named route
 export const route = app
-  .use(
-    "*",
-    cors({
-      origin: "*",
-      allowMethods: ["POST", "GET", "OPTIONS"],
-    }),
-  )
   .route("/authors", authorsApp)
-  .route("/articles", articlesApp)
-  .route("/books", booksApp)
+  .route("/articles", articlesRoute)
+  .route("/books", booksRoute)
   .route("/user", userApp);
+
+app.doc("/doc", {
+  openapi: "3.0.0",
+  info: {
+    version: "1.0.0",
+    title: "LitArchive API",
+  },
+});
+app.get(
+  "/reference",
+  apiReference({
+    spec: {
+      url: "/doc",
+    },
+  }),
+);
 
 export type AppTypes = typeof route;
 

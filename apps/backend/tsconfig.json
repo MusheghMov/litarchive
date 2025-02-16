@@ -1,11 +1,7 @@
 {
   "extends": "../../tsconfig.json",
-  "files": ["../../packages/db/index.ts"],
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "@repo/*": ["../../packages/*"]
-    },
     "composite": true,
     "target": "ESNext",
     "module": "ESNext",

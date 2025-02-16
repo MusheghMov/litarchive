@@ -33,18 +33,23 @@ export default forwardRef(function BookCard(
         }
       }}
     >
-      <div className="overflow-hidden rounded">
-        <AspectRatio
-          ratio={5 / 4}
-          className="relative flex items-center justify-center transition-all group-hover:scale-125"
-        >
-          <BookImage
-            size={100}
-            strokeWidth={0.5}
-            className="stroke-foreground/40"
+      <AspectRatio
+        ratio={5 / 4}
+        className="relative flex items-center justify-center"
+      >
+        <BookImage
+          size={100}
+          strokeWidth={0.5}
+          className="stroke-foreground/40 transition-all group-hover:scale-125"
+        />
+        <div className="absolute bottom-2 right-2">
+          <FavoriteButton
+            bookId={book.id}
+            isLiked={isLiked}
+            key={isLiked?.toString()}
           />
-        </AspectRatio>
-      </div>
+        </div>
+      </AspectRatio>
 
       <div className="flex w-full flex-col items-start justify-between gap-3 px-2 pb-2">
         <div className="flex w-full flex-row items-center justify-between gap-2">
@@ -56,15 +61,10 @@ export default forwardRef(function BookCard(
               {book.titleTranslit}
             </p>
           </div>
-          <FavoriteButton
-            bookId={book.id}
-            isLiked={isLiked}
-            key={isLiked?.toString()}
-          />
         </div>
 
         <p className="line-clamp-1 text-sm font-bold uppercase">
-          {book.author.name || "Author"}
+          {book?.author?.name || "Author"}
         </p>
       </div>
       {book?.userReadingProgress?.length > 0 ? (
