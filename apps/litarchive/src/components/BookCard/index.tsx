@@ -18,6 +18,7 @@ export default forwardRef(function BookCard(
   ref: any
 ) {
   const router = useRouter();
+  console.log("book: ", book);
 
   return (
     <div
@@ -28,7 +29,7 @@ export default forwardRef(function BookCard(
           router.push(`/books/${book.id}?page=${1}`);
         } else {
           return router.push(
-            `/books/${book.id}?page=${book?.userReadingProgress[0]?.lastPageNumber}`
+            `/books/${book.id}?page=${book?.userReadingProgress[0]?.lastPageNumber || 1}`
           );
         }
       }}
