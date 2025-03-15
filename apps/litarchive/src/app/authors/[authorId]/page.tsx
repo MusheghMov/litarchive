@@ -1,6 +1,8 @@
 import Image from "next/image";
+import Rating from "@/components/Rating";
 import type { Metadata } from "next";
 import honoClient from "@/app/honoRPCClient";
+import { auth } from "@clerk/nextjs/server";
 
 export async function generateMetadata({
   params,
@@ -37,12 +39,18 @@ export default async function AuthorPage({
   params: Promise<{ authorId: string }>;
 }) {
   const { authorId } = await params;
+  const { userId } = await auth();
 
-  const res = await honoClient.authors[":authorId"].$get({
-    param: {
-      authorId,
+  const res = await honoClient.authors[":authorId"].$get(
+    {
+      param: {
+        authorId,
+      },
     },
-  });
+    {
+      headers: { Authorization: `${userId}` },
+    }
+  );
   const author = await res.json();
 
   return (
@@ -58,6 +66,13 @@ export default async function AuthorPage({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           quality={30}
           alt="author"
+        />
+      </div>
+      <div className="flex items-center gap-10">
+        <Rating
+          initialRating={author.userRating || 0}
+          authorId={author?.id?.toString()}
+          userId={userId?.toString()}
         />
       </div>
     </div>

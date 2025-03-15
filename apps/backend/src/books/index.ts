@@ -234,6 +234,17 @@ const booksRoute = router
           }),
         },
         with: {
+          booksToGenre: {
+            with: {
+              genre: {
+                columns: {
+                  id: true,
+                  name: true,
+                  description: true,
+                },
+              },
+            },
+          },
           author: {
             columns: {
               id: true,

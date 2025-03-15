@@ -1,10 +1,48 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  integer,
+  primaryKey,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 import { relations, sql } from "drizzle-orm";
 
 export const user = sqliteTable("user", {
   id: integer("id").primaryKey(),
   sub: text("sub").unique(),
 });
+
+export const authors = sqliteTable("author", {
+  id: integer("id").primaryKey(),
+  name: text("name"),
+  imageUrl: text("imageUrl"),
+  color: text("color"),
+  bio: text("bio"),
+  birthDate: text("birthDate"),
+  deathDate: text("deathDate"),
+});
+
+export const authorRatings = sqliteTable(
+  "authorRatings",
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => user.id),
+    authorId: integer("author_id")
+      .notNull()
+      .references(() => authors.id),
+    rating: integer("rating").notNull(), // e.g., 1-5 stars
+    review: text("review"), // Optional text review
+    createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
+  },
+  (t) => {
+    return {
+      unq: uniqueIndex("user_author_rating_unique").on(t.userId, t.authorId),
+    };
+  },
+);
 
 export const books = sqliteTable("books", {
   id: integer("id").primaryKey(),
@@ -17,18 +55,53 @@ export const books = sqliteTable("books", {
   sourceUrl: text("sourceUrl"),
   fileUrl: text("fileUrl"),
   authorName: text("author_name"),
-  authorId: integer("author_id"),
+  authorId: integer("author_id").references(() => authors.id),
 });
 
-export const authors = sqliteTable("author", {
+export const bookRatings = sqliteTable(
+  "bookRatings",
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => user.id),
+    bookId: integer("book_id")
+      .notNull()
+      .references(() => books.id),
+    rating: integer("rating").notNull(), // e.g., 1-5 stars
+    review: text("review"), // Optional text review
+    createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
+  },
+  (t) => {
+    return {
+      unq: uniqueIndex("user_book_rating_unique").on(t.userId, t.bookId),
+    };
+  },
+);
+
+export const genre = sqliteTable("genre", {
   id: integer("id").primaryKey(),
   name: text("name"),
-  imageUrl: text("imageUrl"),
-  color: text("color"),
-  bio: text("bio"),
-  birthDate: text("birthDate"),
-  deathDate: text("deathDate"),
+  description: text("description"),
 });
+
+export const booksToGenre = sqliteTable(
+  "books_to_genre",
+  {
+    bookId: integer("book_id")
+      .references(() => books.id)
+      .notNull(),
+    genreId: integer("genre_id")
+      .references(() => genre.id)
+      .notNull(),
+  },
+  (t) => {
+    return {
+      pk: primaryKey({ name: "asdfasd", columns: [t.genreId, t.genreId] }),
+    };
+  },
+);
 
 export const articles = sqliteTable("articles", {
   id: integer("id").primaryKey(),
@@ -96,6 +169,8 @@ export const userRelations = relations(user, ({ many }) => ({
   userReadingProgress: many(userReadingProgress),
   userLikedArticles: many(userLikedArticles),
   articles: many(articles),
+  bookRatings: many(bookRatings), // Add this
+  authorRatings: many(authorRatings), // Add this
 }));
 
 export const articlesRelations = relations(articles, ({ one, many }) => ({
@@ -117,12 +192,24 @@ export const userLikedArticlesRelations = relations(
       fields: [userLikedArticles.articleId],
       references: [articles.id],
     }),
-  })
+  }),
 );
 
 export const authorRelations = relations(authors, ({ many }) => ({
   books: many(books),
   userLikedAuthors: many(userLikedAuthors),
+  ratings: many(authorRatings),
+}));
+
+export const authorRatingsRelations = relations(authorRatings, ({ one }) => ({
+  user: one(user, {
+    fields: [authorRatings.userId],
+    references: [user.id],
+  }),
+  author: one(authors, {
+    fields: [authorRatings.authorId],
+    references: [authors.id],
+  }),
 }));
 
 export const booksRelations = relations(books, ({ one, many }) => ({
@@ -130,8 +217,36 @@ export const booksRelations = relations(books, ({ one, many }) => ({
     fields: [books.authorId],
     references: [authors.id],
   }),
+  booksToGenre: many(booksToGenre),
   userLikedBooks: many(userLikedBooks),
   userReadingProgress: many(userReadingProgress),
+  ratings: many(bookRatings),
+}));
+
+export const bookRatingsRelations = relations(bookRatings, ({ one }) => ({
+  user: one(user, {
+    fields: [bookRatings.userId],
+    references: [user.id],
+  }),
+  book: one(books, {
+    fields: [bookRatings.bookId],
+    references: [books.id],
+  }),
+}));
+
+export const genreRelations = relations(genre, ({ many }) => ({
+  booksToGenre: many(booksToGenre),
+}));
+
+export const boolsToGenreRelations = relations(booksToGenre, ({ one }) => ({
+  book: one(books, {
+    fields: [booksToGenre.bookId],
+    references: [books.id],
+  }),
+  genre: one(genre, {
+    fields: [booksToGenre.genreId],
+    references: [genre.id],
+  }),
 }));
 
 export const userLikedBooksRelations = relations(userLikedBooks, ({ one }) => ({
@@ -156,5 +271,5 @@ export const userReadingProgressRelations = relations(
       fields: [userReadingProgress.bookId],
       references: [books.id],
     }),
-  })
+  }),
 );
