@@ -53,7 +53,9 @@ export default async function Layout({
                       inactiveFillColor: "#f59e0b",
                     }}
                   />
-                  <p className="text-4xl">{author.averageRating || 0}</p>
+                  <p className="text-4xl">
+                    {author.averageRating ? author.averageRating.toFixed(1) : 0}
+                  </p>
                   <div className="flex h-fit flex-row items-center justify-between gap-2">
                     <p className="text-xs text-foreground/50">
                       {author.ratingsCount || 0} ratings
