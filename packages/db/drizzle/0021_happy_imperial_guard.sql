@@ -1,0 +1,1 @@
+ALTER TABLE `genera` RENAME TO `genra`;

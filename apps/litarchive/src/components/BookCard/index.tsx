@@ -18,8 +18,6 @@ export default forwardRef(function BookCard(
   ref: any
 ) {
   const router = useRouter();
-  console.log("book: ", book);
-
   return (
     <div
       className="group relative flex !h-min w-full cursor-pointer flex-col space-y-1 justify-self-center overflow-hidden rounded-md border border-foreground/20 bg-card-foreground/5 hover:border-primary/60"

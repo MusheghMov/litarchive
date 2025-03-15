@@ -22,7 +22,7 @@ export async function generateMetadata({
       bookId: bookId,
     },
   });
-  const book = await bookJson.json();
+  // const book = await bookJson.json();
   return {
     // title: book?.title,
     openGraph: {
