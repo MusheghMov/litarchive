@@ -74,7 +74,25 @@ const authorsRoute = router
                 ratingsCount: z.number(),
                 reviewsCount: z.number(),
                 userRating: z.number().nullable(),
-                // Optional user's rating info that will be added conditionally
+                userReview: z.string().nullable(),
+                ratings: z.array(
+                  z.object({
+                    id: z.number(),
+                    userId: z.number(),
+                    authorId: z.number(),
+                    rating: z.number(),
+                    review: z.string().nullable(),
+                    createdAt: z.string().nullable(),
+                    updatedAt: z.string().nullable(),
+                    user: z.object({
+                      sub: z.string(),
+                      firstName: z.string(),
+                      lastName: z.string(),
+                      email: z.string(),
+                      imageUrl: z.string(),
+                    }),
+                  }),
+                ),
               }),
             },
           },
@@ -124,6 +142,10 @@ const authorsRoute = router
                   sql<number>`(SELECT ${authorRatings.rating} FROM ${authorRatings} WHERE ${authorRatings.authorId} = ${authorId} AND ${authorRatings.userId} = ${dbUser?.id})`.as(
                     "userRating",
                   ),
+                userReview:
+                  sql<string>`(SELECT ${authorRatings.review} FROM ${authorRatings} WHERE ${authorRatings.authorId} = ${authorId} AND ${authorRatings.userId} = ${dbUser?.id})`.as(
+                    "userReview",
+                  ),
               }
             : {}),
           //         ratingInfo: sql`(
@@ -138,16 +160,27 @@ const authorsRoute = router
           // )`.as("ratingInfo"),
         },
         with: {
-          // Only include the user's rating if they're logged in
-          // ratings: true,
-          // ...(dbUser
-          //   ? {
-          //       ratings: {
-          //         where: eq(authorRatings.userId, dbUser.id),
-          //         limit: 1,
-          //       },
-          //     }
-          //   : {}),
+          ratings: {
+            columns: {
+              userId: true,
+              authorId: true,
+              rating: true,
+              review: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+            with: {
+              user: {
+                columns: {
+                  sub: true,
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                  imageUrl: true,
+                },
+              },
+            },
+          },
         },
       });
 

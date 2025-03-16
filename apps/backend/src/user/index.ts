@@ -17,17 +17,23 @@ const userApp = app.post(
     "query",
     z.object({
       sub: z.string(),
+      firstName: z.string().optional(),
+      lastName: z.string().optional(),
+      email: z.string().optional(),
+      imageUrl: z.string().optional(),
     }),
   ),
   async (c) => {
-    const sub = c.req.query("sub");
-
     const db = connectToDB({
       url: c.env.DATABASE_URL,
       authoToken: c.env.DATABASE_AUTH_TOKEN,
     });
     const res = await db.insert(user).values({
-      sub: sub,
+      sub: c.req.query("sub"),
+      firstName: c.req.query("firstName"),
+      lastName: c.req.query("lastName"),
+      email: c.req.query("email"),
+      imageUrl: c.req.query("imageUrl"),
     });
     return c.json(res);
   },

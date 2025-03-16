@@ -10,6 +10,10 @@ import { relations, sql } from "drizzle-orm";
 export const user = sqliteTable("user", {
   id: integer("id").primaryKey(),
   sub: text("sub").unique(),
+  firstName: text("firstName"),
+  lastName: text("lastName"),
+  email: text("email"),
+  imageUrl: text("imageUrl"),
 });
 
 export const authors = sqliteTable("author", {

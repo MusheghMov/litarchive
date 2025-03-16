@@ -1,5 +1,5 @@
 import { connectToDB, sql, eq, and } from "@repo/db";
-import { z, createRoute } from "@hono/zod-openapi";
+import { z } from "@hono/zod-openapi";
 import { createRouter } from "../lib/create-app";
 import { bookRatings, authorRatings } from "@repo/db/schema";
 import { zValidator } from "@hono/zod-validator";
@@ -8,7 +8,7 @@ const router = createRouter();
 
 // Schema for creating/updating ratings
 const ratingSchema = z.object({
-  rating: z.number().min(1).max(5),
+  rating: z.number().min(1).max(5).optional(),
   review: z.string().optional(),
 });
 
@@ -255,10 +255,10 @@ const ratingsRoute = router
       });
     } else {
       // Create new rating
-      result = await db.insert(bookRatings).values({
+      result = await db.insert(bookRatings)?.values({
         userId: dbUser.id,
         bookId: parseInt(bookId),
-        rating,
+        rating: rating || 0,
         review,
       });
       return c.json({
@@ -338,7 +338,7 @@ const ratingsRoute = router
       result = await db.insert(authorRatings).values({
         userId: dbUser.id,
         authorId: parseInt(authorId),
-        rating,
+        rating: rating || 0,
         review,
       });
       return c.json({

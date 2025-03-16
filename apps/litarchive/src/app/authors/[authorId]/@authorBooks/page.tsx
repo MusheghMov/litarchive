@@ -29,20 +29,10 @@ export default async function AuthorBooks({
 
   return (
     <div className="flex w-full flex-col space-y-2">
-      <p className="text-2xl font-bold">Books</p>
       <div className="flex h-full w-full">
         {!!booksByAuthor && booksByAuthor.length > 0 ? (
           <BooksByAuthor booksByAuthor={booksByAuthor} />
         ) : (
-          // <div className="grid w-full grid-cols-2 gap-6 md:grid-cols-3">
-          //   {booksByAuthor?.map((book: any) => (
-          //     <BookCard
-          //       key={book.id}
-          //       book={book}
-          //       isLiked={book?.userLikedBooks?.length > 0}
-          //     />
-          //   ))}
-          // </div>
           <p>No books</p>
         )}
       </div>

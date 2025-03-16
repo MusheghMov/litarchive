@@ -104,14 +104,14 @@ export default function BooksByAuthor({
 
   return (
     <div className="grid w-full gap-4">
-      <div className="flex w-full items-center justify-between">
+      <div className="sticky top-16 z-40 flex w-full items-center justify-between gap-2 md:top-20">
         <Input
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:w-[400px]"
+          className="w-full shadow-md sm:w-[400px]"
           placeholder="Search for book by title or author name"
         />
         <Select value={sort} onValueChange={handleSortOptionChange}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="h-10 w-48 bg-background">
             <SelectValue placeholder="Select sorting option">
               {getSortLabel(sort)}
             </SelectValue>
