@@ -64,6 +64,10 @@ export async function POST(req: Request) {
     const createdUser = await honoClient.user["create"].$post({
       query: {
         sub: payload.data.id,
+        firstName: payload.data.first_name,
+        lastName: payload.data.last_name,
+        email: payload.data.external_accounts[0].email_address,
+        imageUrl: payload.data.image_url,
       },
     });
     console.log("Created user:", createdUser);

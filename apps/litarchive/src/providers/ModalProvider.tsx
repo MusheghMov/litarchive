@@ -13,6 +13,10 @@ const SignUpSuggestionModal = dynamic(
   () => import("@/components/modals/SignUpSuggestionModal")
 );
 
+const UpsertAuthorReviewModal = dynamic(
+  () => import("@/components/modals/UpsertAuthorReviewModal")
+);
+
 interface BaseModalProps {
   isOpen?: boolean;
   setIsOpen?: (isOpen: boolean) => void;
@@ -21,6 +25,7 @@ interface BaseModalProps {
 
 const Modals = {
   SignUpSuggestionModal,
+  UpsertAuthorReviewModal,
 } as const;
 
 type ModalComponents = {
@@ -73,9 +78,6 @@ export default function ModalProvider({
     if (!open) {
       modalState.props?.onClose?.();
       setIsOpen(false);
-      // setTimeout(() => {
-      //   setModalState({ component: null });
-      // }, 200); // small delay to allow for closing animation
     } else {
       setIsOpen(true);
     }

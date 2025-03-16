@@ -23,7 +23,7 @@ export default function Rating({
   const router = useRouter();
 
   const onHandleRatingUpdate = async (rating: number) => {
-    const res = await honoClient.ratings["authors"][":authorId"].$post(
+    await honoClient.ratings["authors"][":authorId"].$post(
       {
         param: {
           authorId: authorId,
@@ -55,7 +55,7 @@ export default function Rating({
         }
         setRating(newRating);
         updateRatingMutation(newRating, {
-          onSuccess: (a) => {
+          onSuccess: () => {
             router.refresh();
           },
         });

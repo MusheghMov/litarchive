@@ -3,6 +3,7 @@ import Rating from "@/components/Rating";
 import type { Metadata } from "next";
 import honoClient from "@/app/honoRPCClient";
 import { auth } from "@clerk/nextjs/server";
+import AuthorReview from "@/components/AuthorReview";
 
 export async function generateMetadata({
   params,
@@ -68,13 +69,17 @@ export default async function AuthorPage({
           alt="author"
         />
       </div>
-      <div className="flex items-center gap-10">
+      <div className="flex flex-col items-start gap-1">
+        <p className="self-start text-base font-medium capitalize">
+          your rating
+        </p>
         <Rating
           initialRating={author.userRating || 0}
           authorId={author?.id?.toString()}
           userId={userId?.toString()}
         />
       </div>
+      <AuthorReview author={author} />
     </div>
   );
 }

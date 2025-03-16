@@ -10,19 +10,19 @@ const queryClient = new QueryClient();
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <ModalProvider>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="blue"
-          enableSystem
-          disableTransitionOnChange
-          themes={["violet", "blue", "green", "zink", "light", "slate"]}
-        >
-          <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <ModalProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="blue"
+            enableSystem
+            disableTransitionOnChange
+            themes={["violet", "blue", "green", "zink", "light", "slate"]}
+          >
             <JotaiProvider>{children}</JotaiProvider>
-          </QueryClientProvider>
-        </ThemeProvider>
-      </ModalProvider>
+          </ThemeProvider>
+        </ModalProvider>
+      </QueryClientProvider>
     </ClerkProvider>
   );
 }
