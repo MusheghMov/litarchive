@@ -14,9 +14,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { SignInButton, SignedOut, UserButton, useAuth } from "@clerk/nextjs";
+import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "../ui/button";
 import dynamic from "next/dynamic";
+import { useTheme } from "next-themes";
 
 export default function Header() {
   const { isSignedIn } = useAuth();
@@ -24,6 +25,7 @@ export default function Header() {
   const pathname = usePathname();
   const [selected, setSelected] = useState(pathname.split("/")[1]);
   const [expanded, setExpanded] = useState(false);
+  const { theme } = useTheme();
 
   return (
     <div className="sticky top-0 z-50 !m-0 grid w-full shrink-0 grow-0 self-center overflow-hidden rounded-none border-b border-border/65 bg-background/35 backdrop-blur-lg lg:inset-0 lg:top-3 lg:m-auto lg:w-fit lg:rounded-[30px] lg:border">
@@ -123,37 +125,58 @@ export default function Header() {
         <div className="flex flex-row items-center space-x-4 lg:flex">
           {isSignedIn && (
             <UserButton
+              fallback={<SignInButton />}
               appearance={{
                 elements: {
-                  userButtonPopoverMain: "dark:bg-slate-800 dark:text-white",
-                  button: "dark:text-white",
+                  userButtonPopoverCard:
+                    theme !== "light" && "bg-slate-800 text-white",
+                  userButtonPopoverMain:
+                    theme !== "light" && "bg-slate-800 ext-white",
+                  button: theme !== "light" && "text-white",
+                  userPreviewMainIdentifier: theme !== "light" && "text-white",
+                  userPreviewTextContainer: theme !== "light" && "text-white",
+                  userButtonPopoverActionButton:
+                    theme !== "light" && "hover:bg-slate-600 hover:text-white",
+                  userButtonPopoverFooter: "text-white bg-transparent hidden",
                 },
               }}
               userProfileProps={{
                 appearance: {
                   elements: {
-                    scrollBox: "dark:bg-slate-800",
-                    page: "dark:text-white",
-                    navbarButtons: "dark:text-white",
+                    scrollBox: theme !== "light" && "bg-slate-800",
+                    page: theme !== "light" && "text-white",
+                    navbarButtons: theme !== "light" && "text-white",
                     navbarButton:
-                      "dark:hover:bg-slate-600 dark:focus:bg-slate-800 dark:focus:text-white dark:text-black dark:hover:text-white",
-                    formFieldLabel: "dark:text-white",
-                    headerTitle: "dark:text-white",
-                    profileSection: "dark:bg-slate-800",
-                    button: "dark:text-white",
-                    menuList: "dark:bg-slate-700 dark:hover:bg-slate-600",
-                    navbarMobileMenuRow: "dark:bg-slate-600",
-                    navbarMobileMenuButton: "dark:text-black",
-                    navbarMobileMenuButtonIcon: "dark:text-white",
-                    badge: "dark:text-white border dark:border-white",
-                    userPreview: "dark:text-white",
-                    profileSectionPrimaryButton: "dark:hover:bg-slate-600",
-                    menuButton: "dark:hover:bg-slate-600",
-                    cardBox: "dark:bg-slate-600",
-                    actionCard: "dark:bg-slate-700",
-                    formButtonReset: "dark:hover:bg-slate-600",
-                    avatarImageActionsUpload: "dark:hover:bg-slate-600",
-                    avatarImageActionsRemove: "dark:hover:bg-slate-600",
+                      theme !== "light" &&
+                      "hover:bg-slate-600 focus:bg-slate-800 focus:text-white text-white hover:text-white",
+                    formFieldLabel: theme !== "light" && "text-white",
+                    headerTitle: theme !== "light" && "text-white",
+                    profileSection: theme !== "light" && "bg-slate-800",
+                    button: theme !== "light" && "text-white",
+                    menuList:
+                      theme !== "light" && "bg-slate-700 hover:bg-slate-600",
+                    navbarMobileMenuRow:
+                      theme !== "light" && "bg-slate-800 bg-none",
+                    navbarMobileMenuButton: theme !== "light" && "text-black",
+                    navbarMobileMenuButtonIcon:
+                      theme !== "light" && "text-white",
+                    badge:
+                      theme !== "light" && "text-white border border-white",
+                    userPreviewTextContainer: theme !== "light" && "text-white",
+                    userPreviewMainIdentifier:
+                      theme !== "light" && "text-white",
+                    profileSectionPrimaryButton:
+                      theme !== "light" && "hover:bg-slate-600",
+                    menuButton: theme !== "light" && "hover:bg-slate-600",
+                    cardBox: theme !== "light" && "bg-slate-600",
+                    actionCard: theme !== "light" && "bg-slate-700",
+                    formButtonReset: theme !== "light" && "hover:bg-slate-600",
+                    avatarImageActionsUpload:
+                      theme !== "light" && "hover:bg-slate-600",
+                    avatarImageActionsRemove:
+                      theme !== "light" && "hover:bg-slate-600",
+                    navbar: theme !== "light" && "bg-slate-800 bg-none",
+                    footer: "hidden",
                   },
                 },
               }}
