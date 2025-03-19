@@ -58,7 +58,9 @@ export default async function Layout({
                     />
                     <p className="text-4xl">
                       {author.averageRating
-                        ? author.averageRating.toFixed(1)
+                        ? Number.isInteger(author.averageRating)
+                          ? author.averageRating
+                          : author.averageRating.toFixed(1)
                         : 0}
                     </p>
                   </div>

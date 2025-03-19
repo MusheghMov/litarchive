@@ -22,6 +22,7 @@ export default function Authors({
     bio: string | null;
     birthDate: string | null;
     deathDate: string | null;
+    averageRating: number | null;
   }[];
 }) {
   const [search, setSearch] = useState("");
@@ -40,7 +41,11 @@ export default function Authors({
       />
       <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
         {filteredAuthors?.map((author) => (
-          <AuthorCard key={author.id} author={author} />
+          <AuthorCard
+            key={author.id}
+            author={author}
+            averageRating={author.averageRating || 0}
+          />
         ))}
       </div>
     </div>

@@ -55,7 +55,7 @@ export default async function AuthorPage({
   const author = await res.json();
 
   return (
-    <div className="top-20 flex w-fit grow-[1] flex-col gap-4 self-start lg:sticky lg:w-auto">
+    <div className="top-20 flex w-full grow-[1] flex-col gap-4 self-start lg:sticky lg:w-auto">
       <div className="relative max-h-[350px] min-h-[350px] w-fit min-w-[250px] max-w-[250px] overflow-hidden border-transparent p-1 outline outline-1 lg:rounded-lg lg:border-2">
         <Image
           src={

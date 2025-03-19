@@ -1,7 +1,7 @@
-import { connectToDB, sql } from "@repo/db";
+import { connectToDB, like, eq, sql } from "@repo/db";
 import { z, createRoute } from "@hono/zod-openapi";
 import { createRouter } from "../lib/create-app";
-import { authorRatings } from "@repo/db/schema";
+import { authorRatings, authors } from "@repo/db/schema";
 
 const router = createRouter();
 
@@ -28,6 +28,7 @@ const authorsRoute = router
                   bio: z.string().nullable(),
                   birthDate: z.string().nullable(),
                   deathDate: z.string().nullable(),
+                  averageRating: z.number().nullable(),
                 }),
               ),
             },
@@ -42,11 +43,109 @@ const authorsRoute = router
         url: c.env.DATABASE_URL,
         authoToken: c.env.DATABASE_AUTH_TOKEN,
       });
-      const res = await db.query.authors.findMany({
-        where: (authors, { like }) => like(authors.name, `%${search}%`),
-      });
+      const authorsWithRatings = await db
+        .select({
+          id: authors.id,
+          name: authors.name,
+          imageUrl: authors.imageUrl,
+          color: authors.color,
+          bio: authors.bio,
+          birthDate: authors.birthDate,
+          deathDate: authors.deathDate,
+          averageRating: sql<number>`COALESCE(AVG(${authorRatings.rating}), 0)`,
+        })
+        .from(authors)
+        .leftJoin(authorRatings, eq(authors.id, authorRatings.authorId))
+        .where(like(authors.name, `%${search}%`))
+        .groupBy(
+          authors.id,
+          authors.name,
+          authors.imageUrl,
+          authors.color,
+          authors.bio,
+          authors.birthDate,
+          authors.deathDate,
+        );
 
-      return c.json(res);
+      return c.json(authorsWithRatings);
+    },
+  )
+  .openapi(
+    createRoute({
+      method: "get",
+      path: "/ratedAuthors",
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: z.array(
+                z.object({
+                  id: z.number(),
+                  name: z.string().nullable(),
+                  imageUrl: z.string().nullable(),
+                  color: z.string().nullable(),
+                  bio: z.string().nullable(),
+                  birthDate: z.string().nullable(),
+                  deathDate: z.string().nullable(),
+                  userRating: z.number().nullable(),
+                  review: z.string().nullable(),
+                  averageRating: z.number().nullable(),
+                  totalRatings: z.number().nullable(),
+                }),
+              ),
+            },
+          },
+          description: "Retrive authors rated by user",
+        },
+        401: {
+          description: "Unauthorized",
+        },
+      },
+    }),
+    async (c) => {
+      const userId = c.req.header("Authorization");
+      if (!userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const db = connectToDB({
+        url: c.env.DATABASE_URL,
+        authoToken: c.env.DATABASE_AUTH_TOKEN,
+      });
+      const user = await db.query.user.findFirst({
+        where: (users, { eq }) => eq(users.sub, userId),
+      });
+      if (!user) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+      const ratedAuthors = await db
+        .select({
+          // Author details
+          id: authors.id,
+          name: authors.name,
+          imageUrl: authors.imageUrl,
+          color: authors.color,
+          bio: authors.bio,
+          birthDate: authors.birthDate,
+          deathDate: authors.deathDate,
+          userRating: authorRatings.rating,
+          review: authorRatings.review,
+          averageRating: sql<number>`(
+          SELECT AVG(ar2.rating) 
+          FROM ${authorRatings} ar2 
+          WHERE ar2.author_id = ${authors.id}
+        )`,
+          totalRatings: sql<number>`(
+          SELECT COUNT(*) 
+          FROM ${authorRatings} ar2 
+          WHERE ar2.author_id = ${authors.id}
+        )`,
+        })
+        .from(authorRatings)
+        .innerJoin(authors, eq(authorRatings.authorId, authors.id))
+        .where(eq(authorRatings.userId, user.id));
+
+      return c.json(ratedAuthors);
     },
   )
   .openapi(
