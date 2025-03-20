@@ -437,7 +437,7 @@ const extensions = [
     //   return "Can you add some further context?";
     // },
   }),
-  TextStyle.configure({ types: [ListItem.name] }),
+  TextStyle,
   StarterKit.configure({
     bulletList: {
       keepMarks: true,
