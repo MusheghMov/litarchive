@@ -4,9 +4,7 @@ compatibility_date = "2024-11-27"
 
 # compatibility_flags = [ "nodejs_compat" ]
 
-[vars]
-DATABASE_URL = "libsql://arm-lit-archive-musheghmov.turso.io"
-DATABASE_AUTH_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDc1MTk2MzQsImlkIjoiNmQ2ZDViNDgtYzU1NC0xMWVlLTkzODYtZTI2ZDU1MjRlMzAxIn0.UR3R4dXdHUuxJ_awYSzuqqk080bR0E2VT1zHq_s6gkB0fmNL4Y7nQBWwGOcUQiOQaM9uu0u8wfiVAAAG33_UBw"
+# [vars]
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
@@ -27,4 +25,3 @@ DATABASE_AUTH_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDc1MTk2
 # [observability]
 # enabled = true
 # head_sampling_rate = 1
-
