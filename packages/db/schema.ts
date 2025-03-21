@@ -102,7 +102,10 @@ export const booksToGenre = sqliteTable(
   },
   (t) => {
     return {
-      pk: primaryKey({ name: "asdfasd", columns: [t.genreId, t.genreId] }),
+      pk: primaryKey({
+        name: "books_to_genre_pk",
+        columns: [t.bookId, t.genreId],
+      }),
     };
   },
 );
