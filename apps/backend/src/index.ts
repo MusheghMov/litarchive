@@ -3,6 +3,7 @@ import articlesRoute from "./articles";
 import booksRoute from "./books";
 import userApp from "./user";
 import ratingsRoute from "./ratings";
+import listsRoute from "./lists";
 import { apiReference } from "@scalar/hono-api-reference";
 import createApp from "./lib/create-app";
 
@@ -14,7 +15,8 @@ export const route = app
   .route("/articles", articlesRoute)
   .route("/books", booksRoute)
   .route("/user", userApp)
-  .route("/ratings", ratingsRoute);
+  .route("/ratings", ratingsRoute)
+  .route("/lists", listsRoute);
 
 app.doc("/doc", {
   openapi: "3.0.0",

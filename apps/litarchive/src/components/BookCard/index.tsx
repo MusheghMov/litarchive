@@ -6,6 +6,7 @@ import { forwardRef } from "react";
 import { useRouter } from "next/navigation";
 import FavoriteButton from "../FavoriteButton";
 import { Progress } from "../ui/progress";
+import AddToList from "../AddToList";
 
 export default forwardRef(function BookCard(
   {
@@ -41,12 +42,13 @@ export default forwardRef(function BookCard(
           strokeWidth={0.5}
           className="stroke-foreground/40 transition-all group-hover:scale-125"
         />
-        <div className="absolute bottom-2 right-2">
+        <div className="absolute right-2 top-2 flex flex-col gap-2">
           <FavoriteButton
             bookId={book.id}
             isLiked={isLiked}
             key={isLiked?.toString()}
           />
+          <AddToList bookId={book.id} />
         </div>
       </AspectRatio>
 

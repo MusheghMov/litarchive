@@ -66,7 +66,7 @@ export default function FavoriteButton({
 
   return (
     <Button
-      className="group h-fit w-fit rounded-full border-primary/40 bg-background p-2 hover:bg-background/30 active:scale-125 active:border-primary"
+      className="group h-fit w-fit rounded-full border-primary/40 bg-background p-2 active:scale-125 active:border-primary"
       variant="outline"
       onClick={(e) => {
         e.preventDefault();

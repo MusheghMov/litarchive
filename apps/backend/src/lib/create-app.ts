@@ -20,7 +20,7 @@ export default function createApp() {
     "*",
     cors({
       origin: "*",
-      allowMethods: ["POST", "GET", "OPTIONS"],
+      allowMethods: ["POST", "GET", "OPTIONS", "DELETE", "PUT"],
     }),
   );
   app.get("/error", () => {

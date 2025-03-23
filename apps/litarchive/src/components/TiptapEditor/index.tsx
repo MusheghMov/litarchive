@@ -44,7 +44,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "../ui/separator";
-import { useSearchParams } from "next/navigation";
 
 const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
   const { editor } = useCurrentEditor();
@@ -451,8 +450,6 @@ const extensions = [
 ];
 
 export default function TiptapEditor({ editable }: { editable: boolean }) {
-  const searchParams = useSearchParams();
-  console.log("searchParams", searchParams);
   return (
     <div className="flex h-full w-full flex-col gap-10">
       {/* <article className="prose flex w-full min-w-full flex-col items-start justify-center gap-0 whitespace-pre-wrap text-foreground/90 dark:prose-invert lg:prose-xl prose-headings:text-foreground lg:px-24"> */}
