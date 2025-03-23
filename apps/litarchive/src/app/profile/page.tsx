@@ -61,27 +61,27 @@ export default async function ProfilePage() {
 
   return (
     <div className="flex w-full flex-col gap-6 px-4 md:px-8 lg:max-w-[1000px] lg:p-0">
-      <div className="flex w-full flex-col gap-y-4">
-        <div className="flex w-full items-center justify-between gap-4">
-          <div className="flex w-fit items-center gap-2">
-            <p className="font-bold capitalize">your lists</p>
-            {lists && lists.length > 0 && (
+      {lists && lists.length > 0 && (
+        <div className="flex w-full flex-col gap-y-4">
+          <div className="flex w-full items-center justify-between gap-4">
+            <div className="flex w-fit items-center gap-2">
+              <p className="font-bold capitalize">your lists</p>
               <p className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/40 text-sm font-bold">
                 {lists?.length}
               </p>
-            )}
+            </div>
+            <Link href="/lists">
+              <Button className="w-fit" variant="link">
+                View All Lists
+                <ArrowRight size={16} className="ml-1" />
+              </Button>
+            </Link>
           </div>
-          <Link href="/lists">
-            <Button className="w-fit" variant="link">
-              View All Lists
-              <ArrowRight size={16} className="ml-1" />
-            </Button>
-          </Link>
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+            {lists?.map((list) => <ListCard key={list.id} list={list} />)}
+          </div>
         </div>
-        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-          {lists?.map((list) => <ListCard key={list.id} list={list} />)}
-        </div>
-      </div>
+      )}
       <div className="flex w-full flex-col gap-y-4">
         <p className="font-bold capitalize">rated authors</p>
         <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5">
