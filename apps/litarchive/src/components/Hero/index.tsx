@@ -1,24 +1,42 @@
-/* eslint-disable react/no-unescaped-entities */
 "use client";
 import {
   Carousel,
+  CarouselApi,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 import { MoveRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import Autoplay from "embla-carousel-autoplay";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 export default function Hero() {
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
+
   return (
-    <div className="flex h-min items-center justify-center overflow-hidden lg:py-16">
+    <div className="flex h-min flex-col items-center justify-center gap-4 overflow-hidden lg:py-16">
       <Carousel
+        setApi={setApi}
         plugins={[
           Autoplay({
-            delay: 4000,
+            delay: 6000,
           }),
         ]}
         className="h-min w-full [&>div]:h-min"
@@ -129,9 +147,19 @@ export default function Hero() {
             </div>
           </CarouselItem>
         </CarouselContent>
-        <CarouselPrevious className="left-4" />
-        <CarouselNext className="right-4" />
       </Carousel>
+      <div className="flex h-[40px] w-fit items-center gap-3">
+        {new Array(count).fill(0).map((_, i) => (
+          <span
+            onClick={() => api?.scrollTo(i)}
+            key={i}
+            className={cn(
+              "h-2 w-2 cursor-pointer rounded-full bg-gray-500/40 p-0 outline-accent-foreground hover:outline",
+              i === current - 1 && "bg-accent-foreground"
+            )}
+          />
+        ))}
+      </div>
     </div>
   );
 }
