@@ -118,7 +118,7 @@ export default function Header() {
               )}
               onClick={() => setSelected("profile")}
             >
-              My Collection
+              Profile
             </Link>
           )}
         </div>
@@ -201,7 +201,7 @@ export default function Header() {
               </DropdownMenuItem>
               {isSignedIn && (
                 <DropdownMenuItem onClick={() => router.push("/profile")}>
-                  My Collection
+                  Profile
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
