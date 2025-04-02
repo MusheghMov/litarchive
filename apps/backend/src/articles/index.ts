@@ -10,8 +10,10 @@ const articlesRoute = router
       method: "get",
       path: "/",
       request: {
-        params: z.object({
+        query: z.object({
           search: z.string().optional(),
+          limit: z.string().optional(),
+          sort: z.union([z.literal("asc"), z.literal("desc")]).optional(),
         }),
       },
       responses: {
@@ -41,14 +43,20 @@ const articlesRoute = router
     }),
     async (c) => {
       const search = c.req.query("search") || "";
+      const sort = c.req.query("sort") || "desc";
+      const limit = Number.parseInt(c.req.query("limit")!) || 10;
       const userId = c.req.header("Authorization");
       const isAuthenticated = !!userId;
+
       const db = connectToDB({
         url: c.env.DATABASE_URL,
         authoToken: c.env.DATABASE_AUTH_TOKEN,
       });
       const res = await db.query.articles.findMany({
         where: (articles, { like }) => like(articles.title, `%${search}%`),
+        orderBy: (articles, { desc, asc }) =>
+          sort === "asc" ? asc(articles.id) : desc(articles.id),
+        limit: limit,
       });
       const articlesWithoutUserId = res.map(({ userId, ...rest }) => rest);
       if (isAuthenticated) {

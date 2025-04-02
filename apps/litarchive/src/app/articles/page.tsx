@@ -10,7 +10,7 @@ export default async function ArticlesPage({
 }) {
   const { search } = await searchParams;
   const res = await honoClient.articles.$get({
-    param: { search: search || "" },
+    query: { search: search || "" },
   });
 
   if (!res.ok) {
