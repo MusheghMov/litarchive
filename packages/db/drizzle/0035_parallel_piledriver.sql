@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `author_slug_unique` ON `author` (`slug`);

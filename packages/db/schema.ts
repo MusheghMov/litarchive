@@ -18,7 +18,9 @@ export const user = sqliteTable("user", {
 
 export const authors = sqliteTable("author", {
   id: integer("id").primaryKey(),
+  slug: text("slug").unique(),
   name: text("name"),
+  name_original: text("name_original"),
   imageUrl: text("imageUrl"),
   color: text("color"),
   bio: text("bio"),

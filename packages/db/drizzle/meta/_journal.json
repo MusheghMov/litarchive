@@ -232,6 +232,27 @@
       "when": 1742606441673,
       "tag": "0032_hard_maelstrom",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1743685013302,
+      "tag": "0033_charming_khan",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "6",
+      "when": 1743685469787,
+      "tag": "0034_icy_miss_america",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "6",
+      "when": 1743685522575,
+      "tag": "0035_parallel_piledriver",
+      "breakpoints": true
     }
   ]
 }

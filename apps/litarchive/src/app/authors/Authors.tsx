@@ -4,6 +4,7 @@ import AuthorCard from "@/components/AuthorCard";
 import { Input } from "@/components/ui/input";
 import Fuse from "fuse.js";
 import { useMemo, useState } from "react";
+import { AuthorType } from "@/app/authors/page";
 
 const fuseOptions = {
   shouldSort: true,
@@ -11,20 +12,7 @@ const fuseOptions = {
   keys: ["name"],
 };
 
-export default function Authors({
-  authors,
-}: {
-  authors: {
-    id: number;
-    name: string | null;
-    imageUrl: string | null;
-    color: string | null;
-    bio: string | null;
-    birthDate: string | null;
-    deathDate: string | null;
-    averageRating: number | null;
-  }[];
-}) {
+export default function Authors({ authors }: { authors: AuthorType[] }) {
   const [search, setSearch] = useState("");
   const fuse = new Fuse(authors, fuseOptions);
 

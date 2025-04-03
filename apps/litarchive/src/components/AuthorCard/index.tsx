@@ -16,7 +16,7 @@ export default function AuthorCard({
 }) {
   return (
     <Link
-      href={{ pathname: `/authors/${author.id}` }}
+      href={{ pathname: `/authors/${author.slug}` }}
       className="relative w-full rounded border border-foreground/20 bg-card p-1 hover:border-primary/60"
     >
       <AspectRatio

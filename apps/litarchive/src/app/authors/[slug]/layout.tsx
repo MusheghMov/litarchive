@@ -5,24 +5,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { auth } from "@clerk/nextjs/server";
 import { Button } from "@/components/ui/button";
 import { Rating as ReactRating, StickerStar } from "@smastrom/react-rating";
+import AuthorBooks from "./AuthorBooks";
 
 export default async function Layout({
   children,
-  authorBooks,
   params,
 }: {
   children: React.ReactNode;
-  authorBooks: React.ReactNode;
-  params: Promise<{ authorId: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { authorId } = await params;
+  const { slug } = await params;
   const { userId } = await auth();
 
-  const res = await honoClient.authors[":authorId"].$get(
+  const res = await honoClient.authors["by-slug"][":slug"].$get(
     {
-      param: {
-        authorId,
-      },
+      param: { slug },
     },
     {
       headers: { Authorization: `${userId}` },
@@ -36,11 +33,18 @@ export default async function Layout({
         {children}
         <div className="flex w-fit flex-col gap-10">
           <div className="flex w-full flex-col gap-4 lg:overflow-hidden">
-            <div className="grid gap-1">
-              <div className="flex gap-4">
-                <p className="text-4xl font-medium capitalize">
-                  {author?.name}
-                </p>
+            <div className="grid gap-2">
+              <div className="flex items-start gap-4">
+                <div className="flex flex-col items-start gap-1">
+                  <p className="text-4xl font-medium capitalize">
+                    {author?.name}
+                  </p>
+                  {author?.name_original && (
+                    <p className="text-xl capitalize">
+                      ({author?.name_original})
+                    </p>
+                  )}
+                </div>
                 <Separator orientation="vertical" />
                 <div className="flex flex-col gap-2 md:flex-row">
                   <div className="flex gap-2">
@@ -118,7 +122,8 @@ export default async function Layout({
               </TabsTrigger>
             </TabsList>
             <TabsContent value="books" className="mt-4">
-              {authorBooks}
+              <AuthorBooks authorId={author?.id} />
+              {/* {authorBooks} */}
             </TabsContent>
             <TabsContent value="reviews" className="mt-4 flex flex-col gap-6">
               {author?.ratings?.length > 0 ? (

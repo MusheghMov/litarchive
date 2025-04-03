@@ -8,11 +8,11 @@ import AuthorReview from "@/components/AuthorReview";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ authorId: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { authorId } = await params;
-  const res = await honoClient.authors[":authorId"].$get({
-    param: { authorId },
+  const { slug } = await params;
+  const res = await honoClient.authors["by-slug"][":slug"].$get({
+    param: { slug },
   });
 
   const author = await res.json();
@@ -20,15 +20,15 @@ export async function generateMetadata({
   return {
     title: author?.name,
     openGraph: {
-      title: author?.name as string,
+      title: `${author?.name as string}\n(${author.name_original as string})`,
       description: author?.bio?.substring(0, 150),
-      url: "https://litarchive.com/authors/" + authorId,
+      url: "https://litarchive.com/authors/" + slug,
       type: "website",
       images: [author?.imageUrl as string],
     },
     twitter: {
       card: "summary_large_image",
-      title: author?.name as string,
+      title: `${author?.name as string}\n(${author.name_original as string})`,
       description: author?.bio?.substring(0, 150),
       images: [author?.imageUrl as string],
     },
@@ -37,21 +37,20 @@ export async function generateMetadata({
 export default async function AuthorPage({
   params,
 }: {
-  params: Promise<{ authorId: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { authorId } = await params;
+  const { slug } = await params;
   const { userId } = await auth();
 
-  const res = await honoClient.authors[":authorId"].$get(
+  const res = await honoClient.authors["by-slug"][":slug"].$get(
     {
-      param: {
-        authorId,
-      },
+      param: { slug },
     },
     {
       headers: { Authorization: `${userId}` },
     }
   );
+
   const author = await res.json();
 
   return (
