@@ -49,7 +49,6 @@ const authorsRoute = router
     }),
     async (c) => {
       const search = c.req.query("search") || "";
-      console.log(search);
       const db = connectToDB({
         url: c.env.DATABASE_URL,
         authoToken: c.env.DATABASE_AUTH_TOKEN,
