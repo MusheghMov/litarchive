@@ -23,8 +23,8 @@ export function Combobox({
   selectedAuthor,
 }: {
   authors: Author[];
-  setSelectedAuthor: React.Dispatch<React.SetStateAction<Author> | undefined>  ;
-    selectedAuthor?: Author;
+  setSelectedAuthor: any;
+  selectedAuthor?: Author;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -61,9 +61,7 @@ export function Combobox({
                       author.name?.trim().toLowerCase() ===
                       currentValue.trim().toLowerCase()
                   );
-                  setSelectedAuthor(
-                    currentAuthor! as Author
-                  );
+                  setSelectedAuthor(currentAuthor! as Author);
                   setOpen(false);
                 }}
               >
