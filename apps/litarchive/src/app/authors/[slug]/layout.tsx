@@ -127,9 +127,9 @@ export default async function Layout({
             </TabsContent>
             <TabsContent value="reviews" className="mt-4 flex flex-col gap-6">
               {author?.ratings?.length > 0 ? (
-                author?.ratings.map((rating) => (
+                author?.ratings.map((rating, index) => (
                   <div
-                    key={rating.id}
+                    key={`${rating.id}-${index}`}
                     className="flex w-full flex-col items-start gap-2"
                   >
                     <div className="flex w-full items-start gap-4">

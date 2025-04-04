@@ -1,14 +1,18 @@
 import honoClient from "../honoRPCClient";
-import { InferResponseType } from "hono";
 import Authors from "./Authors";
-export type AuthorType = InferResponseType<typeof honoClient.authors.$get>[0];
+import { cache } from "react";
 
-export default async function AuthorsPage() {
-  const res = await honoClient.authors.$get({
+const cachedGetAauthors = cache(async () => {
+  return await honoClient.authors.$get({
     query: {
       search: "",
     },
   });
+});
+
+export default async function AuthorsPage() {
+  const res = await cachedGetAauthors()
+
   if (!res.ok) {
     console.error("error: ", res);
     return null;

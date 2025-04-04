@@ -87,7 +87,7 @@ export default function UpsertAuthorReviewModal({
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isReviewPending}>
+          <Button type="submit" disabled={isReviewPending} className="text-background">
             Submit
           </Button>
         </div>

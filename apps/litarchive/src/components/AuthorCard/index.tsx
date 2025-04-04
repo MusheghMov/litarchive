@@ -1,16 +1,18 @@
-import { AuthorType } from "@/app/authors/page";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Earth, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import TooltipContainer from "@/components/TooltipContainer";
+// @ts-ignore
+import { unstable_ViewTransition as ViewTransition } from "react";
+import { Author } from "@/types";
 
 export default function AuthorCard({
   author,
   userRating,
   averageRating,
 }: {
-  author: AuthorType;
+  author: Author;
   userRating?: number;
   averageRating?: number;
 }) {
@@ -23,20 +25,22 @@ export default function AuthorCard({
         ratio={9 / 12}
         className="flex flex-col justify-end overflow-hidden"
       >
-        <div className="h-full overflow-hidden p-1">
-          <Image
-            src={
-              author?.imageUrl ||
-              "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Tumanyan_%282%29.jpg/640px-Tumanyan_%282%29.jpg"
-            }
-            className="h-full w-full rounded object-cover object-top"
-            width={200}
-            height={300}
-            loading="lazy"
-            quality={10}
-            alt="Author's image"
-          />
-        </div>
+        <ViewTransition name={`${author.slug}`}>
+          <div className="h-full overflow-hidden p-1">
+            <Image
+              src={
+                author?.imageUrl ||
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Tumanyan_%282%29.jpg/640px-Tumanyan_%282%29.jpg"
+              }
+              className="h-full w-full rounded object-cover object-top"
+              width={200}
+              height={300}
+              loading="lazy"
+              quality={10}
+              alt="Author's image"
+            />
+          </div>
+        </ViewTransition>
         <div className="z-10 flex h-min w-full flex-none items-start justify-between p-2 text-xs font-bold uppercase">
           <div className="flex flex-col items-start gap-1">
             <p className="text-start">{author?.name}</p>

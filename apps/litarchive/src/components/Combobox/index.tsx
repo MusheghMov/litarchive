@@ -15,36 +15,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-type AuthorType = {
-  imageUrl: string | null;
-  id: number;
-  name: string | null;
-  color: string | null;
-  bio: string | null;
-  birthDate: string | null;
-  deathDate: string | null;
-}[];
-type SetSelectedAuthor = React.Dispatch<
-  React.SetStateAction<{
-    imageUrl: string | null;
-    id: number;
-    name: string | null;
-    color: string | null;
-    bio: string | null;
-    birthDate: string | null;
-    deathDate: string | null;
-  } | null>
->;
+import { Author } from "@/types";
 
 export function Combobox({
   authors,
   setSelectedAuthor,
   selectedAuthor,
 }: {
-  authors: AuthorType;
-  setSelectedAuthor: SetSelectedAuthor;
-  selectedAuthor: AuthorType[0] | null;
+  authors: Author[];
+  setSelectedAuthor: React.Dispatch<React.SetStateAction<Author> | undefined>  ;
+    selectedAuthor?: Author;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -82,7 +62,7 @@ export function Combobox({
                       currentValue.trim().toLowerCase()
                   );
                   setSelectedAuthor(
-                    currentAuthor! as AuthorType[0] | null as any
+                    currentAuthor! as Author
                   );
                   setOpen(false);
                 }}

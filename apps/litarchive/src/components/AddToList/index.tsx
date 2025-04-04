@@ -19,7 +19,7 @@ import {
 } from "../ui/command";
 import { useState } from "react";
 
-export default function FavoriteButton({ bookId }: { bookId: number }) {
+export default function AddToListButton({ bookId }: { bookId: number }) {
   const { isSignedIn } = useUser();
   const { userId } = useAuth();
   const { openModal } = useModal();
@@ -95,7 +95,7 @@ export default function FavoriteButton({ bookId }: { bookId: number }) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          className="group h-fit w-fit rounded-full border-primary/40 bg-background p-2 active:scale-125 active:border-primary"
+          className="group h-fit w-fit rounded-full border-primary/40 bg-background !p-2 active:scale-125 active:border-primary"
           variant="outline"
           role="combobox"
           aria-expanded={open}
@@ -131,7 +131,6 @@ export default function FavoriteButton({ bookId }: { bookId: number }) {
           <CommandList>
             <CommandEmpty className="flex items-center justify-center py-2">
               <p className="text-sm">No lists found</p>
-              {/* <Button>Create a new list</Button> */}
             </CommandEmpty>
             <CommandGroup>
               {lists
@@ -164,7 +163,7 @@ export default function FavoriteButton({ bookId }: { bookId: number }) {
                 createList({ name: search });
                 setOpen(false);
               }}
-              className="self-center"
+              className="self-center text-background"
             >
               Create a new list
             </Button>

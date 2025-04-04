@@ -2,9 +2,9 @@
 
 import AuthorCard from "@/components/AuthorCard";
 import { Input } from "@/components/ui/input";
+import { Author } from "@/types";
 import Fuse from "fuse.js";
 import { useMemo, useState } from "react";
-import { AuthorType } from "@/app/authors/page";
 
 const fuseOptions = {
   shouldSort: true,
@@ -12,7 +12,7 @@ const fuseOptions = {
   keys: ["name"],
 };
 
-export default function Authors({ authors }: { authors: AuthorType[] }) {
+export default function Authors({ authors }: { authors: Author[] }) {
   const [search, setSearch] = useState("");
   const fuse = new Fuse(authors, fuseOptions);
 

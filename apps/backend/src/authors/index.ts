@@ -2,8 +2,16 @@ import { connectToDB, like, eq, sql } from "@repo/db";
 import { z, createRoute } from "@hono/zod-openapi";
 import { createRouter } from "../lib/create-app";
 import { authorRatings, authors } from "@repo/db/schema";
+import { cache } from "hono/cache";
 
 const router = createRouter();
+
+router.use(
+  cache({
+    cacheName: "authors",
+    cacheControl: "max-age=3600",
+  }),
+);
 
 const authorsRoute = router
   .openapi(
@@ -374,10 +382,10 @@ const authorsRoute = router
         }
       }
 
-      // get author by slug
       const author = await db.query.authors.findFirst({
         where: (authors, { eq }) => eq(authors.slug, slug),
       });
+
       if (!author) {
         return c.json({ error: "Author not found" }, 404);
       } else {

@@ -18,16 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { Combobox } from "@/components/Combobox";
-
-type AuthorType = {
-  imageUrl: string | null;
-  id: number;
-  name: string | null;
-  color: string | null;
-  bio: string | null;
-  birthDate: string | null;
-  deathDate: string | null;
-}[];
+import { Author } from "@/types";
 
 const BookScheme = z.object({
   title: z.string(),
@@ -44,12 +35,10 @@ export default function AddABookForm({
   authors,
   bookImageUrl,
 }: {
-  authors: AuthorType;
+  authors: Author[];
   bookImageUrl: string | undefined;
 }) {
-  const [selectedAuthor, setSelectedAuthor] = useState<AuthorType[0] | null>(
-    null
-  );
+  const [selectedAuthor, setSelectedAuthor] = useState<Author>();
   const router = useRouter();
   const form = useForm<z.infer<typeof BookScheme>>({
     resolver: zodResolver(BookScheme),

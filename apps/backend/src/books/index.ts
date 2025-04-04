@@ -4,8 +4,16 @@ import { books, userLikedBooks, userReadingProgress } from "@repo/db/schema";
 import { createRouter } from "../lib/create-app";
 import { createRoute } from "@hono/zod-openapi";
 import { zValidator } from "@hono/zod-validator";
+import { cache } from "hono/cache";
 
 const router = createRouter();
+
+router.use(
+  cache({
+    cacheName: "books",
+    cacheControl: "max-age=3600",
+  }),
+);
 
 const booksRoute = router
   .openapi(

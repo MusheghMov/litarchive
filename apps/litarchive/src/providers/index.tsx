@@ -17,7 +17,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             defaultTheme="blue"
             enableSystem
             disableTransitionOnChange
-            themes={["violet", "blue", "green", "zink", "light", "slate"]}
+            themes={["violet", "blue", "green", "dark", "light"]}
           >
             <JotaiProvider>{children}</JotaiProvider>
           </ThemeProvider>

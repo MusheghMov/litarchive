@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import honoClient from "@/app/honoRPCClient";
 import { auth } from "@clerk/nextjs/server";
 import AuthorReview from "@/components/AuthorReview";
+// @ts-ignore
+import { unstable_ViewTransition as ViewTransition } from "react";
 
 export async function generateMetadata({
   params,
@@ -55,7 +57,8 @@ export default async function AuthorPage({
 
   return (
     <div className="top-20 flex w-full grow-[1] flex-col gap-4 self-start lg:sticky lg:w-auto">
-      <div className="relative max-h-[350px] min-h-[350px] w-fit min-w-[250px] max-w-[250px] overflow-hidden border-transparent p-1 outline outline-1 lg:rounded-lg lg:border-2">
+        <ViewTransition name={`${author.slug}`}>
+      <div className="relative max-h-[350px] min-h-[350px] w-fit min-w-[250px] max-w-[250px] overflow-hidden border-transparent p-1 outline-1 lg:rounded-lg lg:border-2">
         <Image
           src={
             author?.imageUrl ||
@@ -68,6 +71,7 @@ export default async function AuthorPage({
           alt="author"
         />
       </div>
+      </ViewTransition>
       <div className="flex flex-col items-start gap-1">
         <p className="self-start text-base font-medium capitalize">
           your rating

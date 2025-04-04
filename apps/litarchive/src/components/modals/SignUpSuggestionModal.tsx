@@ -22,7 +22,7 @@ export default function SignUpSuggestionModal() {
         </DialogDescription>
       </DialogHeader>
       <SignInButton>
-        <Button>Sign In</Button>
+        <Button className="text-background">Sign In</Button>
       </SignInButton>
     </DialogContent>
   );

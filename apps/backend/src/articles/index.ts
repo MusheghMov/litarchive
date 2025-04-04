@@ -1,8 +1,16 @@
 import { connectToDB } from "@repo/db";
 import { z, createRoute } from "@hono/zod-openapi";
 import { createRouter } from "../lib/create-app";
+import { cache } from "hono/cache";
 
 const router = createRouter();
+
+router.use(
+  cache({
+    cacheName: "articles",
+    cacheControl: "max-age=3600",
+  }),
+);
 
 const articlesRoute = router
   .openapi(

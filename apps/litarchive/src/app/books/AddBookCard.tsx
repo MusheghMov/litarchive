@@ -22,18 +22,9 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@uidotdev/usehooks";
+import { Author } from "@/types";
 
-type AuthorType = {
-  imageUrl: string | null;
-  id: number;
-  name: string | null;
-  color: string | null;
-  bio: string | null;
-  birthDate: string | null;
-  deathDate: string | null;
-}[];
-
-export const AddBookCard = ({ authors }: { authors: AuthorType }) => {
+export const AddBookCard = ({ authors }: { authors: Author[] }) => {
   const bookImageRef = useRef<HTMLInputElement>(null);
   const [blob, setBlob] = useState<PutBlobResult | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
