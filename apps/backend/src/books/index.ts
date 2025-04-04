@@ -49,6 +49,7 @@ const booksRoute = router
                     .object({
                       name: z.string().nullable(),
                       id: z.number(),
+                      slug: z.string().nullable(),
                     })
                     .nullable(),
                 }),
@@ -118,6 +119,7 @@ const booksRoute = router
             columns: {
               id: true,
               name: true,
+              slug: true,
             },
           },
           ...(dbUser?.id
@@ -152,6 +154,7 @@ const booksRoute = router
         offset,
         orderBy: (books, { desc }) => desc(books.id),
       });
+
       return c.json(res);
     },
   )

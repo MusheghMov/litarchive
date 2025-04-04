@@ -75,7 +75,7 @@ export default async function Home() {
         <RecommendationSection
           books={booksByAuthor}
           title={`books by ${booksByAuthor[0]?.author?.name}`}
-          href={`/authors/${booksByAuthor[0]?.author?.id}`}
+          href={`/authors/${booksByAuthor[0]?.author?.slug}`}
         />
       </div>
     </div>
