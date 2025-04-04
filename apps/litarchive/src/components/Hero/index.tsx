@@ -44,11 +44,11 @@ export default function Hero() {
         <CarouselContent className="h-[100dvh] md:h-full">
           <CarouselItem className="flex h-full items-center justify-center">
             <div className="relative h-full bg-transparent lg:max-w-[80%]">
-              <div className="relative z-20 flex h-full w-full flex-col justify-center gap-40 bg-gray-500/30 p-3 text-foreground text-white md:bg-transparent md:p-0 md:mix-blend-normal">
-                <p className="translate-x-10 text-lg font-light italic text-foreground">
+              <div className="text-foreground relative z-20 flex h-full w-full flex-col justify-center gap-40 bg-gray-500/30 p-3 text-white md:bg-transparent md:p-0 md:mix-blend-normal">
+                <p className="text-foreground translate-x-10 text-lg font-light italic">
                   - Authors
                 </p>
-                <p className="w-[60%] translate-x-10 text-3xl font-semibold text-foreground sm:text-7xl">
+                <p className="text-foreground w-[60%] translate-x-10 text-3xl font-semibold sm:text-7xl">
                   Hovhannes Tumanyan: Armenia's national poet and writer
                 </p>
                 <div className="flex flex-col pl-6">
@@ -56,14 +56,14 @@ export default function Hero() {
                     Hovhannes Tumanyan biography and books
                   </p>
                   <Link
-                    href="/authors/27"
-                    className="flex flex-row text-foreground"
+                    href="/authors/hovhannes-tumanyan"
+                    className="text-foreground flex flex-row"
                   >
                     Learn More <MoveRight />
                   </Link>
                 </div>
               </div>
-              <div className="absolute bottom-0 top-0 m-auto h-full w-full overflow-hidden bg-black md:right-10 md:h-[400px] md:w-[400px] md:rounded-full lg:right-20 lg:top-20 lg:h-[600px] lg:w-[600px]">
+              <div className="absolute top-0 bottom-0 m-auto h-full w-full overflow-hidden bg-black md:right-10 md:h-[400px] md:w-[400px] md:rounded-full lg:top-20 lg:right-20 lg:h-[600px] lg:w-[600px]">
                 <div className="absolute z-10 h-full w-full bg-gray-500/40 md:rounded-full"></div>
                 <Image
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Tumanyan_%282%29.jpg/640px-Tumanyan_%282%29.jpg"
@@ -80,11 +80,11 @@ export default function Hero() {
           </CarouselItem>
           <CarouselItem className="flex h-full items-center justify-center">
             <div className="relative h-full bg-transparent md:max-w-[80%]">
-              <div className="relative z-20 flex h-full w-full flex-col justify-center gap-40 bg-gray-500/30 text-foreground text-white md:bg-transparent md:mix-blend-normal">
-                <p className="translate-x-10 text-lg font-light italic text-foreground">
+              <div className="text-foreground relative z-20 flex h-full w-full flex-col justify-center gap-40 bg-gray-500/30 text-white md:bg-transparent md:mix-blend-normal">
+                <p className="text-foreground translate-x-10 text-lg font-light italic">
                   - Authors
                 </p>
-                <p className="w-[60%] translate-x-10 text-3xl font-semibold text-foreground sm:text-7xl">
+                <p className="text-foreground w-[60%] translate-x-10 text-3xl font-semibold sm:text-7xl">
                   Ink & Insight: Eghishe Charents' Literary Luminescence
                 </p>
                 <div className="flex flex-col pl-6">
@@ -92,15 +92,15 @@ export default function Hero() {
                     Eghishe Charents' biography and books
                   </p>
                   <Link
-                    href="/authors/17"
-                    className="flex flex-row text-foreground"
+                    href="/authors/yeghishe-charents"
+                    className="text-foreground flex flex-row"
                   >
                     Learn More <MoveRight />
                   </Link>
                 </div>
               </div>
 
-              <div className="absolute bottom-0 top-0 m-auto h-full w-full overflow-hidden bg-black md:right-10 md:top-20 md:h-[400px] md:w-[400px] md:rounded-full lg:right-20 lg:top-10 lg:h-[600px] lg:w-[600px]">
+              <div className="absolute top-0 bottom-0 m-auto h-full w-full overflow-hidden bg-black md:top-20 md:right-10 md:h-[400px] md:w-[400px] md:rounded-full lg:top-10 lg:right-20 lg:h-[600px] lg:w-[600px]">
                 <div className="absolute z-10 h-full w-full bg-gray-500/40 md:rounded-full"></div>
                 <Image
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Yeghishe_Charents_Armenian_poet.jpg/1200px-Yeghishe_Charents_Armenian_poet.jpg"
@@ -115,25 +115,25 @@ export default function Hero() {
           </CarouselItem>
           <CarouselItem className="flex h-full items-center justify-center">
             <div className="relative h-full bg-transparent md:max-w-[80%]">
-              <div className="relative z-20 flex h-full w-full flex-col justify-center gap-40 bg-gray-500/30 text-foreground text-white md:bg-transparent md:mix-blend-normal">
-                <p className="translate-x-10 text-lg font-light italic text-foreground">
+              <div className="text-foreground relative z-20 flex h-full w-full flex-col justify-center gap-40 bg-gray-500/30 text-white md:bg-transparent md:mix-blend-normal">
+                <p className="text-foreground translate-x-10 text-lg font-light italic">
                   - Authors
                 </p>
-                <p className="w-[60%] translate-x-10 text-3xl font-semibold text-foreground sm:text-7xl">
+                <p className="text-foreground w-[60%] translate-x-10 text-3xl font-semibold sm:text-7xl">
                   Vahan Teryan: Poetic Visions in the Armenian Soul
                 </p>
-                <div className="flex flex-col pl-6 text-foreground">
+                <div className="text-foreground flex flex-col pl-6">
                   <p>Vahan Teryan's biography and books</p>
                   <Link
-                    href="/authors/38"
-                    className="flex flex-row text-foreground"
+                    href="/authors/vahan-teryan"
+                    className="text-foreground flex flex-row"
                   >
                     Learn More <MoveRight />
                   </Link>
                 </div>
               </div>
 
-              <div className="absolute bottom-0 top-0 m-auto h-full w-full overflow-hidden bg-black md:right-10 md:top-20 md:h-[400px] md:w-[400px] md:rounded-full lg:right-20 lg:top-10 lg:h-[600px] lg:w-[600px]">
+              <div className="absolute top-0 bottom-0 m-auto h-full w-full overflow-hidden bg-black md:top-20 md:right-10 md:h-[400px] md:w-[400px] md:rounded-full lg:top-10 lg:right-20 lg:h-[600px] lg:w-[600px]">
                 <div className="absolute z-10 h-full w-full bg-gray-500/40 md:rounded-full"></div>
                 <Image
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Vahan_Teryan_portrait.jpg/1920px-Vahan_Teryan_portrait.jpg"
@@ -154,7 +154,7 @@ export default function Hero() {
             onClick={() => api?.scrollTo(i)}
             key={i}
             className={cn(
-              "h-2 w-2 cursor-pointer rounded-full bg-gray-500/40 p-0 outline-accent-foreground hover:outline",
+              "outline-accent-foreground h-2 w-2 cursor-pointer rounded-full bg-gray-500/40 p-0 hover:outline",
               i === current - 1 && "bg-accent-foreground"
             )}
           />
