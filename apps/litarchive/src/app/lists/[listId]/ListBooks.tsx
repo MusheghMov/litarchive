@@ -42,13 +42,13 @@ export default function ListBooks({ list }: { list: List }) {
           <TooltipContainer tooltipContent="Remove from list">
             <Button
               variant="outline"
-              className="absolute bottom-2 right-2 h-min w-min rounded-full p-2"
+              className="absolute right-2 bottom-2 h-min w-min cursor-pointer rounded-full !p-2"
               onClick={(e) => {
                 e.stopPropagation();
                 removeBookFromList(book.id);
               }}
             >
-              <X size={16} className="" />
+              <X size={16} />
             </Button>
           </TooltipContainer>
         </div>
