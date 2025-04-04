@@ -2,6 +2,15 @@ import ArticleCard from "@/components/ArticleCard";
 import honoClient from "../honoRPCClient";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cache } from "react";
+
+const cachedGetArticles = cache(async (search: string) => {
+  return await honoClient.articles.$get({
+    query: {
+      search: search || "",
+    },
+  });
+});
 
 export default async function ArticlesPage({
   searchParams,
@@ -9,9 +18,7 @@ export default async function ArticlesPage({
   searchParams: Promise<{ search: string }>;
 }) {
   const { search } = await searchParams;
-  const res = await honoClient.articles.$get({
-    query: { search: search || "" },
-  });
+  const res = await cachedGetArticles(search);
 
   if (!res.ok) {
     console.error("error: ", res);
