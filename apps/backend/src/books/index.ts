@@ -4,16 +4,17 @@ import { books, userLikedBooks, userReadingProgress } from "@repo/db/schema";
 import { createRouter } from "../lib/create-app";
 import { createRoute } from "@hono/zod-openapi";
 import { zValidator } from "@hono/zod-validator";
-import { cache } from "hono/cache";
+// import { cache } from "hono/cache";
 
 const router = createRouter();
 
-router.use(
-  cache({
-    cacheName: "books",
-    cacheControl: "max-age=3600",
-  }),
-);
+// router.get(
+//   "/",
+//   cache({
+//     cacheName: "books",
+//     cacheControl: "max-age=0", // TODO: change this after figuring out how to revalidate cache
+//   }),
+// );
 
 const booksRoute = router
   .openapi(

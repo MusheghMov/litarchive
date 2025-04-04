@@ -21,7 +21,7 @@ export default forwardRef(function BookCard(
   const router = useRouter();
   return (
     <div
-      className="group relative flex !h-min w-full cursor-pointer flex-col space-y-1 justify-self-center overflow-hidden rounded-md border border-foreground/20 bg-card-foreground/5 hover:border-primary/60"
+      className="group border-foreground/20 bg-card-foreground/5 hover:border-primary/60 relative flex !h-min w-full cursor-pointer flex-col space-y-1 justify-self-center overflow-hidden rounded-md border"
       ref={ref}
       onClick={() => {
         if (!book?.userReadingProgress) {
@@ -42,7 +42,7 @@ export default forwardRef(function BookCard(
           strokeWidth={0.5}
           className="stroke-foreground/40 transition-all group-hover:scale-125"
         />
-        <div className="absolute right-2 top-2 flex flex-col gap-2">
+        <div className="absolute top-2 right-2 flex flex-col gap-2">
           <FavoriteButton
             bookId={book.id}
             isLiked={isLiked}
@@ -58,7 +58,7 @@ export default forwardRef(function BookCard(
             <p className="line-clamp-1 text-sm font-bold uppercase">
               {book.title}
             </p>
-            <p className="line-clamp-1 text-sm font-light uppercase text-gray-400">
+            <p className="line-clamp-1 text-sm font-light text-gray-400 uppercase">
               {book.titleTranslit}
             </p>
           </div>

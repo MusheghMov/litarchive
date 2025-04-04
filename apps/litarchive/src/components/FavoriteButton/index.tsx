@@ -28,8 +28,6 @@ export default function FavoriteButton({
         return;
       }
       setIsBookLiked(true);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       await honoClient.books["like"].$post(
         {
           query: {
@@ -66,7 +64,7 @@ export default function FavoriteButton({
 
   return (
     <Button
-      className="group h-fit w-fit rounded-full border-primary/40 bg-background !p-2 active:scale-125 active:border-primary"
+      className="group border-primary/40 bg-background active:border-primary h-fit w-fit rounded-full !p-2 active:scale-125"
       variant="outline"
       onClick={(e) => {
         e.preventDefault();

@@ -66,7 +66,7 @@ export default async function ProfilePage() {
           <div className="flex w-full items-center justify-between gap-4">
             <div className="flex w-fit items-center gap-2">
               <p className="font-bold capitalize">your lists</p>
-              <p className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/40 text-sm font-bold">
+              <p className="bg-primary/40 flex h-6 w-6 items-center justify-center rounded-full text-sm font-bold">
                 {lists?.length}
               </p>
             </div>
