@@ -6,7 +6,8 @@ import { cache } from "hono/cache";
 
 const router = createRouter();
 
-router.use(
+router.get(
+  "/",
   cache({
     cacheName: "authors",
     cacheControl: "max-age=3600",
