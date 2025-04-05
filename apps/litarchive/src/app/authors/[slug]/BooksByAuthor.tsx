@@ -111,7 +111,7 @@ export default function BooksByAuthor({
           placeholder="Search for book by title or author name"
         />
         <Select value={sort} onValueChange={handleSortOptionChange}>
-          <SelectTrigger className="h-10 w-48 bg-background">
+          <SelectTrigger className="bg-background h-10 w-48">
             <SelectValue placeholder="Select sorting option">
               {getSortLabel(sort)}
             </SelectValue>

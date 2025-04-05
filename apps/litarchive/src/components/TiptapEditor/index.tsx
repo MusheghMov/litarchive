@@ -74,7 +74,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
               onClick={() => editor.chain().focus().toggleBold().run()}
               disabled={!editor.can().chain().focus().toggleBold().run()}
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("bold") ? "bg-foreground text-background" : ""
               )}
               variant="outline"
@@ -85,7 +85,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
               onClick={() => editor.chain().focus().toggleItalic().run()}
               disabled={!editor.can().chain().focus().toggleItalic().run()}
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("italic") ? "bg-foreground text-background" : ""
               )}
               variant="outline"
@@ -96,7 +96,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
               onClick={() => editor.chain().focus().toggleStrike().run()}
               disabled={!editor.can().chain().focus().toggleStrike().run()}
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("strike") ? "bg-foreground text-background" : ""
               )}
               variant="outline"
@@ -114,7 +114,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
             <Button
               onClick={() => editor.chain().focus().setParagraph().run()}
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("paragraph") && "bg-foreground text-background"
               )}
               variant="outline"
@@ -126,7 +126,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
                 editor.chain().focus().toggleHeading({ level: 1 }).run()
               }
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("heading", { level: 1 }) &&
                   "bg-foreground text-background"
               )}
@@ -139,7 +139,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
                 editor.chain().focus().toggleHeading({ level: 2 }).run()
               }
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("heading", { level: 2 }) &&
                   "bg-foreground text-background"
               )}
@@ -152,7 +152,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
                 editor.chain().focus().toggleHeading({ level: 3 }).run()
               }
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("heading", { level: 3 }) &&
                   "bg-foreground text-background"
               )}
@@ -165,7 +165,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
                 editor.chain().focus().toggleHeading({ level: 4 }).run()
               }
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("heading", { level: 4 }) &&
                   "bg-foreground text-background"
               )}
@@ -178,7 +178,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
                 editor.chain().focus().toggleHeading({ level: 5 }).run()
               }
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("heading", { level: 5 }) &&
                   "bg-foreground text-background"
               )}
@@ -191,7 +191,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
                 editor.chain().focus().toggleHeading({ level: 6 }).run()
               }
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("heading", { level: 6 }) &&
                   "bg-foreground text-background"
               )}
@@ -203,7 +203,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
             <Button
               onClick={() => editor.chain().focus().toggleBulletList().run()}
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("bulletList")
                   ? "bg-foreground text-background"
                   : ""
@@ -215,7 +215,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
             <Button
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("orderedList")
                   ? "bg-foreground text-background"
                   : ""
@@ -230,7 +230,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
               onClick={() => editor.chain().focus().toggleCode().run()}
               disabled={!editor.can().chain().focus().toggleCode().run()}
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("code") ? "bg-foreground text-background" : ""
               )}
               variant="outline"
@@ -240,7 +240,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
             <Button
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("codeBlock")
                   ? "bg-foreground text-background"
                   : ""
@@ -252,7 +252,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
             <Button
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
               className={cn(
-                "h-min w-min p-1",
+                "h-min w-min !p-2",
                 editor.isActive("blockquote")
                   ? "bg-foreground text-background"
                   : ""
@@ -264,14 +264,14 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
             <Separator orientation="vertical" className="h-auto" />
             <Button
               onClick={() => editor.chain().focus().setHorizontalRule().run()}
-              className="h-min w-min p-1"
+              className="h-min w-min !p-2"
               variant="outline"
             >
               <SeparatorHorizontal />
             </Button>
             <Button
               onClick={() => editor.chain().focus().setHardBreak().run()}
-              className="h-min w-min p-1"
+              className="h-min w-min !p-2"
               variant="outline"
             >
               <CornerDownRight />
@@ -280,7 +280,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
             <Button
               onClick={() => editor.chain().focus().undo().run()}
               disabled={!editor.can().chain().focus().undo().run()}
-              className="h-min w-min p-1"
+              className="h-min w-min !p-2"
               variant="outline"
             >
               <Undo />
@@ -288,7 +288,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
             <Button
               onClick={() => editor.chain().focus().redo().run()}
               disabled={!editor.can().chain().focus().redo().run()}
-              className="h-min w-min p-1"
+              className="h-min w-min !p-2"
               variant="outline"
             >
               <Redo />
@@ -309,12 +309,12 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
             tippyOptions={{ duration: 100, placement: "bottom" }}
             editor={editor}
           >
-            <div className="flex flex-wrap items-center gap-2 rounded border bg-background p-2 shadow-md">
+            <div className="bg-background flex flex-wrap items-center gap-2 rounded border p-2 shadow-md">
               <Button
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 disabled={!editor.can().chain().focus().toggleBold().run()}
                 className={cn(
-                  "h-min w-min p-1 focus-visible:bg-accent focus-visible:text-accent-foreground",
+                  "focus-visible:bg-accent focus-visible:text-accent-foreground h-min w-min !p-2",
                   editor.isActive("bold") ? "bg-foreground text-background" : ""
                 )}
                 variant="outline"
@@ -325,7 +325,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
                 onClick={() => editor.chain().focus().toggleItalic().run()}
                 disabled={!editor.can().chain().focus().toggleItalic().run()}
                 className={cn(
-                  "h-min w-min p-1 focus-visible:bg-accent focus-visible:text-accent-foreground",
+                  "focus-visible:bg-accent focus-visible:text-accent-foreground h-min w-min !p-2",
                   editor.isActive("italic")
                     ? "bg-foreground text-background"
                     : ""
@@ -338,7 +338,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
                 onClick={() => editor.chain().focus().toggleStrike().run()}
                 disabled={!editor.can().chain().focus().toggleStrike().run()}
                 className={cn(
-                  "h-min w-min p-1 focus-visible:bg-accent focus-visible:text-accent-foreground",
+                  "focus-visible:bg-accent focus-visible:text-accent-foreground h-min w-min !p-2",
                   editor.isActive("strike")
                     ? "bg-foreground text-background"
                     : ""
@@ -347,16 +347,16 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
               >
                 <Strikethrough />
               </Button>
-              <div className="ml-6 grid items-end gap-1 text-xs text-muted-foreground">
+              <div className="text-muted-foreground ml-6 grid items-end gap-1 text-xs">
                 <p>
                   move:{" "}
-                  <kbd className="pointer-events-none inline-flex h-5 w-fit select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                  <kbd className="bg-muted text-muted-foreground pointer-events-none inline-flex h-5 w-fit items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none">
                     <span className="text-xs">TAB</span>
                   </kbd>
                 </p>
                 <p>
                   select:{" "}
-                  <kbd className="pointer-events-none inline-flex h-5 w-fit select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                  <kbd className="bg-muted text-muted-foreground pointer-events-none inline-flex h-5 w-fit items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none">
                     <span className="text-xs">SPACE</span>
                   </kbd>
                 </p>
@@ -368,12 +368,12 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
             tippyOptions={{ duration: 100 }}
             editor={editor}
           >
-            <div className="flex flex-wrap gap-2 rounded border bg-background p-2 shadow-md">
+            <div className="bg-background flex flex-wrap gap-2 rounded border p-2 shadow-md">
               <Button
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 disabled={!editor.can().chain().focus().toggleBold().run()}
                 className={cn(
-                  "h-min w-min p-1 focus-visible:bg-accent focus-visible:text-accent-foreground",
+                  "focus-visible:bg-accent focus-visible:text-accent-foreground h-min w-min !p-2",
                   editor.isActive("bold") ? "bg-foreground text-background" : ""
                 )}
                 variant="outline"
@@ -384,7 +384,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
                 onClick={() => editor.chain().focus().toggleItalic().run()}
                 disabled={!editor.can().chain().focus().toggleItalic().run()}
                 className={cn(
-                  "h-min w-min p-1 focus-visible:bg-accent focus-visible:text-accent-foreground",
+                  "focus-visible:bg-accent focus-visible:text-accent-foreground h-min w-min !p-2",
                   editor.isActive("italic")
                     ? "bg-foreground text-background"
                     : ""
@@ -397,7 +397,7 @@ const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
                 onClick={() => editor.chain().focus().toggleStrike().run()}
                 disabled={!editor.can().chain().focus().toggleStrike().run()}
                 className={cn(
-                  "h-min w-min p-1 focus-visible:bg-accent focus-visible:text-accent-foreground",
+                  "focus-visible:bg-accent focus-visible:text-accent-foreground h-min w-min !p-2",
                   editor.isActive("strike")
                     ? "bg-foreground text-background"
                     : ""

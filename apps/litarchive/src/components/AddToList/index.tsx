@@ -95,7 +95,7 @@ export default function AddToListButton({ bookId }: { bookId: number }) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          className="group h-fit w-fit rounded-full border-primary/40 bg-background !p-2 active:scale-125 active:border-primary"
+          className="group border-primary/40 bg-background active:border-primary h-fit w-fit rounded-full !p-2 active:scale-125"
           variant="outline"
           role="combobox"
           aria-expanded={open}
@@ -163,7 +163,7 @@ export default function AddToListButton({ bookId }: { bookId: number }) {
                 createList({ name: search });
                 setOpen(false);
               }}
-              className="self-center text-background"
+              className="text-background self-center"
             >
               Create a new list
             </Button>
