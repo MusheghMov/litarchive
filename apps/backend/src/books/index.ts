@@ -186,6 +186,7 @@ const booksRoute = router
                 author: z.object({
                   name: z.string().nullable(),
                   id: z.number(),
+                  imageUrl: z.string().nullable(),
                 }),
                 userLikedBooks: z.array(
                   z
@@ -288,6 +289,7 @@ const booksRoute = router
             columns: {
               id: true,
               name: true,
+              imageUrl: true,
             },
           },
           ...(dbUser?.id
