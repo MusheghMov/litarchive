@@ -36,7 +36,7 @@ export async function generateMetadata({
   return {
     title: `"${book?.title}" (by ${book?.author?.name})`,
     openGraph: {
-      title: book?.title as string,
+      title: `"${book?.title}" (by ${book?.author?.name})`,
       images: [book?.author?.imageUrl as string],
       description: book?.textChunk.substring(0, 150),
       url: "https://litarchive.com/books/" + bookId,
