@@ -182,22 +182,50 @@ const booksRoute = router
                 id: z.number(),
                 titleTranslit: z.string().nullable(),
                 textLength: z.number(),
-                textChunk: z.unknown(),
+                textChunk: z.string(),
                 author: z.object({
                   name: z.string().nullable(),
                   id: z.number(),
                 }),
+                userLikedBooks: z.array(
+                  z
+                    .object({
+                      id: z.number(),
+                      userId: z.number(),
+                      createdAt: z.string().nullable(),
+                      bookId: z.number(),
+                    })
+                    .or(
+                      z.object({
+                        id: z.number(),
+                        userId: z.number(),
+                        createdAt: z.string().nullable(),
+                        bookId: z.number(),
+                        isLiked: z.boolean(),
+                      }),
+                    ),
+                ),
+                userReadingProgress: z.array(
+                  z
+                    .object({
+                      id: z.number(),
+                      userId: z.number(),
+                      updatedAt: z.string().nullable(),
+                      bookId: z.number(),
+                      lastCharacterIndex: z.number(),
+                    })
+                    .or(
+                      z.object({
+                        id: z.number(),
+                        userId: z.number(),
+                        updatedAt: z.string().nullable(),
+                        bookId: z.number(),
+                        lastCharacterIndex: z.number(),
+                        lastPageNumber: z.number(),
+                      }),
+                    ),
+                ),
               }),
-              // userLikedBooks: ({
-              //     ...;
-              // } | {
-              //     ...;
-              // })[];
-              // userReadingProgress: ({
-              //     ...;
-              // } | {
-              //     ...;
-              // })[];
             },
           },
           description: "Retrive book",
@@ -226,8 +254,7 @@ const booksRoute = router
         }
       }
 
-      const res = await db.query.books.findMany({
-        limit: 1,
+      const res = await db.query.books.findFirst({
         where: (books, { eq }) => eq(books.id, bookId),
         columns: {
           id: true,
@@ -284,7 +311,8 @@ const booksRoute = router
             : {}),
         },
       });
-      return c.json(res[0]);
+
+      return c.json(res);
     },
   )
   .post(

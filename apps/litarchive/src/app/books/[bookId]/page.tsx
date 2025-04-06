@@ -14,27 +14,37 @@ export async function generateMetadata({
 }: Props): Promise<Metadata> {
   const { bookId } = await params;
   const { page } = (await searchParams) || { page: "1" };
-  const bookJson = await honoClient.books[":bookId"].$get({
-    query: {
-      page: page,
-    },
-    param: {
-      bookId: bookId,
-    },
-  });
-  // const book = await bookJson.json();
+  let book;
+  try {
+    const bookJson = await honoClient.books[":bookId"].$get({
+      query: {
+        page: page,
+      },
+      param: {
+        bookId: bookId,
+      },
+    });
+    if (!bookJson.ok) {
+      console.error("error: ", bookJson);
+    } else {
+      book = await bookJson.json();
+    }
+  } catch (error) {
+    console.error("error", error);
+  }
+
   return {
-    // title: book?.title,
+    title: `"${book?.title}" (by ${book?.author})`,
     openGraph: {
-      // title: book?.title as string,
-      // description: (book?.textChunk as string).substring(0, 150),
+      title: book?.title as string,
+      description: book?.textChunk.substring(0, 150),
       url: "https://litarchive.com/books/" + bookId,
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      // title: book?.title as string,
-      // description: (book?.textChunk as string).substring(0, 150),
+      title: `"${book?.title}" (by ${book?.author})`,
+      description: book?.textChunk.substring(0, 150),
     },
   };
 }
@@ -58,9 +68,13 @@ export default async function BookPage({ params, searchParams }: Props) {
       },
       { headers: { Authorization: `${userId}` } }
     );
-    book = await bookJson.json();
-    // InferResponseType
-    if ((book as any)?.userLikedBooks?.length > 0) {
+    if (!bookJson.ok) {
+      console.error("error: ", bookJson);
+    } else {
+      book = await bookJson.json();
+    }
+
+    if (book?.userLikedBooks && book?.userLikedBooks?.length > 0) {
       isLiked = true;
     }
   } catch (error) {
