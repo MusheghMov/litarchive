@@ -194,7 +194,7 @@ export default async function AuthorPage({
                 >
                   <div className="flex w-full items-start gap-4">
                     <div className="flex gap-2">
-                      <Avatar>
+                      <Avatar className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
                         <AvatarImage
                           src={rating.user.imageUrl}
                           alt={rating.user.firstName}
