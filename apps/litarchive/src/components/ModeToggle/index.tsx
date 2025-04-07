@@ -19,7 +19,7 @@ export default function ModeToggle({
 
   const [fontSize, setFontSize] = useAtom(storeFontSize);
   const { bookId } = useParams<{ bookId: string }>();
-  const { setTheme} = useTheme();
+  const { setTheme } = useTheme();
 
   useEffect(() => {
     if (!ref.current) return;
@@ -51,7 +51,7 @@ export default function ModeToggle({
             <div className="flex w-fit flex-col items-center justify-center gap-2 px-2 py-1">
               <div className="flex flex-row items-center gap-2">
                 <Button
-                  className="group h-min w-min rounded-full border border-foreground/40 bg-transparent p-2 hover:border-foreground/80 hover:bg-transparent"
+                  className="group border-foreground/40 hover:border-foreground/80 h-min w-min rounded-full border bg-transparent p-2 hover:bg-transparent"
                   onClick={() => {
                     setFontSize(fontSize - 1);
                   }}
@@ -63,7 +63,7 @@ export default function ModeToggle({
                 </Button>
                 <p className="w-[20px] text-center text-sm">{fontSize}</p>
                 <Button
-                  className="group h-min w-min rounded-full border border-foreground/40 bg-transparent p-2 hover:border-foreground/80 hover:bg-transparent"
+                  className="group border-foreground/40 hover:border-foreground/80 h-min w-min rounded-full border bg-transparent p-2 hover:bg-transparent"
                   onClick={() => {
                     setFontSize(fontSize + 1);
                   }}
@@ -82,7 +82,7 @@ export default function ModeToggle({
           <Button
             variant="outline"
             size="icon"
-            className="cursor-pointer rounded-full border-border/65 bg-transparent"
+            className="border-border/65 cursor-pointer rounded-full bg-transparent"
             onClick={() => setTheme("light")}
           >
             <Circle className="fill-white stroke-gray-300" />
@@ -90,7 +90,7 @@ export default function ModeToggle({
           <Button
             variant="outline"
             size="icon"
-            className="cursor-pointer rounded-full border-border/65 bg-transparent"
+            className="border-border/65 cursor-pointer rounded-full bg-transparent"
             onClick={() => setTheme("green")}
           >
             <Circle className="fill-green-500 stroke-green-500" />
@@ -98,7 +98,15 @@ export default function ModeToggle({
           <Button
             variant="outline"
             size="icon"
-            className="cursor-pointer rounded-full border-border/65 bg-transparent"
+            className="border-border/65 cursor-pointer rounded-full bg-transparent"
+            onClick={() => setTheme("pink")}
+          >
+            <Circle className="fill-pink-500 stroke-pink-500" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="border-border/65 cursor-pointer rounded-full bg-transparent"
             onClick={() => setTheme("dark")}
           >
             <Circle className="fill-zinc-500 stroke-zinc-500" />
@@ -106,7 +114,7 @@ export default function ModeToggle({
           <Button
             variant="outline"
             size="icon"
-            className="cursor-pointer rounded-full border-border/65 bg-transparent"
+            className="border-border/65 cursor-pointer rounded-full bg-transparent"
             onClick={() => setTheme("violet")}
           >
             <Circle className="fill-violet-500 stroke-violet-500" />
@@ -114,7 +122,7 @@ export default function ModeToggle({
           <Button
             variant="outline"
             size="icon"
-            className="cursor-pointer rounded-full border-border/65 bg-transparent"
+            className="border-border/65 cursor-pointer rounded-full bg-transparent"
             onClick={() => setTheme("blue")}
           >
             <Circle className="fill-blue-500 stroke-blue-500" />
