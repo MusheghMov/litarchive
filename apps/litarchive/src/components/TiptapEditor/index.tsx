@@ -1,6 +1,7 @@
 "use client";
 
 import { Color } from "@tiptap/extension-color";
+import suggestion from "./suggestion";
 import Highlight from "@tiptap/extension-highlight";
 import {
   BubbleMenu,
@@ -14,6 +15,7 @@ import OrderedList from "@tiptap/extension-ordered-list";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
+import Mention from "@tiptap/extension-mention";
 import ListItem from "@tiptap/extension-list-item";
 import TextStyle from "@tiptap/extension-text-style";
 import { EditorProvider, useCurrentEditor } from "@tiptap/react";
@@ -423,6 +425,15 @@ const extensions = [
   Color.configure({ types: [TextStyle.name, ListItem.name] }),
   TextAlign.configure({
     types: ["heading", "paragraph"],
+  }),
+  Mention.configure({
+    HTMLAttributes: {
+      class: "mention",
+    },
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    suggestion,
+    deleteTriggerWithBackspace: true,
   }),
   Placeholder.configure({
     // Use a placeholder:
