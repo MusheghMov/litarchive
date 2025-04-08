@@ -2,7 +2,7 @@
 
 A modern web application for exploring, discovering, and organizing literature, built as a monorepo using Turborepo. Features a clean, responsive UI, user authentication, personal collections, and a rich reading experience.
 
-![LitArchive](https://github.com/username/litarchive/raw/main/assets/preview.png)
+<!-- ![LitArchive](https://github.com/username/litarchive/raw/main/assets/preview.png) -->
 
 ## 🏗️ Monorepo Architecture
 
