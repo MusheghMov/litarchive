@@ -35,11 +35,11 @@ const nextConfig = {
         hostname: "1abnppqngbtuiv5y.public.blob.vercel-storage.com",
         port: "",
       },
-      {
-        protocol: "https",
-        hostname: "pub-e94a2a2980874e3ab621fd44043e7eca.r2.dev",
-        port: "",
-      },
+      // {
+      //   protocol: "https",
+      //   hostname: "pub-e94a2a2980874e3ab621fd44043e7eca.r2.dev",
+      //   port: "",
+      // },
     ],
   },
 };
