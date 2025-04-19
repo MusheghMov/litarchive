@@ -28,7 +28,7 @@ export default function Header() {
   const { theme } = useTheme();
 
   return (
-    <div className="sticky top-0 z-50 !m-0 grid w-full shrink-0 grow-0 self-center overflow-hidden rounded-none border-b border-border/65 bg-background/35 backdrop-blur-lg lg:inset-0 lg:top-3 lg:m-auto lg:w-fit lg:rounded-[30px] lg:border">
+    <div className="border-border/65 bg-background/35 sticky top-0 z-50 !m-0 grid w-full shrink-0 grow-0 self-center overflow-hidden rounded-none border-b backdrop-blur-lg lg:inset-0 lg:top-3 lg:m-auto lg:w-fit lg:rounded-[30px] lg:border">
       <div className="flex w-full flex-row items-center justify-between gap-14 px-4 py-2 md:justify-between lg:justify-center lg:px-2 lg:py-1">
         <Link href="/" className="flex flex-row items-center gap-2 pl-3">
           <svg
@@ -66,12 +66,12 @@ export default function Header() {
           <h2 className="text-sm font-semibold">LITARCHIVE</h2>
         </Link>
 
-        <div className="hidden flex-row items-center gap-10 text-foreground lg:flex">
+        <div className="text-foreground hidden flex-row items-center gap-10 lg:flex">
           <Link
             href="/"
             prefetch
             className={cn(
-              "border-primary/80 text-sm text-foreground/60 hover:text-foreground",
+              "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
               selected === "" && "text-foreground"
             )}
             onClick={() => setSelected("")}
@@ -82,7 +82,7 @@ export default function Header() {
             href="/authors"
             prefetch
             className={cn(
-              "border-primary/80 text-sm text-foreground/60 hover:text-foreground",
+              "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
               selected === "authors" && "text-foreground"
             )}
             onClick={() => setSelected("authors")}
@@ -92,7 +92,7 @@ export default function Header() {
           <Link
             href="/books"
             className={cn(
-              "border-primary/80 text-sm text-foreground/60 hover:text-foreground",
+              "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
               selected === "books" && "text-foreground"
             )}
             onClick={() => setSelected("books")}
@@ -102,24 +102,46 @@ export default function Header() {
           <Link
             href="/articles"
             className={cn(
-              "border-primary/80 text-sm text-foreground/60 hover:text-foreground",
+              "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
               selected === "articles" && "text-foreground"
             )}
             onClick={() => setSelected("articles")}
           >
             Articles
           </Link>
+          <Link
+            href="/community"
+            className={cn(
+              "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
+              selected === "community" && "text-foreground"
+            )}
+            onClick={() => setSelected("community")}
+          >
+            Community
+          </Link>
           {isSignedIn && (
-            <Link
-              href="/profile"
-              className={cn(
-                "border-primary/80 text-sm text-foreground/60 hover:text-foreground",
-                selected === "profile" && "text-foreground"
-              )}
-              onClick={() => setSelected("profile")}
-            >
-              Profile
-            </Link>
+            <>
+              <Link
+                href="/profile"
+                className={cn(
+                  "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
+                  selected === "profile" && "text-foreground"
+                )}
+                onClick={() => setSelected("profile")}
+              >
+                Profile
+              </Link>
+              <Link
+                href="/studio"
+                className={cn(
+                  "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
+                  selected === "studio" && "text-foreground"
+                )}
+                onClick={() => setSelected("studio")}
+              >
+                Studio
+              </Link>
+            </>
           )}
         </div>
         <div className="flex flex-row items-center space-x-4 lg:flex">
@@ -203,10 +225,18 @@ export default function Header() {
               <DropdownMenuItem onClick={() => router.push("/articles")}>
                 Articles
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/community")}>
+                Community
+              </DropdownMenuItem>
               {isSignedIn && (
-                <DropdownMenuItem onClick={() => router.push("/profile")}>
-                  Profile
-                </DropdownMenuItem>
+                <>
+                  <DropdownMenuItem onClick={() => router.push("/profile")}>
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/studio")}>
+                    Studio
+                  </DropdownMenuItem>
+                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -215,7 +245,7 @@ export default function Header() {
           <Button
             variant="outline"
             size="icon"
-            className="rounded-full border border-border bg-background p-2 backdrop-blur-lg hover:bg-foreground/10"
+            className="border-border bg-background hover:bg-foreground/10 rounded-full border p-2 backdrop-blur-lg"
             onClick={() => setExpanded(!expanded)}
           >
             <SlidersHorizontal className="stroke-main" />

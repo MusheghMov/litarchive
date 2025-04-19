@@ -1,10 +1,13 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import type { R2Bucket } from "@cloudflare/workers-types";
 
 type Bindings = {
   DATABASE_URL: string;
   DATABASE_AUTH_TOKEN: string;
+  OPENAI_API_KEY: string;
+  litarchive: R2Bucket;
 };
 
 export function createRouter() {
@@ -24,7 +27,7 @@ export default function createApp() {
     }),
   );
   app.get("/error", () => {
-    throw new Error("Errorrrrrrrrrr!!!!!!");
+    throw new Error("Error in backend");
   });
   app.notFound((c) => {
     return c.json({ message: "Not Found" }, 404);

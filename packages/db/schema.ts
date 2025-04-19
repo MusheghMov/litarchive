@@ -64,6 +64,34 @@ export const books = sqliteTable("books", {
   authorId: integer("author_id").references(() => authors.id),
 });
 
+// Updated UserBooks table with slug field
+export const userBooks = sqliteTable("userBooks", {
+  id: integer("id").primaryKey(),
+  slug: text("slug").unique(), // Added slug field with unique constraint
+  title: text("title").notNull(),
+  description: text("description"),
+  coverImageUrl: text("cover_image_url"),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => user.id),
+  isPublic: integer("is_public", { mode: "boolean" }).default(false),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+// UserBook chapters table
+export const userBookChapters = sqliteTable("userBookChapters", {
+  id: integer("id").primaryKey(),
+  number: integer("number").notNull(), // Chapter number field
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  userBookId: integer("user_book_id")
+    .notNull()
+    .references(() => userBooks.id),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
 // Book lists table
 export const bookLists = sqliteTable("bookLists", {
   id: integer("id").primaryKey(),
@@ -213,6 +241,7 @@ export const userRelations = relations(user, ({ many }) => ({
   bookRatings: many(bookRatings),
   bookLists: many(bookLists),
   authorRatings: many(authorRatings),
+  userBooks: many(userBooks),
 }));
 
 export const articlesRelations = relations(articles, ({ one, many }) => ({
@@ -264,6 +293,24 @@ export const booksRelations = relations(books, ({ one, many }) => ({
   userReadingProgress: many(userReadingProgress),
   ratings: many(bookRatings),
 }));
+
+export const userBooksRelations = relations(userBooks, ({ one, many }) => ({
+  user: one(user, {
+    fields: [userBooks.userId],
+    references: [user.id],
+  }),
+  chapters: many(userBookChapters),
+}));
+
+export const userBookChaptersRelations = relations(
+  userBookChapters,
+  ({ one }) => ({
+    userBook: one(userBooks, {
+      fields: [userBookChapters.userBookId],
+      references: [userBooks.id],
+    }),
+  }),
+);
 
 export const bookListsRelations = relations(bookLists, ({ one, many }) => ({
   user: one(user, {

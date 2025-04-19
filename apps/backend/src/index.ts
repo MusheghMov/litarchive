@@ -1,6 +1,7 @@
 import authorsApp from "./authors";
 import articlesRoute from "./articles";
 import booksRoute from "./books";
+import communityBooks from "./communityBooks";
 import userApp from "./user";
 import ratingsRoute from "./ratings";
 import listsRoute from "./lists";
@@ -16,7 +17,8 @@ export const route = app
   .route("/books", booksRoute)
   .route("/user", userApp)
   .route("/ratings", ratingsRoute)
-  .route("/lists", listsRoute);
+  .route("/lists", listsRoute)
+  .route("/community/books", communityBooks);
 
 app.doc("/doc", {
   openapi: "3.0.0",
