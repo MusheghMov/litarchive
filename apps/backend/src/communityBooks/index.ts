@@ -29,9 +29,18 @@ const communityBooks = router
                 z.object({
                   id: z.number(),
                   title: z.string(),
+                  slug: z.string().nullable(),
                   description: z.string().nullable(),
                   coverImageUrl: z.string().nullable(),
                   isPublic: z.boolean().nullable(),
+                  user: z
+                    .object({
+                      firstName: z.string().nullable(),
+                      lastName: z.string().nullable(),
+                      email: z.string().nullable(),
+                      imageUrl: z.string().nullable(),
+                    })
+                    .nullable(),
                 }),
               ),
             },
@@ -55,6 +64,7 @@ const communityBooks = router
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
+      console.log("userId", userId);
 
       const db = connectToDB({
         url: c.env.DATABASE_URL,
@@ -74,9 +84,20 @@ const communityBooks = router
         columns: {
           id: true,
           title: true,
+          slug: true,
           description: true,
           coverImageUrl: true,
           isPublic: true,
+        },
+        with: {
+          user: {
+            columns: {
+              firstName: true,
+              lastName: true,
+              email: true,
+              imageUrl: true,
+            },
+          },
         },
       });
 
@@ -95,6 +116,7 @@ const communityBooks = router
                 z.object({
                   id: z.number(),
                   title: z.string(),
+                  slug: z.string().nullable(),
                   description: z.string().nullable(),
                   coverImageUrl: z.string().nullable(),
                   isPublic: z.boolean().nullable(),
@@ -126,6 +148,7 @@ const communityBooks = router
         columns: {
           id: true,
           title: true,
+          slug: true,
           description: true,
           coverImageUrl: true,
           isPublic: true,
@@ -145,6 +168,89 @@ const communityBooks = router
       return c.json(res, 200);
     },
   )
+  .openapi(
+    createRoute({
+      method: "get",
+      path: "/:slug",
+      request: {
+        params: z.object({
+          slug: z.string(),
+        }),
+      },
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                id: z.number(),
+                title: z.string(),
+                slug: z.string().nullable(),
+                description: z.string().nullable(),
+                coverImageUrl: z.string().nullable(),
+                isPublic: z.boolean().nullable(),
+                user: z
+                  .object({
+                    firstName: z.string().nullable(),
+                    lastName: z.string().nullable(),
+                    email: z.string().nullable(),
+                    imageUrl: z.string().nullable(),
+                  })
+                  .nullable(),
+              }),
+            },
+          },
+          description: "Retrieve community book by slug",
+        },
+        500: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Internal server error",
+        },
+      },
+    }),
+    async (c) => {
+      try {
+        const slug = c.req.param("slug");
+
+        const db = connectToDB({
+          url: c.env.DATABASE_URL,
+          authoToken: c.env.DATABASE_AUTH_TOKEN,
+        });
+
+        const res = await db.query.userBooks.findFirst({
+          where: (userBooks, { eq }) => eq(userBooks.slug, slug),
+          columns: {
+            id: true,
+            title: true,
+            slug: true,
+            description: true,
+            coverImageUrl: true,
+            isPublic: true,
+          },
+          with: {
+            user: {
+              columns: {
+                firstName: true,
+                lastName: true,
+                email: true,
+                imageUrl: true,
+              },
+            },
+          },
+        });
+
+        return c.json(res, 200);
+      } catch (error) {
+        console.error("Error fetching community book:", error);
+        return c.json({ error: "Error fetching community book" }, 500);
+      }
+    },
+  )
   .post(
     "/",
     zValidator(
@@ -161,6 +267,7 @@ const communityBooks = router
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
+      console.log("userId", userId);
 
       const db = connectToDB({
         url: c.env.DATABASE_URL,
@@ -174,6 +281,7 @@ const communityBooks = router
       if (!dbUser) {
         return c.json({ error: "Unauthorized" }, 401);
       }
+      console.log("dbUser", dbUser);
 
       const formData = await c.req.formData();
 
@@ -187,7 +295,7 @@ const communityBooks = router
       const description = formData.get("description") as string;
       const isPublic = formData.get("isPublic") === "true";
 
-      const res: { id: number }[] = await db
+      const res: { id: number; slug: string | null }[] = await db
         .insert(userBooks)
         .values({
           userId: dbUser.id,
@@ -196,12 +304,14 @@ const communityBooks = router
           slug: slug,
           isPublic: isPublic,
         })
-        .returning({ id: userBooks.id });
+        .returning({ id: userBooks.id, slug: userBooks.slug });
 
       c.executionCtx.waitUntil(
         new Promise(async (resolve) => {
           try {
+            console.log("formData", formData);
             const coverImageFormData = formData.get("coverImage") as File;
+            console.log("coverImageFormData", coverImageFormData);
             let coverImageUrl;
 
             if (coverImageFormData && coverImageFormData.size > 0) {
@@ -209,8 +319,9 @@ const communityBooks = router
                 const buffer = await coverImageFormData?.arrayBuffer();
                 const fileExtension = coverImageFormData?.type.split("/")[1];
                 const key = `${nanoid()}.${fileExtension}`;
-                await c.env.litarchive.put(key, buffer);
-                coverImageUrl = `https://pub-e94a2a2980874e3ab621fd44043e7eca.r2.dev/${key}`;
+                const putResult = await c.env.litarchive.put(key, buffer);
+                console.log("putResult", putResult);
+                coverImageUrl = `${c.env.IMAGE_STORAGE_URL}/${key}`;
               } catch (error) {
                 console.error("Error uploading file:", error);
               }
@@ -218,26 +329,31 @@ const communityBooks = router
               const openai = new OpenAI({
                 apiKey: c.env.OPENAI_API_KEY,
               });
+              console.log("openai", openai);
 
               try {
                 const prompt = `Create a cover image for the book titled ${title} and description ${description}`;
+                console.log("prompt", prompt);
 
+                console.log("openai apiKey", c.env.OPENAI_API_KEY);
                 const response = await openai?.images?.generate({
                   model: "dall-e-3",
                   prompt: prompt,
                   n: 1,
                   size: "1024x1024",
                 });
+                console.log("response", response);
 
                 try {
                   const imageUrl = response.data[0].url;
+                  console.log("imageUrl", imageUrl);
                   const imageResponse = await fetch(imageUrl!);
                   const imageBuffer = await imageResponse.arrayBuffer();
                   const fileExtension = "png";
                   const key = `${nanoid()}.${fileExtension}`;
                   await c.env.litarchive.put(key, imageBuffer);
 
-                  coverImageUrl = `https://pub-e94a2a2980874e3ab621fd44043e7eca.r2.dev/${key}`;
+                  coverImageUrl = `${c.env.IMAGE_STORAGE_URL}/${key}`;
                 } catch (error) {
                   console.error("Error fetching image:", error);
                 }

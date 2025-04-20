@@ -56,19 +56,26 @@ export default function CommunityBooksCreatePage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await honoClient.community.books.$post(
-      {
-        form: {
-          title: values.title,
-          description: values.description,
-          coverImage: values.coverImage,
-          isPublic: (values.isPublic || false).toString(),
+    try {
+      const resJson = await honoClient.community.books.$post(
+        {
+          form: {
+            title: values.title,
+            description: values.description,
+            coverImage: values.coverImage,
+            isPublic: (values.isPublic || false).toString(),
+          },
         },
-      },
-      { headers: { Authorization: `${userId}` } }
-    );
+        { headers: { Authorization: `${userId}` } }
+      );
 
-    router.push("/studio");
+      if (resJson.ok) {
+        const res = await resJson.json();
+        router.push("/community/" + res[0]?.slug);
+      }
+    } catch (error) {
+      console.error("Error creating book:", error);
+    }
   }
 
   return (
@@ -90,10 +97,10 @@ export default function CommunityBooksCreatePage() {
             )}
           </CardContent>
           <CardHeader className="px-3 py-0">
-            <CardTitle className="text-base">
+            <CardTitle className="line-clamp-2 text-base">
               {form.watch("title") || "Placeholder Title"}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="line-clamp-2">
               {form.watch("description") || "Placeholder Description"}
             </CardDescription>
           </CardHeader>
@@ -196,7 +203,7 @@ export default function CommunityBooksCreatePage() {
           </div>
           <Button
             type="submit"
-            className="text-background self-end"
+            className="text-background cursor-pointer self-end"
             disabled={form.formState.isSubmitting}
           >
             Submit

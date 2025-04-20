@@ -3,6 +3,13 @@ import { InferResponseType } from "hono";
 import honoClient from "./app/honoRPCClient";
 
 export type Book = InferResponseType<typeof honoClient.books.$get>[0];
+
+const getCommunityBookEndpoint = honoClient.community.books[":slug"].$get;
+export type CommunityBook = Exclude<
+  InferResponseType<typeof getCommunityBookEndpoint>,
+  {} & { [key: string]: string }
+>;
+
 export type Author = InferResponseType<typeof honoClient.authors.$get>[0];
 export type Article = InferResponseType<typeof honoClient.articles.$get>[0];
 
