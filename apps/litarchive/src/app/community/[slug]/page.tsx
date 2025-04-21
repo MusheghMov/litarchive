@@ -1,21 +1,29 @@
 import honoClient from "@/app/honoRPCClient";
 import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
 import { ImageIcon } from "lucide-react";
 import Chapters from "@/components/Chapters";
+import Genres from "@/components/Genres";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function CommunityBookPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const { userId } = await auth();
   const { slug } = await params;
   let book;
   let chapters;
+
   try {
-    const bookJson = await honoClient.community.books[":slug"].$get({
-      param: { slug },
-    });
+    const bookJson = await honoClient.community.books[":slug"].$get(
+      {
+        param: { slug },
+      },
+      {
+        headers: { Authorization: `${userId}` },
+      }
+    );
 
     if (bookJson.ok) {
       book = await bookJson.json();
@@ -31,6 +39,8 @@ export default async function CommunityBookPage({
   } catch (error) {
     console.error("Error fetching community book:", error);
   }
+
+  const genres = book?.genres.map((genre) => genre.genre);
 
   if (!book) {
     return <div>Not found</div>;
@@ -59,17 +69,13 @@ export default async function CommunityBookPage({
               {book.user?.firstName + " " + book.user?.lastName}
             </p>
           </div>
-          <div className="flex w-full gap-1">
-            <Badge variant="outline" className="text-xs">
-              Drama
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              Romance
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              Comedy
-            </Badge>
-          </div>
+
+          <Genres
+            genres={genres}
+            bookId={book.id}
+            isUserEditor={!!book.isUserEditor}
+          />
+
           <div className="flex w-full flex-col gap-1">
             <p className="font-bold">Description</p>
             <p className="text-sm text-gray-400">{book.description}</p>
@@ -80,6 +86,7 @@ export default async function CommunityBookPage({
         bookId={book.id.toString()}
         bookSlug={book.slug!}
         chapters={chapters}
+        isUserEditor={!!book.isUserEditor}
       />
     </div>
   );

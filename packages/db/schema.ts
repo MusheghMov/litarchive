@@ -172,6 +172,26 @@ export const booksToGenre = sqliteTable(
   },
 );
 
+export const userBooksToGenre = sqliteTable(
+  "userBooks_to_genre",
+  {
+    userBookId: integer("user_book_id")
+      .references(() => userBooks.id)
+      .notNull(),
+    genreId: integer("genre_id")
+      .references(() => genre.id)
+      .notNull(),
+  },
+  (t) => {
+    return {
+      pk: primaryKey({
+        name: "userBooks_to_genre_pkey",
+        columns: [t.userBookId, t.genreId],
+      }),
+    };
+  },
+);
+
 export const articles = sqliteTable("articles", {
   id: integer("id").primaryKey(),
   title: text("title").notNull(),
@@ -300,6 +320,7 @@ export const userBooksRelations = relations(userBooks, ({ one, many }) => ({
     references: [user.id],
   }),
   chapters: many(userBookChapters),
+  genres: many(userBooksToGenre),
 }));
 
 export const userBookChaptersRelations = relations(
@@ -344,9 +365,10 @@ export const bookRatingsRelations = relations(bookRatings, ({ one }) => ({
 
 export const genreRelations = relations(genre, ({ many }) => ({
   booksToGenre: many(booksToGenre),
+  userBooksToGenre: many(userBooksToGenre),
 }));
 
-export const boolsToGenreRelations = relations(booksToGenre, ({ one }) => ({
+export const booksToGenreRelations = relations(booksToGenre, ({ one }) => ({
   book: one(books, {
     fields: [booksToGenre.bookId],
     references: [books.id],
@@ -356,6 +378,20 @@ export const boolsToGenreRelations = relations(booksToGenre, ({ one }) => ({
     references: [genre.id],
   }),
 }));
+
+export const userBooksToGenreRelations = relations(
+  userBooksToGenre,
+  ({ one }) => ({
+    userBook: one(userBooks, {
+      fields: [userBooksToGenre.userBookId],
+      references: [userBooks.id],
+    }),
+    genre: one(genre, {
+      fields: [userBooksToGenre.genreId],
+      references: [genre.id],
+    }),
+  }),
+);
 
 export const userLikedBooksRelations = relations(userLikedBooks, ({ one }) => ({
   user: one(user, {

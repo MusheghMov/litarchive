@@ -11,10 +11,12 @@ export default function Chapters({
   bookId,
   bookSlug,
   chapters,
+  isUserEditor,
 }: {
   bookId: string;
   bookSlug: string;
   chapters: any;
+  isUserEditor: boolean;
 }) {
   const { userId } = useAuth();
   const router = useRouter();
@@ -48,15 +50,17 @@ export default function Chapters({
     <div className="flex w-full flex-col gap-4">
       <div className="flex w-full items-center justify-between gap-2">
         <p className="text-lg font-bold">Chapters</p>
-        <Button
-          variant="outline"
-          className="text-xs"
-          onClick={() => {
-            onCreateChapter();
-          }}
-        >
-          Add Chapter
-        </Button>
+        {isUserEditor && (
+          <Button
+            variant="outline"
+            className="text-xs"
+            onClick={() => {
+              onCreateChapter();
+            }}
+          >
+            Add Chapter
+          </Button>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {chapters?.map((chapter: any) => (

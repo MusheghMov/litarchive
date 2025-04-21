@@ -19,6 +19,10 @@ export type Chapter = Exclude<
 
 export type Author = InferResponseType<typeof honoClient.authors.$get>[0];
 export type Article = InferResponseType<typeof honoClient.articles.$get>[0];
+export type Genre = Exclude<
+  InferResponseType<typeof honoClient.genres.$get>,
+  {} & { [key: string]: string }
+>[0];
 
 export type Lists = Extract<
   InferResponseType<typeof honoClient.lists.$get>,

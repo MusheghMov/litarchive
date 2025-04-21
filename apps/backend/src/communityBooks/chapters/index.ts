@@ -164,7 +164,6 @@ const communityBooksChaptersRouter = router
     )`.as("isUserEditor"),
           },
         });
-        console.log("res chapters: ", res);
 
         if (!res) {
           return c.json({ error: "Chapter not found" }, 404);

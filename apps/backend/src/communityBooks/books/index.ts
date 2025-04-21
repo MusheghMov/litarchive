@@ -1,6 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
-import { connectToDB, eq } from "@repo/db";
-import { userBooks } from "@repo/db/schema";
+import { connectToDB, eq, sql } from "@repo/db";
+import { user, userBooks } from "@repo/db/schema";
 import { nanoid } from "nanoid";
 import OpenAI from "openai";
 import slugify from "slugify";
@@ -63,7 +63,6 @@ const communityBooks = router
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
-      console.log("userId", userId);
 
       const db = connectToDB({
         url: c.env.DATABASE_URL,
@@ -187,6 +186,17 @@ const communityBooks = router
                 description: z.string().nullable(),
                 coverImageUrl: z.string().nullable(),
                 isPublic: z.boolean().nullable(),
+                genres: z.array(
+                  z.object({
+                    userBookId: z.number(),
+                    genreId: z.number(),
+                    genre: z.object({
+                      description: z.string().nullable(),
+                      name: z.string().nullable(),
+                      id: z.number(),
+                    }),
+                  }),
+                ),
                 user: z
                   .object({
                     firstName: z.string().nullable(),
@@ -195,6 +205,7 @@ const communityBooks = router
                     imageUrl: z.string().nullable(),
                   })
                   .nullable(),
+                isUserEditor: z.boolean().nullable(),
               }),
             },
           },
@@ -214,6 +225,7 @@ const communityBooks = router
     }),
     async (c) => {
       try {
+        const userId = c.req.header("Authorization");
         const slug = c.req.param("slug");
 
         const db = connectToDB({
@@ -240,6 +252,29 @@ const communityBooks = router
                 imageUrl: true,
               },
             },
+            genres: {
+              with: {
+                genre: {
+                  columns: {
+                    id: true,
+                    name: true,
+                    description: true,
+                  },
+                },
+              },
+            },
+          },
+          extras: {
+            isUserEditor: sql`(
+      SELECT CASE 
+        WHEN ${userBooks}.user_id IN (
+          SELECT u.id 
+          FROM ${user} u 
+          WHERE u.sub = ${userId}
+        ) THEN TRUE
+        ELSE FALSE
+      END
+    )`.as("isUserEditor"),
           },
         });
 
@@ -266,7 +301,6 @@ const communityBooks = router
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
-      console.log("userId", userId);
 
       const db = connectToDB({
         url: c.env.DATABASE_URL,
@@ -280,7 +314,6 @@ const communityBooks = router
       if (!dbUser) {
         return c.json({ error: "Unauthorized" }, 401);
       }
-      console.log("dbUser", dbUser);
 
       const formData = await c.req.formData();
 
@@ -308,9 +341,7 @@ const communityBooks = router
       c.executionCtx.waitUntil(
         new Promise(async (resolve) => {
           try {
-            console.log("formData", formData);
             const coverImageFormData = formData.get("coverImage") as File;
-            console.log("coverImageFormData", coverImageFormData);
             let coverImageUrl;
 
             if (coverImageFormData && coverImageFormData.size > 0) {
@@ -319,7 +350,6 @@ const communityBooks = router
                 const fileExtension = coverImageFormData?.type.split("/")[1];
                 const key = `${nanoid()}.${fileExtension}`;
                 const putResult = await c.env.litarchive.put(key, buffer);
-                console.log("putResult", putResult);
                 coverImageUrl = `${c.env.IMAGE_STORAGE_URL}/${key}`;
               } catch (error) {
                 console.error("Error uploading file:", error);
@@ -328,24 +358,19 @@ const communityBooks = router
               const openai = new OpenAI({
                 apiKey: c.env.OPENAI_API_KEY,
               });
-              console.log("openai", openai);
 
               try {
                 const prompt = `Create a cover image for the book titled ${title} and description ${description}`;
-                console.log("prompt", prompt);
 
-                console.log("openai apiKey", c.env.OPENAI_API_KEY);
                 const response = await openai?.images?.generate({
                   model: "dall-e-3",
                   prompt: prompt,
                   n: 1,
                   size: "1024x1024",
                 });
-                console.log("response", response);
 
                 try {
                   const imageUrl = response.data[0].url;
-                  console.log("imageUrl", imageUrl);
                   const imageResponse = await fetch(imageUrl!);
                   const imageBuffer = await imageResponse.arrayBuffer();
                   const fileExtension = "png";
@@ -374,6 +399,54 @@ const communityBooks = router
           }
         }),
       );
+
+      return c.json(res);
+    },
+  )
+  .put(
+    "/:bookId",
+    zValidator(
+      "form",
+      z.object({
+        title: z.string().optional(),
+        description: z.string().optional(),
+      }),
+    ),
+    async (c) => {
+      const userId = c.req.header("Authorization");
+      if (!userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+      const db = connectToDB({
+        url: c.env.DATABASE_URL,
+        authoToken: c.env.DATABASE_AUTH_TOKEN,
+      });
+      const dbUser = await db.query.user.findFirst({
+        where: (users, { eq }) => eq(users.sub, userId),
+      });
+
+      if (!dbUser) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const params = c.req.param();
+      const bookId = Number.parseInt(params.bookId);
+
+      if (!bookId) {
+        return c.json({ error: "Book id is required" }, 400);
+      }
+
+      const { title, description } = c.req.valid("form");
+
+      const res = await db
+        .update(userBooks)
+        .set({
+          ...(title && { title: title || "" }),
+          ...(description && {
+            description: description || "",
+          }),
+        })
+        .where(eq(userBooks.id, bookId));
 
       return c.json(res);
     },
