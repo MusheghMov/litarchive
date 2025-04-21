@@ -2,6 +2,7 @@ import honoClient from "@/app/honoRPCClient";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { ImageIcon } from "lucide-react";
+import Chapters from "@/components/Chapters";
 
 export default async function CommunityBookPage({
   params,
@@ -10,6 +11,7 @@ export default async function CommunityBookPage({
 }) {
   const { slug } = await params;
   let book;
+  let chapters;
   try {
     const bookJson = await honoClient.community.books[":slug"].$get({
       param: { slug },
@@ -17,6 +19,14 @@ export default async function CommunityBookPage({
 
     if (bookJson.ok) {
       book = await bookJson.json();
+
+      const chaptersJson = await honoClient.community.chapters.$get({
+        query: { bookId: book.id.toString() },
+      });
+
+      if (chaptersJson.ok) {
+        chapters = await chaptersJson.json();
+      }
     }
   } catch (error) {
     console.error("Error fetching community book:", error);
@@ -27,43 +37,50 @@ export default async function CommunityBookPage({
   }
 
   return (
-    <div className="flex w-full flex-col gap-4 md:flex-row">
-      <div className="bg-card aspect-[2/3] max-h-[600px] w-full flex-col justify-end overflow-hidden rounded border p-2 md:w-[300px]">
-        {book.coverImageUrl ? (
-          <Image
-            src={book.coverImageUrl}
-            alt="Cover Image"
-            className="aspect-square h-full w-full object-cover"
-            width={300}
-            height={300}
-          />
-        ) : (
-          <ImageIcon className="h-full w-full object-cover" strokeWidth={1} />
-        )}
+    <div className="flex flex-col gap-4">
+      <div className="flex w-full flex-col gap-4 md:flex-row">
+        <div className="bg-card aspect-[2/3] max-h-[600px] w-full flex-col justify-end overflow-hidden rounded border p-2 md:w-[300px]">
+          {book.coverImageUrl ? (
+            <Image
+              src={book.coverImageUrl}
+              alt="Cover Image"
+              className="aspect-square h-full w-full object-cover"
+              width={300}
+              height={300}
+            />
+          ) : (
+            <ImageIcon className="h-full w-full object-cover" strokeWidth={1} />
+          )}
+        </div>
+        <div className="flex flex-1 flex-col gap-4">
+          <div className="flex w-full flex-col items-start gap-1">
+            <h1 className="text-2xl font-bold">{book.title}</h1>
+            <p className="cursor-pointer text-gray-400 hover:underline">
+              {book.user?.firstName + " " + book.user?.lastName}
+            </p>
+          </div>
+          <div className="flex w-full gap-1">
+            <Badge variant="outline" className="text-xs">
+              Drama
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              Romance
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              Comedy
+            </Badge>
+          </div>
+          <div className="flex w-full flex-col gap-1">
+            <p className="font-bold">Description</p>
+            <p className="text-sm text-gray-400">{book.description}</p>
+          </div>
+        </div>
       </div>
-      <div className="flex flex-1 flex-col gap-4">
-        <div className="flex w-full flex-col items-start gap-1">
-          <h1 className="text-2xl font-bold">{book.title}</h1>
-          <p className="cursor-pointer text-gray-400 hover:underline">
-            {book.user?.firstName + " " + book.user?.lastName}
-          </p>
-        </div>
-        <div className="flex w-full gap-1">
-          <Badge variant="outline" className="text-xs">
-            Drama
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            Romance
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            Comedy
-          </Badge>
-        </div>
-        <div className="flex w-full flex-col gap-1">
-          <p className="font-bold">Description</p>
-          <p className="text-sm text-gray-400">{book.description}</p>
-        </div>
-      </div>
+      <Chapters
+        bookId={book.id.toString()}
+        bookSlug={book.slug!}
+        chapters={chapters}
+      />
     </div>
   );
 }

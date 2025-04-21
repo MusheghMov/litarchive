@@ -18,7 +18,7 @@ export const route = app
   .route("/user", userApp)
   .route("/ratings", ratingsRoute)
   .route("/lists", listsRoute)
-  .route("/community/books", communityBooks);
+  .route("/community", communityBooks);
 
 app.doc("/doc", {
   openapi: "3.0.0",

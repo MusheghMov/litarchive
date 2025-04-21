@@ -5,6 +5,7 @@ import suggestion from "./suggestion";
 import Highlight from "@tiptap/extension-highlight";
 import {
   BubbleMenu,
+  Editor,
   // EditorContent,
   FloatingMenu,
   // useEditor,
@@ -20,13 +21,12 @@ import ListItem from "@tiptap/extension-list-item";
 import TextStyle from "@tiptap/extension-text-style";
 import { EditorProvider, useCurrentEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "../ui/button";
 import {
   Bold,
   Code,
   CornerDownRight,
-  FilePenLine,
   Heading1,
   Heading2,
   Heading3,
@@ -46,29 +46,52 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "../ui/separator";
+import { Badge } from "../ui/badge";
 
-const MenuBar = ({ showEditButton }: { showEditButton: boolean }) => {
+const MenuBar = ({
+  showEditButton,
+  saved = true,
+}: {
+  showEditButton: boolean;
+  saved?: boolean;
+}) => {
   const { editor } = useCurrentEditor();
-  const [isEditable, setIsEditable] = useState(false);
+  // const [isEditable, setIsEditable] = useState(false);
 
   if (!editor) {
     return null;
   }
 
   return (
-    <div className="flex w-fit flex-row-reverse justify-end gap-2 self-center">
-      {showEditButton && (
-        <Button
-          onClick={() => {
-            setIsEditable(!isEditable);
-            editor.setEditable(!editor.isEditable);
-          }}
-          className="h-auto"
-          variant="outline"
-        >
-          <FilePenLine />
-        </Button>
+    <div
+      className={cn(
+        "flex w-fit flex-col-reverse justify-end gap-2 lg:flex-row-reverse",
+        !editor.isEditable && "hidden"
       )}
+    >
+      {editor.isEditable && (
+        <Badge
+          variant="outline"
+          className={cn(
+            "h-fit self-end text-xs lg:self-center",
+            saved && "text-background bg-green-400"
+          )}
+        >
+          {saved ? "Saved" : "Not Saved"}
+        </Badge>
+      )}
+      {/* {showEditButton && ( */}
+      {/*   <Button */}
+      {/*     onClick={() => { */}
+      {/*       setIsEditable(!isEditable); */}
+      {/*       editor.setEditable(!editor.isEditable); */}
+      {/*     }} */}
+      {/*     className="h-auto" */}
+      {/*     variant="outline" */}
+      {/*   > */}
+      {/*     <FilePenLine /> */}
+      {/*   </Button> */}
+      {/* )} */}
       {editor.isEditable && (
         <div>
           <div className="flex flex-wrap gap-2 rounded border p-2">
@@ -460,15 +483,26 @@ const extensions = [
   }),
 ];
 
-export default function TiptapEditor({ editable }: { editable: boolean }) {
+export default function TiptapEditor({
+  editable,
+  onUpdate,
+  content,
+  saved = true,
+}: {
+  editable: boolean;
+  onUpdate?: ({ editor }: { editor: Editor }) => void;
+  content?: string;
+  saved?: boolean;
+}) {
   return (
     <div className="flex h-full w-full flex-col gap-10">
       {/* <article className="prose flex w-full min-w-full flex-col items-start justify-center gap-0 whitespace-pre-wrap text-foreground/90 dark:prose-invert lg:prose-xl prose-headings:text-foreground lg:px-24"> */}
       <EditorProvider
         editable={editable}
-        slotBefore={<MenuBar showEditButton={!editable} />}
+        slotBefore={<MenuBar showEditButton={!editable} saved={saved} />}
         extensions={extensions}
-        content=""
+        content={content || ""}
+        onUpdate={onUpdate}
       />
       {/* </article> */}
     </div>

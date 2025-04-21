@@ -10,6 +10,13 @@ export type CommunityBook = Exclude<
   {} & { [key: string]: string }
 >;
 
+const getCommunityChaptersEndpoint =
+  honoClient.community.chapters[":chapterId"].$get;
+export type Chapter = Exclude<
+  InferResponseType<typeof getCommunityChaptersEndpoint>,
+  {} & { [key: string]: string }
+>;
+
 export type Author = InferResponseType<typeof honoClient.authors.$get>[0];
 export type Article = InferResponseType<typeof honoClient.articles.$get>[0];
 
