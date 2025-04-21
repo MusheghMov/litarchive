@@ -79,7 +79,7 @@ export default function CommunityBooksCreatePage() {
   }
 
   return (
-    <div className="flex w-full gap-8">
+    <div className="flex w-full flex-col gap-8 lg:flex-row">
       <Card className="flex max-w-[300px] min-w-[300px] flex-col justify-between gap-2 p-2">
         <div className="flex flex-col gap-2">
           <CardContent className="overflow-hidden rounded p-0">
