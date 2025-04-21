@@ -3,6 +3,7 @@ import honoClient from "../honoRPCClient";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import CommunityBookCard from "@/components/CommunityBookCard";
+import { CommunityBook } from "@/types";
 
 export default async function StudioPage() {
   const { userId } = await auth();
@@ -35,7 +36,7 @@ export default async function StudioPage() {
         <div className="grid w-full gap-4">
           <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
             {userBooks?.map((book) => (
-              <CommunityBookCard key={book.id} book={book} />
+              <CommunityBookCard key={book.id} book={book as CommunityBook} />
             ))}
           </div>
         </div>

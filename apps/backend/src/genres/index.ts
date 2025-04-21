@@ -1,6 +1,6 @@
-import { createRouter } from "src/lib/create-app";
+import { createRouter } from "../lib/create-app";
 import { createRoute, z } from "@hono/zod-openapi";
-import { connectToDB, eq } from "@repo/db";
+import { connectToDB } from "@repo/db";
 import { userBooksToGenre } from "@repo/db/schema";
 import { zValidator } from "@hono/zod-validator";
 
