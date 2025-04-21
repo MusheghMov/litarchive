@@ -1,4 +1,5 @@
 "use client";
+
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "../ui/button";
 import honoClient from "@/app/honoRPCClient";
@@ -58,30 +59,18 @@ export default function Chapters({
         </Button>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {chapters?.lenght ? (
-          <>
-            {chapters?.map((chapter: any) => (
-              <Link
-                key={chapter.id}
-                href={`/community/${bookSlug}/${chapter.number}?chapterId=${chapter.id}`}
-                className="bg-card h-fit w-full justify-end overflow-hidden rounded border p-2"
-              >
-                <p className="text-sm text-gray-400">
-                  Chapter {chapter.number}
-                </p>
-                {chapter.title && (
-                  <p className="text-lg font-bold capitalize">
-                    {chapter.title}
-                  </p>
-                )}
-              </Link>
-            ))}
-          </>
-        ) : (
-          <div className="col-span-2 flex w-full items-center justify-center p-4">
-            <p className="text-gray-400">No chapters yet</p>
-          </div>
-        )}
+        {chapters?.map((chapter: any) => (
+          <Link
+            key={chapter.id}
+            href={`/community/${bookSlug}/${chapter.number}?chapterId=${chapter.id}`}
+            className="bg-card h-fit w-full justify-end overflow-hidden rounded border p-2"
+          >
+            <p className="text-sm text-gray-400">Chapter {chapter.number}</p>
+            {chapter.title && (
+              <p className="text-lg font-bold capitalize">{chapter.title}</p>
+            )}
+          </Link>
+        ))}
       </div>
     </div>
   );
