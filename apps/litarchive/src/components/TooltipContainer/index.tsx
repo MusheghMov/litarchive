@@ -18,7 +18,7 @@ export default function TooltipContainer({
   children: React.ReactNode;
   classname?: string;
   side?: "top" | "bottom" | "left" | "right";
-  tooltipContent?: string;
+  tooltipContent?: React.ReactNode | string;
   disableTooltip?: boolean;
 }) {
   return (
