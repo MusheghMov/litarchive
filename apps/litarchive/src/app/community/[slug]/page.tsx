@@ -2,8 +2,8 @@ import honoClient from "@/app/honoRPCClient";
 import Image from "next/image";
 import { ImageIcon } from "lucide-react";
 import Chapters from "@/components/Chapters";
-import Genres from "@/components/Genres";
 import { auth } from "@clerk/nextjs/server";
+import CommunityBookInfo from "@/components/CommunityBookInfo";
 
 export default async function CommunityBookPage({
   params,
@@ -62,25 +62,7 @@ export default async function CommunityBookPage({
             <ImageIcon className="h-full w-full object-cover" strokeWidth={1} />
           )}
         </div>
-        <div className="flex flex-1 flex-col gap-4">
-          <div className="flex w-full flex-col items-start gap-1">
-            <h1 className="text-2xl font-bold">{book.title}</h1>
-            <p className="cursor-pointer text-gray-400 hover:underline">
-              {book.user?.firstName + " " + book.user?.lastName}
-            </p>
-          </div>
-
-          <Genres
-            genres={genres}
-            bookId={book.id}
-            isUserEditor={!!book.isUserEditor}
-          />
-
-          <div className="flex w-full flex-col gap-1">
-            <p className="font-bold">Description</p>
-            <p className="text-sm text-gray-400">{book.description}</p>
-          </div>
-        </div>
+        <CommunityBookInfo book={book} genres={genres} />
       </div>
       <Chapters
         bookId={book.id.toString()}

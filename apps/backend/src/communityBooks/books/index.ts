@@ -490,7 +490,11 @@ const communityBooks = router
             description: description || "",
           }),
         })
-        .where(eq(userBooks.id, bookId));
+        .where(eq(userBooks.id, bookId))
+        .returning({
+          title: userBooks.title,
+          description: userBooks.description,
+        });
 
       return c.json(res);
     },

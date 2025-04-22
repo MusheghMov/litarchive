@@ -4,8 +4,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import TiptapEditor from "../TiptapEditor";
 import { Chapter } from "@/types";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import useDebounce from "@/lib/useDebounce";
+import Contenteditable from "../Contenteditable";
 
 export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
   const [saved, setSaved] = useState(true);
@@ -13,7 +14,6 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
   const debouncedContent = useDebounce(content, 500);
 
   const { userId } = useAuth();
-  const titleRef = useRef<HTMLDivElement>(null);
 
   const { mutate: onUpdateTitle } = useMutation({
     mutationFn: async (title: string) => {
@@ -27,16 +27,16 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
         }
       );
     },
-    // onError: () => {
-    //   console.log("error");
-    // },
+    onError: () => {
+      console.error("error"); // TODO: handle error
+    },
   });
   const { mutate: onUpdateContent } = useMutation({
     mutationFn: async (content: string) => {
       return await honoClient.community.chapters[":chapterId"].$put(
         {
           param: { chapterId: chapter.id.toString() },
-          form: { content: content },
+          form: { content: content.trim() },
         },
         {
           headers: { Authorization: `${userId}` },
@@ -46,32 +46,27 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
     onSuccess: async (_res) => {
       setSaved(true);
     },
-    // onError: () => {
-    //   console.log("error");
-    // },
+    onError: () => {
+      console.error("error"); // TODO: handle error
+    },
   });
 
   useEffect(() => {
     onUpdateContent(debouncedContent);
   }, [debouncedContent]);
-  useEffect(() => {
-    if (titleRef.current) {
-      titleRef.current.innerText = chapter.title;
-    }
-  }, [chapter.title]);
 
   return (
     <div className="flex w-full flex-col gap-8">
       <div className="itemc-center flex w-full flex-col gap-1">
         <p className="text-foreground/50">Chapter {chapter.number}</p>
-        <div
-          ref={titleRef}
+        <Contenteditable
+          contenteditable={!!chapter.isUserEditor}
           onBlur={(e) => {
             onUpdateTitle(e.target.innerText);
           }}
-          contentEditable={true}
-          className="before:text-foreground/50 h-min min-h-0 w-full text-2xl font-bold capitalize before:pointer-events-none empty:before:content-['Title...'] focus-visible:outline-none"
-          aria-placeholder="Title..."
+          text={chapter.title}
+          className="text-2xl font-bold capitalize"
+          placeholder="Title..."
         />
       </div>
       <TiptapEditor
