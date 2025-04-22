@@ -26,7 +26,11 @@ export default async function CommunityPage() {
     <div className="grid w-full gap-4">
       <div className="grid w-full grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
         {userBooks?.map((book) => (
-          <CommunityBookCard key={book.id} book={book as CommunityBook} />
+          <CommunityBookCard
+            key={book.id}
+            book={book as CommunityBook}
+            genres={book.genres.map((genre) => genre.genre)}
+          />
         ))}
       </div>
     </div>

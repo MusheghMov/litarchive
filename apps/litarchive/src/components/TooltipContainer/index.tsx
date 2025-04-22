@@ -32,7 +32,7 @@ export default function TooltipContainer({
                 side={side}
                 className={cn("max-w-[600px]", classname)}
               >
-                <p>{tooltipContent}</p>
+                <div>{tooltipContent}</div>
               </TooltipContent>
             )}
           </TooltipPortal>

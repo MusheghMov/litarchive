@@ -13,13 +13,20 @@ import { Badge } from "@/components/ui/badge";
 import { CommunityBook } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
+import { Genre } from "@/types";
 
-export default function CommunityBookCard({ book }: { book: CommunityBook }) {
+export default function CommunityBookCard({
+  book,
+  genres,
+}: {
+  book: CommunityBook;
+  genres: Genre[] | undefined;
+}) {
   return (
     <Link href={`/community/${book.slug}`}>
       <Card
         key={book.id}
-        className="flex aspect-[2/3] w-full flex-col justify-end overflow-hidden rounded border p-2"
+        className="flex aspect-[2/3] w-full flex-col justify-end gap-2 overflow-hidden rounded border p-2"
       >
         <div className="flex h-full flex-col gap-2 overflow-hidden">
           <CardContent className="aspect-square overflow-hidden rounded p-0">
@@ -44,6 +51,44 @@ export default function CommunityBookCard({ book }: { book: CommunityBook }) {
                 {book.title}
               </CardTitle>
             </TooltipContainer>
+
+            {genres && genres.length > 0 && (
+              <div className="flex flex-row items-center gap-2">
+                {genres.map((genre, index) =>
+                  index > 0 ? (
+                    <TooltipContainer
+                      key={genre.id}
+                      tooltipContent={
+                        <div className="flex flex-row items-center gap-2">
+                          {genres.map((genre) => (
+                            <Badge
+                              key={genre.id}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {genre.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      }
+                    >
+                      <Badge
+                        key={genre.id}
+                        variant="outline"
+                        className="text-xs"
+                      >
+                        + {genres.length - index} more
+                      </Badge>
+                    </TooltipContainer>
+                  ) : (
+                    <Badge key={genre.id} variant="outline" className="text-xs">
+                      {genre.name}
+                    </Badge>
+                  )
+                )}
+              </div>
+            )}
+
             <TooltipContainer tooltipContent={book.description || ""}>
               <CardDescription className="line-clamp-2">
                 {book.description}

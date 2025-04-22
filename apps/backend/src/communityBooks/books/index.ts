@@ -32,6 +32,17 @@ const communityBooks = router
                   description: z.string().nullable(),
                   coverImageUrl: z.string().nullable(),
                   isPublic: z.boolean().nullable(),
+                  genres: z.array(
+                    z.object({
+                      userBookId: z.number(),
+                      genreId: z.number(),
+                      genre: z.object({
+                        description: z.string().nullable(),
+                        name: z.string().nullable(),
+                        id: z.number(),
+                      }),
+                    }),
+                  ),
                   user: z
                     .object({
                       firstName: z.string().nullable(),
@@ -96,6 +107,17 @@ const communityBooks = router
               imageUrl: true,
             },
           },
+          genres: {
+            with: {
+              genre: {
+                columns: {
+                  id: true,
+                  name: true,
+                  description: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -118,6 +140,17 @@ const communityBooks = router
                   description: z.string().nullable(),
                   coverImageUrl: z.string().nullable(),
                   isPublic: z.boolean().nullable(),
+                  genres: z.array(
+                    z.object({
+                      userBookId: z.number(),
+                      genreId: z.number(),
+                      genre: z.object({
+                        description: z.string().nullable(),
+                        name: z.string().nullable(),
+                        id: z.number(),
+                      }),
+                    }),
+                  ),
                   user: z
                     .object({
                       firstName: z.string().nullable(),
@@ -158,6 +191,17 @@ const communityBooks = router
               lastName: true,
               email: true,
               imageUrl: true,
+            },
+          },
+          genres: {
+            with: {
+              genre: {
+                columns: {
+                  id: true,
+                  name: true,
+                  description: true,
+                },
+              },
             },
           },
         },
