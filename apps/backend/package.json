@@ -1,10 +1,19 @@
 {
   "name": "backend",
+  "exports": {
+    "./hc": {
+      "import": {
+        "default": "./dist/hc.js",
+        "types": "./dist/hc.d.ts"
+      }
+    }
+  },
   "scripts": {
-    "dev": "wrangler dev --remote --env dev",
-    "deploy": "wrangler deploy --minify",
-    "build": "tsc --build",
-    "build:types": "tsc --emitDeclarationOnly --outDir ./dist"
+    "dev": "pnpm --parallel \"/^dev:.*/\"",
+    "dev:tsc": "tsc -p tsconfig.build.json --watch",
+    "dev:wrangler": "wrangler dev --remote --env dev",
+    "build": "tsc -p tsconfig.build.json",
+    "deploy": "wrangler deploy --minify"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.5.0",

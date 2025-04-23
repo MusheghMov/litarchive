@@ -385,7 +385,9 @@ const communityBooks = router
       c.executionCtx.waitUntil(
         new Promise(async (resolve) => {
           try {
-            const coverImageFormData = formData.get("coverImage") as File;
+            const coverImageFormData = formData.get(
+              "coverImage",
+            ) as unknown as File;
             let coverImageUrl;
 
             if (coverImageFormData && coverImageFormData.size > 0) {
