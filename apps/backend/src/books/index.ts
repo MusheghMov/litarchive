@@ -185,6 +185,7 @@ const booksRoute = router
                 textChunk: z.string(),
                 author: z.object({
                   name: z.string().nullable(),
+                  slug: z.string().nullable(),
                   id: z.number(),
                   imageUrl: z.string().nullable(),
                 }),
@@ -289,6 +290,7 @@ const booksRoute = router
             columns: {
               id: true,
               name: true,
+              slug: true,
               imageUrl: true,
             },
           },

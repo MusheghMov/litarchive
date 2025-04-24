@@ -33,7 +33,7 @@ export default function BookContent({
           }
         />
       ) : null}
-      <div className="flex h-full w-full flex-col items-center gap-y-10 bg-background px-4 md:px-8 lg:max-w-[80%] lg:p-0">
+      <div className="bg-background flex h-full w-full flex-col items-center gap-y-10 px-4 md:px-8 lg:max-w-[80%] lg:p-0">
         <div className="flex w-full flex-col-reverse lg:flex-row">
           <div className="flex w-full flex-col items-center space-y-2 px-8">
             <div className="flex flex-row space-x-4">
@@ -43,7 +43,7 @@ export default function BookContent({
             <p className="text-center text-slate-500">{book?.titleTranslit}</p>
             <div className="flex flex-row space-x-1 text-slate-500">
               <Link
-                href={`/authors/${book.author.id}`}
+                href={`/authors/${book.author.slug}`}
                 className="hover:underline"
               >
                 {book?.author.name}
@@ -66,7 +66,7 @@ export default function BookContent({
           style={{
             fontSize: `${fontSize}px`,
           }}
-          className="prose flex w-full min-w-full flex-col items-center justify-center gap-0 whitespace-pre-wrap text-foreground/80 dark:prose-invert lg:prose-xl lg:px-24"
+          className="prose text-foreground/80 dark:prose-invert lg:prose-xl flex w-full min-w-full flex-col items-center justify-center gap-0 whitespace-pre-wrap lg:px-24"
         >
           {book.textLength > chunkSize ? (
             <PageButtons
