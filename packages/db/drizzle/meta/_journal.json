@@ -302,6 +302,13 @@
       "when": 1745626079679,
       "tag": "0042_puzzling_red_ghost",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "6",
+      "when": 1745796202918,
+      "tag": "0043_windy_bedlam",
+      "breakpoints": true
     }
   ]
 }

@@ -34,10 +34,10 @@ export const authorRatings = sqliteTable(
     id: integer("id").primaryKey(),
     userId: integer("user_id")
       .notNull()
-      .references(() => user.id),
+      .references(() => user.id, { onDelete: "cascade" }),
     authorId: integer("author_id")
       .notNull()
-      .references(() => authors.id),
+      .references(() => authors.id, { onDelete: "cascade" }),
     rating: integer("rating").notNull(), // e.g., 1-5 stars
     review: text("review"), // Optional text review
     createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
@@ -73,7 +73,7 @@ export const userBooks = sqliteTable("userBooks", {
   coverImageUrl: text("cover_image_url"),
   userId: integer("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   isPublic: integer("is_public", { mode: "boolean" }).default(false),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
@@ -87,7 +87,7 @@ export const userBookChapters = sqliteTable("userBookChapters", {
   content: text("content").notNull(),
   userBookId: integer("user_book_id")
     .notNull()
-    .references(() => userBooks.id),
+    .references(() => userBooks.id, { onDelete: "cascade" }),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
@@ -102,7 +102,7 @@ export const chapterVersions = sqliteTable("chapterVersions", {
   }).default(false),
   userBookChapterId: integer("user_book_chapter_id")
     .notNull()
-    .references(() => userBookChapters.id),
+    .references(() => userBookChapters.id, { onDelete: "cascade" }),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   lastPublishedAt: text("last_published_at"),
 });
@@ -114,7 +114,7 @@ export const bookLists = sqliteTable("bookLists", {
   description: text("description"),
   userId: integer("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   isPublic: integer("is_public", { mode: "boolean" }).default(false),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
@@ -126,10 +126,10 @@ export const booksToLists = sqliteTable(
   {
     bookId: integer("book_id")
       .notNull()
-      .references(() => books.id),
+      .references(() => books.id, { onDelete: "cascade" }),
     listId: integer("list_id")
       .notNull()
-      .references(() => bookLists.id),
+      .references(() => bookLists.id, { onDelete: "cascade" }),
     createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
     notes: text("notes"),
@@ -145,10 +145,10 @@ export const bookRatings = sqliteTable(
     id: integer("id").primaryKey(),
     userId: integer("user_id")
       .notNull()
-      .references(() => user.id),
+      .references(() => user.id, { onDelete: "cascade" }),
     bookId: integer("book_id")
       .notNull()
-      .references(() => books.id),
+      .references(() => books.id, { onDelete: "cascade" }),
     rating: integer("rating").notNull(), // e.g., 1-5 stars
     review: text("review"), // Optional text review
     createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
@@ -171,10 +171,10 @@ export const booksToGenre = sqliteTable(
   "books_to_genre",
   {
     bookId: integer("book_id")
-      .references(() => books.id)
+      .references(() => books.id, { onDelete: "cascade" })
       .notNull(),
     genreId: integer("genre_id")
-      .references(() => genre.id)
+      .references(() => genre.id, { onDelete: "cascade" })
       .notNull(),
   },
   (t) => {
@@ -191,10 +191,10 @@ export const userBooksToGenre = sqliteTable(
   "userBooks_to_genre",
   {
     userBookId: integer("user_book_id")
-      .references(() => userBooks.id)
+      .references(() => userBooks.id, { onDelete: "cascade" })
       .notNull(),
     genreId: integer("genre_id")
-      .references(() => genre.id)
+      .references(() => genre.id, { onDelete: "cascade" })
       .notNull(),
   },
   (t) => {
@@ -215,7 +215,7 @@ export const articles = sqliteTable("articles", {
   imageUrl: text("imageUrl"),
   userId: integer("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
   status: text("status").default("draft"),
@@ -227,10 +227,10 @@ export const userLikedArticles = sqliteTable("userLikedArticles", {
   id: integer("id").primaryKey(),
   userId: integer("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   articleId: integer("article_id")
     .notNull()
-    .references(() => articles.id),
+    .references(() => articles.id, { onDelete: "cascade" }),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
@@ -238,10 +238,10 @@ export const userLikedBooks = sqliteTable("userLikedBooks", {
   id: integer("id").primaryKey(),
   userId: integer("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   bookId: integer("book_id")
     .notNull()
-    .references(() => books.id),
+    .references(() => books.id, { onDelete: "cascade" }),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
@@ -249,20 +249,20 @@ export const userLikedAuthors = sqliteTable("userLikedAuthors", {
   id: integer("id").primaryKey(),
   userId: integer("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   authorId: integer("author_id")
     .notNull()
-    .references(() => authors.id),
+    .references(() => authors.id, { onDelete: "cascade" }),
 });
 
 export const userReadingProgress = sqliteTable("userReadingProgress", {
   id: integer("id").primaryKey(),
   userId: integer("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   bookId: integer("book_id")
     .notNull()
-    .references(() => books.id),
+    .references(() => books.id, { onDelete: "cascade" }),
   lastCharacterIndex: integer("last_character_index").notNull(),
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });

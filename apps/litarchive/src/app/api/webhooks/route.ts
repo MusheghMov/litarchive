@@ -66,11 +66,27 @@ export async function POST(req: Request) {
         sub: payload.data.id,
         firstName: payload.data.first_name,
         lastName: payload.data.last_name,
-        email: payload.data.external_accounts[0].email_address,
+        email: payload.data.email_addresses[0].email_address,
         imageUrl: payload.data.image_url,
       },
     });
     console.log("Created user:", createdUser);
+  }
+  if (eventType === "user.deleted") {
+    const deletedUser = await honoClient.user.$delete(
+      {
+        query: {
+          sub: payload.data.id,
+        },
+      },
+      {
+        headers: {
+          Authorization: payload.data.id,
+        },
+      }
+    );
+
+    console.log("Deleted user:", deletedUser);
   }
   return new Response("", { status: 200 });
 }
