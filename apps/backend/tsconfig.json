@@ -13,6 +13,9 @@
     "skipLibCheck": true,
     "lib": ["ESNext"],
     "types": ["@cloudflare/workers-types"],
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   }

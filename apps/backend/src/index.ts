@@ -1,7 +1,7 @@
 import authorsApp from "./authors";
 import articlesRoute from "./articles";
 import booksRoute from "./books";
-import communityBooks from "./communityBooks";
+import community from "./community";
 import userApp from "./user";
 import ratingsRoute from "./ratings";
 import listsRoute from "./lists";
@@ -19,7 +19,7 @@ export const route = app
   .route("/user", userApp)
   .route("/ratings", ratingsRoute)
   .route("/lists", listsRoute)
-  .route("/community", communityBooks)
+  .route("/community", community)
   .route("/genres", genresRouter);
 
 app.doc("/doc", {

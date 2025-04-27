@@ -11,9 +11,9 @@ import {
   // useEditor,
 } from "@tiptap/react";
 import Typography from "@tiptap/extension-typography";
-import BulletList from "@tiptap/extension-bullet-list";
-import OrderedList from "@tiptap/extension-ordered-list";
-import HorizontalRule from "@tiptap/extension-horizontal-rule";
+// import BulletList from "@tiptap/extension-bullet-list";
+// import OrderedList from "@tiptap/extension-ordered-list";
+// import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
 import Mention from "@tiptap/extension-mention";
@@ -65,7 +65,7 @@ const MenuBar = ({
   return (
     <div
       className={cn(
-        "flex w-fit flex-col-reverse justify-end gap-2 lg:flex-row-reverse",
+        "bg-background sticky top-16 z-10 flex w-fit flex-col-reverse justify-end gap-2 lg:flex-row-reverse",
         !editor.isEditable && "hidden"
       )}
     >
@@ -442,9 +442,9 @@ const MenuBar = ({
 const extensions = [
   Highlight,
   Typography,
-  HorizontalRule,
-  BulletList,
-  OrderedList,
+  // HorizontalRule,
+  // BulletList,
+  // OrderedList,
   Color.configure({ types: [TextStyle.name, ListItem.name] }),
   TextAlign.configure({
     types: ["heading", "paragraph"],
@@ -471,16 +471,7 @@ const extensions = [
     // },
   }),
   TextStyle,
-  StarterKit.configure({
-    bulletList: {
-      keepMarks: true,
-      keepAttributes: false, // TODO : Making this as `false` becase marks are not preserved when I try to preserve attrs, awaiting a bit of help
-    },
-    orderedList: {
-      keepMarks: true,
-      keepAttributes: false, // TODO : Making this as `false` becase marks are not preserved when I try to preserve attrs, awaiting a bit of help
-    },
-  }),
+  StarterKit,
 ];
 
 export default function TiptapEditor({
@@ -503,6 +494,7 @@ export default function TiptapEditor({
         extensions={extensions}
         content={content || ""}
         onUpdate={onUpdate}
+        immediatelyRender={false}
       />
       {/* </article> */}
     </div>

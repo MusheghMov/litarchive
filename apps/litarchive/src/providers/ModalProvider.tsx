@@ -17,6 +17,8 @@ const UpsertAuthorReviewModal = dynamic(
   () => import("@/components/modals/UpsertAuthorReviewModal")
 );
 
+const WarningModal = dynamic(() => import("@/components/modals/WarningModal"));
+
 interface BaseModalProps {
   isOpen?: boolean;
   setIsOpen?: (isOpen: boolean) => void;
@@ -26,6 +28,7 @@ interface BaseModalProps {
 const Modals = {
   SignUpSuggestionModal,
   UpsertAuthorReviewModal,
+  WarningModal,
 } as const;
 
 type ModalComponents = {

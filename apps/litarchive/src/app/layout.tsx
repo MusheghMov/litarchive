@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Providers from "@/providers";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import "@smastrom/react-rating/style.css";
 
@@ -68,6 +69,17 @@ export default function RootLayout({
             <Header />
             {children}
             <Analytics />
+            <Toaster
+              position="top-right"
+              closeButton={true}
+              toastOptions={{
+                classNames: {
+                  success: "",
+                  closeButton:
+                    "!text-foreground hover:!text-background hover:!bg-foreground",
+                },
+              }}
+            />
             <SpeedInsights />
           </Providers>
         </ClerkProvider>

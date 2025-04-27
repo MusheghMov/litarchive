@@ -92,6 +92,21 @@ export const userBookChapters = sqliteTable("userBookChapters", {
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const chapterVersions = sqliteTable("chapterVersions", {
+  id: integer("id").primaryKey(),
+  name: text("name").notNull(),
+  content: text("content").notNull(),
+  versionNumber: integer("version_number").notNull(),
+  isCurrentlyPublished: integer("is_currently_published", {
+    mode: "boolean",
+  }).default(false),
+  userBookChapterId: integer("user_book_chapter_id")
+    .notNull()
+    .references(() => userBookChapters.id),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+  lastPublishedAt: text("last_published_at"),
+});
+
 // Book lists table
 export const bookLists = sqliteTable("bookLists", {
   id: integer("id").primaryKey(),
@@ -325,10 +340,21 @@ export const userBooksRelations = relations(userBooks, ({ one, many }) => ({
 
 export const userBookChaptersRelations = relations(
   userBookChapters,
-  ({ one }) => ({
+  ({ one, many }) => ({
     userBook: one(userBooks, {
       fields: [userBookChapters.userBookId],
       references: [userBooks.id],
+    }),
+    versions: many(chapterVersions),
+  }),
+);
+
+export const chapterVersionsRelations = relations(
+  chapterVersions,
+  ({ one }) => ({
+    chapter: one(userBookChapters, {
+      fields: [chapterVersions.userBookChapterId],
+      references: [userBookChapters.id],
     }),
   }),
 );

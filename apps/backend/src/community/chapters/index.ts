@@ -3,10 +3,12 @@ import { createRouter } from "../../lib/create-app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { zValidator } from "@hono/zod-validator";
 import { user, userBookChapters, userBooks } from "@repo/db/schema";
+import chapterVersionsRouter from "./versions";
 
 const router = createRouter();
 
 const communityBooksChaptersRouter = router
+  .route("/versions", chapterVersionsRouter)
   .openapi(
     createRoute({
       method: "get",
@@ -32,6 +34,16 @@ const communityBooksChaptersRouter = router
           },
           description: "Retrieve community book by slug",
         },
+        400: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Bad request",
+        },
         500: {
           content: {
             "application/json": {
@@ -46,25 +58,68 @@ const communityBooksChaptersRouter = router
     }),
     async (c) => {
       try {
+        const userId = c.req.header("Authorization");
         const { bookId } = c.req.valid("query");
+        if (!bookId) {
+          return c.json({ error: "Book id is required" }, 400);
+        }
 
         const db = connectToDB({
           url: c.env.DATABASE_URL,
           authoToken: c.env.DATABASE_AUTH_TOKEN,
         });
 
-        const res = await db.query.userBookChapters.findMany({
-          where: (userBookChapters, { eq }) =>
-            eq(userBookChapters.userBookId, +bookId),
-          columns: {
-            id: true,
-            title: true,
-            number: true,
-            content: true,
-          },
-        });
+        let dbUser: any;
+        let isUserEditor = false;
 
-        return c.json(res, 200);
+        if (userId && userId !== "null") {
+          dbUser = await db.query.user.findFirst({
+            where: (users, { eq }) => eq(users.sub, userId),
+          });
+
+          isUserEditor = await db.query.userBooks
+            .findFirst({
+              where: (userBooks, { eq }) => eq(userBooks.id, +bookId!),
+            })
+            .then((res) => res?.userId === dbUser.id);
+        }
+
+        try {
+          const res = await db.query.userBookChapters.findMany({
+            where: (userBookChapters, { eq }) =>
+              eq(userBookChapters.userBookId, +bookId),
+            columns: {
+              id: true,
+              title: true,
+              number: true,
+              content: true,
+            },
+            with: {
+              versions: {
+                ...(!isUserEditor && {
+                  where: (chapterVersions, { eq }) =>
+                    eq(chapterVersions.isCurrentlyPublished, true),
+                }),
+              },
+            },
+          });
+
+          if (isUserEditor) {
+            return c.json(res, 200);
+          } else {
+            // return only books that has published chapters
+            return c.json(
+              res.filter((chapter) => chapter.versions.length > 0),
+              200,
+            );
+          }
+        } catch (error: any) {
+          console.error("Error fetching community book chapters:", error);
+          return c.json(
+            { error: "Error fetching community book chapters" },
+            500,
+          );
+        }
       } catch (error) {
         console.error("Error fetching community book chapters:", error);
         return c.json({ error: "Error fetching community book chapters" }, 500);
@@ -86,10 +141,22 @@ const communityBooksChaptersRouter = router
             "application/json": {
               schema: z.object({
                 id: z.number(),
-                title: z.string(),
+                title: z.string().nullish(),
+                content: z.string().nullish(),
                 number: z.number(),
-                content: z.string(),
                 isUserEditor: z.boolean(),
+                versions: z.array(
+                  z.object({
+                    content: z.string(),
+                    name: z.string(),
+                    id: z.number(),
+                    isCurrentlyPublished: z.boolean().nullable(),
+                    createdAt: z.string().nullable(),
+                    versionNumber: z.number(),
+                    userBookChapterId: z.number(),
+                    lastPublishedAt: z.string().nullable(),
+                  }),
+                ),
               }),
             },
           },
@@ -129,9 +196,6 @@ const communityBooksChaptersRouter = router
     }),
     async (c) => {
       const userId = c.req.header("Authorization");
-      if (!userId) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
 
       try {
         const { chapterId } = c.req.valid("param");
@@ -141,14 +205,49 @@ const communityBooksChaptersRouter = router
           authoToken: c.env.DATABASE_AUTH_TOKEN,
         });
 
+        let dbUser: any;
+        let isUserEditor = false;
+
+        if (userId && userId !== "null") {
+          dbUser = await db.query.user.findFirst({
+            where: (users, { eq }) => eq(users.sub, userId),
+          });
+
+          if (!dbUser) {
+            return c.json({ error: "Unauthorized" }, 401);
+          }
+
+          isUserEditor = await db.query.userBookChapters
+            .findFirst({
+              where: (userBookChapters, { eq }) =>
+                eq(userBookChapters.id, +chapterId),
+              with: {
+                userBook: {
+                  columns: {
+                    userId: true,
+                  },
+                },
+              },
+            })
+            .then((res) => res?.userBook?.userId === dbUser.id);
+        }
+
         const res = await db.query.userBookChapters.findFirst({
           where: (userBookChapters, { eq }) =>
             eq(userBookChapters.id, +chapterId),
           columns: {
             id: true,
-            title: true,
+            ...(isUserEditor && { title: true }),
             number: true,
-            content: true,
+            ...(isUserEditor && { content: true }),
+          },
+          with: {
+            versions: {
+              ...(!isUserEditor && {
+                where: (chapterVersions, { eq }) =>
+                  eq(chapterVersions.isCurrentlyPublished, true),
+              }),
+            },
           },
           extras: {
             isUserEditor: sql<boolean>`(

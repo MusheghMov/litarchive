@@ -41,9 +41,6 @@ export default function Chapters({
         );
       }
     },
-    // onError: () => {
-    //   console.log("error");
-    // },
   });
 
   return (

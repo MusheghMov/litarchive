@@ -295,6 +295,13 @@
       "when": 1745243772269,
       "tag": "0041_mushy_nightmare",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "6",
+      "when": 1745626079679,
+      "tag": "0042_puzzling_red_ghost",
+      "breakpoints": true
     }
   ]
 }

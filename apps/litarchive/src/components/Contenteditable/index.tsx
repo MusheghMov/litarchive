@@ -11,7 +11,7 @@ export default function Contenteditable({
   placeholder = "write something...",
   ...props
 }: {
-  onBlur: (e: FocusEvent<HTMLDivElement, Element>) => void;
+  onBlur?: (e: FocusEvent<HTMLDivElement, Element>) => void;
   text?: string;
   className?: string;
   contenteditable?: boolean;

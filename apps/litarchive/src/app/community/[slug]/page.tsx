@@ -28,9 +28,14 @@ export default async function CommunityBookPage({
     if (bookJson.ok) {
       book = await bookJson.json();
 
-      const chaptersJson = await honoClient.community.chapters.$get({
-        query: { bookId: book.id.toString() },
-      });
+      const chaptersJson = await honoClient.community.chapters.$get(
+        {
+          query: { bookId: book.id.toString() },
+        },
+        {
+          headers: { Authorization: `${userId}` },
+        }
+      );
 
       if (chaptersJson.ok) {
         chapters = await chaptersJson.json();
