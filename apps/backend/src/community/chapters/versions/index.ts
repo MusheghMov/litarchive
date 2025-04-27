@@ -1,5 +1,5 @@
 import { connectToDB, eq } from "@repo/db";
-import { createRouter } from "@/lib/create-app";
+import { createRouter } from "../../../lib/create-app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { zValidator } from "@hono/zod-validator";
 import { chapterVersions } from "@repo/db/schema";
