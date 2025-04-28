@@ -119,6 +119,7 @@ const communityBooks = router
             },
           },
         },
+        orderBy: (userBooks, { desc }) => desc(userBooks.createdAt),
       });
 
       return c.json(res, 200);
@@ -205,6 +206,7 @@ const communityBooks = router
             },
           },
         },
+        orderBy: (userBooks, { desc }) => desc(userBooks.createdAt),
       });
 
       return c.json(res, 200);
