@@ -506,6 +506,45 @@ const communityBooks = router
 
       return c.json(res);
     },
-  );
+  )
+  .delete("/:bookId", async (c) => {
+    const userId = c.req.header("Authorization");
+    if (!userId) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    const params = c.req.param();
+    const bookId = Number.parseInt(params.bookId);
+
+    if (!bookId) {
+      return c.json({ error: "Book id is required" }, 400);
+    }
+
+    const db = connectToDB({
+      url: c.env.DATABASE_URL,
+      authoToken: c.env.DATABASE_AUTH_TOKEN,
+    });
+
+    const dbUser = await db.query.user.findFirst({
+      where: (users, { eq }) => eq(users.sub, userId),
+    });
+
+    if (!dbUser) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const isUserEditor = await db.query.userBooks
+      .findFirst({
+        where: (userBooks, { eq }) => eq(userBooks.id, bookId),
+      })
+      .then((res) => res?.userId === dbUser.id);
+
+    if (!isUserEditor) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const res = await db.delete(userBooks).where(eq(userBooks.id, bookId));
+
+    return c.json(res);
+  });
 
 export default communityBooks;

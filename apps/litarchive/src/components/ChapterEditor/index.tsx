@@ -210,12 +210,13 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
         <Contenteditable
           contenteditable={!selectedChapterVersion}
           onBlur={(e) => {
-            if (!selectedChapterVersion) {
-              return;
-            }
             onUpdateTitle(e.target.innerText);
           }}
-          text={chapter.title!}
+          text={
+            selectedChapterVersion
+              ? selectedChapterVersion.name || "no title yet"
+              : chapter.title!
+          }
           className="text-2xl font-bold capitalize"
           placeholder="Title..."
         />

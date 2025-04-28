@@ -9,6 +9,9 @@ import { useAuth } from "@clerk/nextjs";
 import { Switch } from "../ui/switch";
 import { useState } from "react";
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { useModal } from "@/providers/ModalProvider";
 
 export default function CommunityBookInfo({
   book,
@@ -17,6 +20,9 @@ export default function CommunityBookInfo({
   book: CommunityBook;
   genres: Genre[] | undefined;
 }) {
+  const router = useRouter();
+  const { openModal } = useModal();
+
   const [isPublic, setIsPublic] = useState<boolean>(book.isPublic || false);
   const { userId } = useAuth();
   const { mutate: onUpdateTitleAndDescription } = useMutation({
@@ -50,6 +56,28 @@ export default function CommunityBookInfo({
       }
     },
   });
+  const { mutate: onDeleteBook } = useMutation({
+    mutationFn: async () => {
+      try {
+        await honoClient.community.books[":bookId"].$delete(
+          {
+            param: {
+              bookId: book.id.toString(),
+            },
+          },
+          {
+            headers: { Authorization: `${userId}` },
+          }
+        );
+      } catch (error) {
+        console.error("Error deleting book:", error);
+      }
+    },
+    onSuccess: () => {
+      router.push("/studio");
+    },
+  });
+
   return (
     <div className="flex flex-1 flex-col gap-4">
       <div className="flex w-full flex-col items-start gap-1">
@@ -62,6 +90,10 @@ export default function CommunityBookInfo({
           className="before:text-foreground/50 h-min min-h-0 w-full text-2xl font-bold capitalize before:pointer-events-none empty:before:content-['Title...'] focus-visible:outline-none"
           placeholder="Title..."
         />
+
+        <p className="cursor-pointer text-gray-400 hover:underline">
+          {book.user?.firstName + " " + book.user?.lastName}
+        </p>
 
         {!!book.isUserEditor && (
           <div className="flex items-center gap-2">
@@ -77,9 +109,6 @@ export default function CommunityBookInfo({
             </Badge>
           </div>
         )}
-        <p className="cursor-pointer text-gray-400 hover:underline">
-          {book.user?.firstName + " " + book.user?.lastName}
-        </p>
       </div>
 
       <Genres
@@ -100,6 +129,24 @@ export default function CommunityBookInfo({
           placeholder="Description..."
         />
       </div>
+      <Button
+        className="w-fit cursor-pointer"
+        variant="destructive"
+        onClick={() => {
+          openModal({
+            modalName: "WarningModal",
+            props: {
+              title: "Deleting book",
+              description: "Are you sure you want to delete this book?",
+              onContinue: async () => {
+                onDeleteBook();
+              },
+            },
+          });
+        }}
+      >
+        Delete Book
+      </Button>
     </div>
   );
 }
