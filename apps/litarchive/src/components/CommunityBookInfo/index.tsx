@@ -63,18 +63,20 @@ export default function CommunityBookInfo({
           placeholder="Title..."
         />
 
-        <div className="flex items-center gap-2">
-          <Switch
-            checked={isPublic}
-            onCheckedChange={(value) => {
-              setIsPublic(value);
-              onUpdateTitleAndDescription({ isPublic: value.toString() });
-            }}
-          />
-          <Badge variant="outline" className="text-xs">
-            {isPublic ? "Public" : "Private"}
-          </Badge>
-        </div>
+        {!!book.isUserEditor && (
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={isPublic}
+              onCheckedChange={(value) => {
+                setIsPublic(value);
+                onUpdateTitleAndDescription({ isPublic: value.toString() });
+              }}
+            />
+            <Badge variant="outline" className="text-xs">
+              {isPublic ? "Public" : "Private"}
+            </Badge>
+          </div>
+        )}
         <p className="cursor-pointer text-gray-400 hover:underline">
           {book.user?.firstName + " " + book.user?.lastName}
         </p>
