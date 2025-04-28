@@ -22,26 +22,24 @@ export default async function ListsPage() {
   }
 
   return (
-    <div className="flex w-full max-w-[1000px] flex-col items-start justify-between gap-2 self-center px-4 py-10 sm:p-10 lg:px-0">
-      <div className="flex w-full flex-col gap-y-4">
-        <div className="flex w-fit items-center gap-2">
-          <p className="font-bold capitalize">your lists</p>
-          {lists && lists.length > 0 && (
-            <p className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/40 text-sm font-bold">
-              {lists?.length}
-            </p>
-          )}
-        </div>
-        {lists && lists.length > 0 ? (
-          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-            {lists?.map((list) => <ListCard key={list.id} list={list} />)}
-          </div>
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <p className="text-sm font-bold">You have no lists</p>
-          </div>
+    <div className="flex w-full flex-col gap-y-4">
+      <div className="flex w-fit items-center gap-2">
+        <p className="font-bold capitalize">your lists</p>
+        {lists && lists.length > 0 && (
+          <p className="bg-primary/40 flex h-6 w-6 items-center justify-center rounded-full text-sm font-bold">
+            {lists?.length}
+          </p>
         )}
       </div>
+      {lists && lists.length > 0 ? (
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+          {lists?.map((list) => <ListCard key={list.id} list={list} />)}
+        </div>
+      ) : (
+        <div className="flex h-full w-full items-center justify-center">
+          <p className="text-sm font-bold">You have no lists</p>
+        </div>
+      )}
     </div>
   );
 }
