@@ -129,24 +129,26 @@ export default function CommunityBookInfo({
           placeholder="Description..."
         />
       </div>
-      <Button
-        className="w-fit cursor-pointer"
-        variant="destructive"
-        onClick={() => {
-          openModal({
-            modalName: "WarningModal",
-            props: {
-              title: "Deleting book",
-              description: "Are you sure you want to delete this book?",
-              onContinue: async () => {
-                onDeleteBook();
+      {!!book.isUserEditor && (
+        <Button
+          className="w-fit cursor-pointer"
+          variant="destructive"
+          onClick={() => {
+            openModal({
+              modalName: "WarningModal",
+              props: {
+                title: "Deleting book",
+                description: "Are you sure you want to delete this book?",
+                onContinue: async () => {
+                  onDeleteBook();
+                },
               },
-            },
-          });
-        }}
-      >
-        Delete Book
-      </Button>
+            });
+          }}
+        >
+          Delete Book
+        </Button>
+      )}
     </div>
   );
 }
