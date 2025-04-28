@@ -7,7 +7,7 @@ export default function ListsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex w-full max-w-[1000px] flex-col items-start justify-between gap-2 self-center px-4 py-10 sm:p-10 lg:px-0">
+    <div className="mt-8 flex w-full flex-col items-start gap-4 self-center px-4 md:px-8 lg:mt-14 lg:max-w-[1000px] lg:p-0">
       <Suspense
         fallback={
           <div className="flex w-full flex-col gap-y-4">

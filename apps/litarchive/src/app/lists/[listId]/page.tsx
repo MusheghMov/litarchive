@@ -30,13 +30,13 @@ export default async function AuthorsPage({
   }
 
   return (
-    <div className="flex w-full max-w-[1000px] flex-col items-start justify-between gap-2 self-center px-4 py-10 sm:p-10 lg:px-0">
+    <>
       {list && list.books?.length > 0 && (
         <div className="flex flex-col space-y-4">
           <p className="font-bold capitalize">{list.name}</p>
           <ListBooks list={list} />
         </div>
       )}
-    </div>
+    </>
   );
 }
