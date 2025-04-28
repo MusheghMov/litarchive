@@ -458,6 +458,7 @@ const communityBooks = router
       z.object({
         title: z.string().optional(),
         description: z.string().optional(),
+        isPublic: z.string().optional(),
       }),
     ),
     async (c) => {
@@ -484,7 +485,8 @@ const communityBooks = router
         return c.json({ error: "Book id is required" }, 400);
       }
 
-      const { title, description } = c.req.valid("form");
+      const { title, description, isPublic } = c.req.valid("form");
+      const isPublicBoolean = isPublic === "true";
 
       const res = await db
         .update(userBooks)
@@ -493,11 +495,13 @@ const communityBooks = router
           ...(description && {
             description: description || "",
           }),
+          ...(isPublic && { isPublic: isPublicBoolean }),
         })
         .where(eq(userBooks.id, bookId))
         .returning({
           title: userBooks.title,
           description: userBooks.description,
+          isPublic: userBooks.isPublic,
         });
 
       return c.json(res);
