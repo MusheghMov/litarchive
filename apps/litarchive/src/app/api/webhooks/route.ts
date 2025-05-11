@@ -65,11 +65,11 @@ export async function POST(req: Request) {
     if (eventType === "user.created") {
       const createdUser = await honoClient.user["create"].$post({
         query: {
-          sub: payload.data.id,
-          firstName: payload.data.first_name,
-          lastName: payload.data.last_name,
-          email: payload.data.email_addresses[0].email_address,
-          imageUrl: payload.data.image_url,
+          sub: (payload as any)?.data.id,
+          firstName: (payload as any)?.data.first_name,
+          lastName: (payload as any)?.data.last_name,
+          email: (payload as any)?.data.email_addresses[0].email_address,
+          imageUrl: (payload as any)?.data.image_url,
         },
       });
       console.log("Created user:", createdUser);
@@ -78,12 +78,12 @@ export async function POST(req: Request) {
       const deletedUser = await honoClient.user.$delete(
         {
           query: {
-            sub: payload.data.id,
+            sub: (payload as any)?.data.id,
           },
         },
         {
           headers: {
-            Authorization: payload.data.id,
+            Authorization: (payload as any)?.data.id,
           },
         }
       );
