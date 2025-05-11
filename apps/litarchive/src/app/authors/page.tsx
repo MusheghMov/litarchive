@@ -1,23 +1,24 @@
 import honoClient from "../honoRPCClient";
 import Authors from "./Authors";
-import { cache } from "react";
-
-const cachedGetAuthors = cache(async () => {
-  return await honoClient.authors.$get({
-    query: {
-      search: "",
-    },
-  });
-});
 
 export default async function AuthorsPage() {
-  const res = await cachedGetAuthors();
-  if (!res.ok) {
-    console.error("error: ", res);
-    return null;
+  let authors;
+  try {
+    const res = await honoClient.authors.$get({
+      query: {
+        search: "",
+      },
+    });
+    if (res.ok) {
+      authors = await res.json();
+    }
+  } catch (error) {
+    console.error("Error fetching authors:", error);
   }
 
-  const authors = await res.json();
+  if (!authors) {
+    return <div>No authors found</div>;
+  }
 
   return <Authors authors={authors} />;
 }

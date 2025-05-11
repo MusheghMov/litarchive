@@ -41,7 +41,7 @@ const formSchema = z.object({
 });
 
 export default function CommunityBooksCreatePage() {
-  const { userId } = useAuth();
+  const { getToken } = useAuth();
   const [previewImage, setPreviewImage] = useState<string | undefined>(
     undefined
   );
@@ -57,6 +57,7 @@ export default function CommunityBooksCreatePage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      const token = await getToken();
       const resJson = await honoClient.community.books.$post(
         {
           form: {
@@ -66,7 +67,7 @@ export default function CommunityBooksCreatePage() {
             isPublic: (values.isPublic || false).toString(),
           },
         },
-        { headers: { Authorization: `${userId}` } }
+        { headers: { ...(token && { Authorization: token }) } }
       );
 
       if (resJson.ok) {

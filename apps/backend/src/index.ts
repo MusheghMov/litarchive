@@ -8,6 +8,8 @@ import listsRoute from "./lists";
 import genresRouter from "./genres";
 import { apiReference } from "@scalar/hono-api-reference";
 import createApp from "./lib/create-app";
+import { YDurableObjects, yRoute } from "y-durableobjects";
+import { Env } from "./lib/create-app";
 
 const app = createApp();
 
@@ -20,7 +22,12 @@ export const route = app
   .route("/ratings", ratingsRoute)
   .route("/lists", listsRoute)
   .route("/community", community)
-  .route("/genres", genresRouter);
+  .route("/genres", genresRouter)
+  .route(
+    "/editor",
+    //@ts-ignore
+    yRoute<Env>((env) => env.Y_DURABLE_OBJECTS),
+  );
 
 app.doc("/doc", {
   openapi: "3.0.0",
@@ -41,3 +48,4 @@ app.get(
 export type AppTypes = typeof route;
 
 export default app;
+export { YDurableObjects };

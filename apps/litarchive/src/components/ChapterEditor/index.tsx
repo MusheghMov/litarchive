@@ -1,14 +1,13 @@
 "use client";
 
 import honoClient from "@/app/honoRPCClient";
-import useDebounce from "@/lib/useDebounce";
 import { cn } from "@/lib/utils";
 import { useModal } from "@/providers/ModalProvider";
 import { Chapter, ChapterVersion } from "@/types";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChapterVersionPicker } from "../ChapterVersionPicker";
 import Contenteditable from "../Contenteditable";
@@ -19,24 +18,25 @@ import { Button } from "../ui/button";
 
 export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
   const router = useRouter();
+  const { getToken } = useAuth();
   const { openModal } = useModal();
+
   const [saved, setSaved] = useState(true);
-  const [content, setContent] = useState(chapter.content);
-  const debouncedContent = useDebounce(content, 500);
   const [selectedChapterVersion, setSelectedChapterVersion] =
     useState<ChapterVersion | null>(null);
-
-  const { userId } = useAuth();
+  const lastSavedContent = useRef(chapter.content);
+  const timeout = useRef<NodeJS.Timeout>(null);
 
   const { mutate: onSaveDraftAsVersion } = useMutation({
     mutationFn: async () => {
+      const token = await getToken();
       return await honoClient.community.chapters.versions[":chapterId"].$post(
         {
           param: { chapterId: chapter.id.toString() },
-          form: { name: chapter.title!, content: content! },
+          form: { name: chapter.title!, content: lastSavedContent.current! },
         },
         {
-          headers: { Authorization: `${userId}` },
+          headers: { ...(token && { Authorization: token }) },
         }
       );
     },
@@ -54,6 +54,7 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
   const { mutate: onPublishChapterVersion, isPending: isPublishing } =
     useMutation({
       mutationFn: async (chapterVersionId: number) => {
+        const token = await getToken();
         return await honoClient.community.chapters.versions[
           ":chapterVersionId"
         ].$put(
@@ -62,7 +63,7 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
             query: { chapterId: chapter.id.toString() },
           },
           {
-            headers: { Authorization: `${userId}` },
+            headers: { ...(token && { Authorization: token }) },
           }
         );
       },
@@ -75,13 +76,14 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
     });
   const { mutate: onUpdateTitle } = useMutation({
     mutationFn: async (title: string) => {
+      const token = await getToken();
       return await honoClient.community.chapters[":chapterId"].$put(
         {
           param: { chapterId: chapter.id.toString() },
           form: { title: title },
         },
         {
-          headers: { Authorization: `${userId}` },
+          headers: { ...(token && { Authorization: token }) },
         }
       );
     },
@@ -91,13 +93,14 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
   });
   const { mutate: onUpdateContent } = useMutation({
     mutationFn: async (content: string) => {
+      const token = await getToken();
       return await honoClient.community.chapters[":chapterId"].$put(
         {
           param: { chapterId: chapter.id.toString() },
           form: { content: content.trim() },
         },
         {
-          headers: { Authorization: `${userId}` },
+          headers: { ...(token && { Authorization: token }) },
         }
       );
     },
@@ -109,9 +112,6 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
     },
   });
 
-  useEffect(() => {
-    onUpdateContent(debouncedContent);
-  }, [debouncedContent]);
   useEffect(() => {
     if (chapter) {
       setSelectedChapterVersion(
@@ -150,65 +150,88 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
                 : "Draft"}
             </Badge>
           </div>
-          <div className="flex items-center gap-2">
-            {selectedChapterVersion ? (
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => {
-                    onPublishChapterVersion(selectedChapterVersion.id);
-                  }}
-                  className="text-background cursor-pointer capitalize"
-                  disabled={
-                    isPublishing ||
-                    !!selectedChapterVersion.isCurrentlyPublished
-                  }
-                >
-                  publish
-                </Button>
-                <Button
-                  onClick={() => {
-                    openModal({
-                      modalName: "WarningModal",
-                      props: {
-                        title: "Existing draft will be replaced",
-                        description:
-                          "Are you sure you want to create a new draft?",
-                        onContinue: async () => {
-                          onUpdateTitle(selectedChapterVersion.name);
-                          onUpdateContent(selectedChapterVersion.content, {
-                            onSuccess: () => {
-                              toast.success("Draft created");
-                              router.refresh();
-                              setContent(selectedChapterVersion.content);
-                              setSelectedChapterVersion(null);
-                            },
-                            onError: () => {
-                              toast.error("Error creating draft");
+          {chapter.isUserViewer ? null : (
+            <div className="flex items-center gap-2">
+              {chapter.isUserEditor ? (
+                <>
+                  {selectedChapterVersion ? null : (
+                    <Button
+                      onClick={() => {
+                        onSaveDraftAsVersion();
+                      }}
+                      className="text-background cursor-pointer capitalize"
+                    >
+                      save as a version
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <>
+                  {selectedChapterVersion ? (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => {
+                          onPublishChapterVersion(selectedChapterVersion.id);
+                        }}
+                        className="text-background cursor-pointer capitalize"
+                        disabled={
+                          isPublishing ||
+                          !!selectedChapterVersion.isCurrentlyPublished
+                        }
+                      >
+                        publish
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          openModal({
+                            modalName: "WarningModal",
+                            props: {
+                              title: "Existing draft will be replaced",
+                              description:
+                                "Are you sure you want to create a new draft?",
+                              onContinue: async () => {
+                                onUpdateTitle(selectedChapterVersion.name);
+                                onUpdateContent(
+                                  selectedChapterVersion.content,
+                                  {
+                                    onSuccess: () => {
+                                      toast.success("Draft created");
+                                      router.refresh();
+                                      lastSavedContent.current =
+                                        selectedChapterVersion.content;
+                                      setSelectedChapterVersion(null);
+                                    },
+                                    onError: () => {
+                                      toast.error("Error creating draft");
+                                    },
+                                  }
+                                );
+                              },
                             },
                           });
-                        },
-                      },
-                    });
-                  }}
-                  className="text-background cursor-pointer capitalize"
-                >
-                  create draft from this version
-                </Button>
-              </div>
-            ) : (
-              <Button
-                onClick={() => {
-                  onSaveDraftAsVersion();
-                }}
-                className="text-background cursor-pointer capitalize"
-              >
-                save as a version
-              </Button>
-            )}
-          </div>
+                        }}
+                        className="text-background cursor-pointer capitalize"
+                      >
+                        create draft from this version
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={() => {
+                        onSaveDraftAsVersion();
+                      }}
+                      className="text-background cursor-pointer capitalize"
+                    >
+                      save as a version
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
         <Contenteditable
-          contenteditable={!selectedChapterVersion}
+          contenteditable={!(selectedChapterVersion || chapter.isUserViewer)}
           onBlur={(e) => {
             onUpdateTitle(e.target.innerText);
           }}
@@ -221,24 +244,44 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
           placeholder="Title..."
         />
       </div>
+
       {selectedChapterVersion ? (
         <ReadOnlyTiptapEditor
           key={selectedChapterVersion.id}
           content={selectedChapterVersion.content}
         />
       ) : (
-        <TiptapEditor
-          editable={true}
-          content={content!}
-          onUpdate={({ editor }) => {
-            // check if the content is different from the current chapter
-            if (editor.getHTML() !== chapter.content) {
-              setSaved(false);
-              setContent(editor.getHTML());
-            }
-          }}
-          saved={saved}
-        />
+        <>
+          {chapter.isUserViewer ? (
+            <ReadOnlyTiptapEditor content={lastSavedContent.current!} />
+          ) : (
+            <TiptapEditor
+              editable={true}
+              content={lastSavedContent.current!}
+              onUpdate={({ editor }) => {
+                if (timeout.current) {
+                  clearTimeout(timeout.current);
+                  setSaved(false);
+                }
+
+                timeout.current = setTimeout(() => {
+                  const newHTML = editor.getHTML();
+
+                  if (newHTML !== lastSavedContent.current) {
+                    lastSavedContent.current = newHTML;
+
+                    onUpdateContent(newHTML); // <-- This should trigger the actual save (e.g., mutation or API call)
+
+                    setSaved(true); // Optional UI indicator
+                  }
+
+                  timeout.current = null;
+                }, 1000);
+              }}
+              saved={saved}
+            />
+          )}
+        </>
       )}
     </div>
   );

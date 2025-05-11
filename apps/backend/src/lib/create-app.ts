@@ -2,6 +2,8 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import type { R2Bucket } from "@cloudflare/workers-types";
+import { YDurableObjects } from "y-durableobjects";
+import { clerkMiddleware } from "@hono/clerk-auth";
 
 type Bindings = {
   DATABASE_URL: string;
@@ -9,10 +11,15 @@ type Bindings = {
   OPENAI_API_KEY: string;
   IMAGE_STORAGE_URL: string;
   litarchive: R2Bucket;
+  Y_DURABLE_OBJECTS: DurableObjectNamespace<YDurableObjects<Env>>;
+};
+
+export type Env = {
+  Bindings: Bindings;
 };
 
 export function createRouter() {
-  return new OpenAPIHono<{ Bindings: Bindings }>({
+  return new OpenAPIHono<Env>({
     strict: false,
   });
 }
@@ -20,6 +27,7 @@ export function createRouter() {
 export default function createApp() {
   const app = createRouter();
   app.use(logger());
+  app.use("*", clerkMiddleware());
   app.use(
     "*",
     cors({

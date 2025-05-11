@@ -5,23 +5,22 @@ import ReadOnlyTiptapEditor from "@/components/ReadonlyTiptapEditor";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function ChapterPage({
-  params,
   searchParams,
 }: {
-  params: Promise<{ chapterNumber: string }>;
   searchParams: Promise<{ chapterId: string }>;
 }) {
-  const { userId } = await auth();
+  const { getToken, userId } = await auth();
   const { chapterId } = await searchParams;
   let chapter;
 
   try {
+    const token = await getToken();
     const chapterJson = await honoClient.community.chapters[":chapterId"].$get(
       {
         param: { chapterId: chapterId },
       },
       {
-        headers: { Authorization: `${userId}` },
+        headers: { ...(token && { Authorization: token }) },
       }
     );
 
@@ -36,7 +35,11 @@ export default async function ChapterPage({
     return <div>Not found</div>;
   }
 
-  if (!chapter.isUserEditor || !userId || userId === "null") {
+  if (
+    !(chapter.isUserEditor || chapter.isUserAuthor || chapter.isUserViewer) ||
+    !userId ||
+    userId === "null"
+  ) {
     return (
       <div className="flex w-full flex-col gap-6">
         <div className="itemc-center flex w-full flex-col gap-4">

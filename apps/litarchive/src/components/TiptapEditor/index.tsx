@@ -1,19 +1,14 @@
 "use client";
 
+import { WebsocketProvider } from "y-websocket";
+import * as Y from "yjs";
+import Collaboration from "@tiptap/extension-collaboration";
+import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
 import { Color } from "@tiptap/extension-color";
 import suggestion from "./suggestion";
 import Highlight from "@tiptap/extension-highlight";
-import {
-  BubbleMenu,
-  Editor,
-  // EditorContent,
-  FloatingMenu,
-  // useEditor,
-} from "@tiptap/react";
+import { BubbleMenu, Editor, FloatingMenu } from "@tiptap/react";
 import Typography from "@tiptap/extension-typography";
-// import BulletList from "@tiptap/extension-bullet-list";
-// import OrderedList from "@tiptap/extension-ordered-list";
-// import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
 import Mention from "@tiptap/extension-mention";
@@ -21,7 +16,7 @@ import ListItem from "@tiptap/extension-list-item";
 import TextStyle from "@tiptap/extension-text-style";
 import { EditorProvider, useCurrentEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { Button } from "../ui/button";
 import {
   Bold,
@@ -47,16 +42,11 @@ import {
 import { cn } from "@/lib/utils";
 import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
+import honoClient from "@/app/honoRPCClient";
+import { useUser } from "@clerk/nextjs";
 
-const MenuBar = ({
-  showEditButton,
-  saved = true,
-}: {
-  showEditButton: boolean;
-  saved?: boolean;
-}) => {
+const MenuBar = ({ saved = true }: { saved?: boolean }) => {
   const { editor } = useCurrentEditor();
-  // const [isEditable, setIsEditable] = useState(false);
 
   if (!editor) {
     return null;
@@ -80,18 +70,6 @@ const MenuBar = ({
           {saved ? "Saved" : "Not Saved"}
         </Badge>
       )}
-      {/* {showEditButton && ( */}
-      {/*   <Button */}
-      {/*     onClick={() => { */}
-      {/*       setIsEditable(!isEditable); */}
-      {/*       editor.setEditable(!editor.isEditable); */}
-      {/*     }} */}
-      {/*     className="h-auto" */}
-      {/*     variant="outline" */}
-      {/*   > */}
-      {/*     <FilePenLine /> */}
-      {/*   </Button> */}
-      {/* )} */}
       {editor.isEditable && (
         <div>
           <div className="flex flex-wrap gap-2 rounded border p-2">
@@ -128,13 +106,6 @@ const MenuBar = ({
             >
               <Strikethrough />
             </Button>
-            {/* <Separator orientation="vertical" className="h-auto" /> */}
-            {/* <Button onClick={() => editor.chain().focus().unsetAllMarks().run()}> */}
-            {/*   Clear marks */}
-            {/* </Button> */}
-            {/* <Button onClick={() => editor.chain().focus().clearNodes().run()}> */}
-            {/*   Clear nodes */}
-            {/* </Button> */}
             <Separator orientation="vertical" className="h-auto" />
             <Button
               onClick={() => editor.chain().focus().setParagraph().run()}
@@ -318,16 +289,6 @@ const MenuBar = ({
             >
               <Redo />
             </Button>
-            {/* <Button */}
-            {/*   onClick={() => editor.chain().focus().setColor("#958DF1").run()} */}
-            {/*   className={ */}
-            {/*     editor.isActive("textStyle", { color: "#958DF1" }) */}
-            {/*       ? "is-active" */}
-            {/*       : "" */}
-            {/*   } */}
-            {/* > */}
-            {/*   Purple */}
-            {/* </Button> */}
           </div>
           <FloatingMenu
             className="bubble-menu"
@@ -439,41 +400,6 @@ const MenuBar = ({
   );
 };
 
-const extensions = [
-  Highlight,
-  Typography,
-  // HorizontalRule,
-  // BulletList,
-  // OrderedList,
-  Color.configure({ types: [TextStyle.name, ListItem.name] }),
-  TextAlign.configure({
-    types: ["heading", "paragraph"],
-  }),
-  Mention.configure({
-    HTMLAttributes: {
-      class: "mention",
-    },
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    suggestion,
-    deleteTriggerWithBackspace: true,
-  }),
-  Placeholder.configure({
-    // Use a placeholder:
-    placeholder: "Write something …",
-    // Use different placeholders depending on the node type:
-    // placeholder: ({ node }) => {
-    //   if (node.type.name === "heading") {
-    //     return "What’s the title?";
-    //   }
-    //
-    //   return "Can you add some further context?";
-    // },
-  }),
-  TextStyle,
-  StarterKit,
-];
-
 export default function TiptapEditor({
   editable,
   onUpdate,
@@ -485,18 +411,96 @@ export default function TiptapEditor({
   content?: string;
   saved?: boolean;
 }) {
+  const { user } = useUser();
+
+  const ydoc = useMemo(() => new Y.Doc(), []);
+  const room = `room.${new Date()
+    .getFullYear()
+    .toString()
+    .slice(-2)}${new Date().getMonth() + 1}${new Date().getDate()}`;
+
+  const provider = useMemo(() => {
+    const url = honoClient.editor[":id"].$url();
+    return new WebsocketProvider(
+      url.toString().replace("http", "ws").replace("/:id", ""),
+      room,
+      ydoc
+    );
+  }, [ydoc]);
+
+  useEffect(() => {
+    if (!provider) {
+      return;
+    }
+
+    const statusHandler = (event: any) => {
+      console.log("status:", event);
+    };
+
+    provider.on("status", statusHandler);
+
+    return () => {
+      provider.off("status", statusHandler);
+    };
+  }, [provider]);
+
+  if (!provider) {
+    return null;
+  }
+
   return (
     <div className="flex h-full w-full flex-col gap-10">
-      {/* <article className="prose flex w-full min-w-full flex-col items-start justify-center gap-0 whitespace-pre-wrap text-foreground/90 dark:prose-invert lg:prose-xl prose-headings:text-foreground lg:px-24"> */}
       <EditorProvider
+        enableContentCheck={true}
+        onContentError={({ disableCollaboration }) => {
+          disableCollaboration();
+        }}
+        onCreate={({ editor: currentEditor }) => {
+          if (!provider) {
+            return;
+          }
+          provider.on("sync", () => {
+            if (currentEditor.isEmpty) {
+              currentEditor.commands.setContent(content || "");
+            }
+          });
+        }}
         editable={editable}
-        slotBefore={<MenuBar showEditButton={!editable} saved={saved} />}
-        extensions={extensions}
-        content={content || ""}
-        onUpdate={onUpdate}
+        slotBefore={<MenuBar saved={saved} />}
+        extensions={[
+          Collaboration.extend().configure({
+            document: ydoc,
+          }),
+          CollaborationCursor.extend().configure({
+            provider,
+            user: {
+              name: user?.firstName,
+              color: "#958DF1",
+            },
+          }),
+          Highlight,
+          Typography,
+          Color.configure({ types: [TextStyle.name, ListItem.name] }),
+          TextAlign.configure({
+            types: ["heading", "paragraph"],
+          }),
+          Mention.configure({
+            HTMLAttributes: {
+              class: "mention",
+            },
+            // @ts-ignore
+            suggestion,
+            deleteTriggerWithBackspace: true,
+          }),
+          Placeholder.configure({
+            placeholder: "Write something …",
+          }),
+          TextStyle,
+          StarterKit,
+        ]}
         immediatelyRender={false}
+        onUpdate={onUpdate}
       />
-      {/* </article> */}
     </div>
   );
 }

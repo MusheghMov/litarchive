@@ -4,24 +4,26 @@ import { ImageIcon } from "lucide-react";
 import Chapters from "@/components/Chapters";
 import { auth } from "@clerk/nextjs/server";
 import CommunityBookInfo from "@/components/CommunityBookInfo";
+import { CollaboratorEditor } from "@/components/CollaboratorEditor";
 
 export default async function CommunityBookPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { userId } = await auth();
+  const { getToken } = await auth();
   const { slug } = await params;
   let book;
   let chapters;
 
   try {
+    const token = await getToken();
     const bookJson = await honoClient.community.books[":slug"].$get(
       {
         param: { slug },
       },
       {
-        headers: { Authorization: `${userId}` },
+        headers: { Authorization: token || "" },
       }
     );
 
@@ -33,7 +35,7 @@ export default async function CommunityBookPage({
           query: { bookId: book.id.toString() },
         },
         {
-          headers: { Authorization: `${userId}` },
+          headers: { Authorization: token || "" },
         }
       );
 
@@ -53,6 +55,13 @@ export default async function CommunityBookPage({
 
   return (
     <div className="flex w-full flex-col gap-4">
+      {book.isUserAuthor || book.isUserEditor || book.isUserViewer ? (
+        <CollaboratorEditor
+          collaborators={book.collaborators}
+          bookId={book.id}
+          isUserAuthor={!!book.isUserAuthor}
+        />
+      ) : null}
       <div className="flex w-full flex-col gap-4 md:flex-row">
         <div className="bg-card aspect-[2/3] max-h-[600px] w-full flex-col justify-end overflow-hidden rounded border p-2 md:w-[300px]">
           {book.coverImageUrl ? (
@@ -73,6 +82,7 @@ export default async function CommunityBookPage({
         bookId={book.id.toString()}
         bookSlug={book.slug!}
         chapters={chapters}
+        isUserAuthor={!!book.isUserAuthor}
         isUserEditor={!!book.isUserEditor}
       />
     </div>

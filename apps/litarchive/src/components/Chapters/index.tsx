@@ -11,29 +11,35 @@ export default function Chapters({
   bookId,
   bookSlug,
   chapters,
+  isUserAuthor,
   isUserEditor,
 }: {
   bookId: string;
   bookSlug: string;
   chapters: any;
+  isUserAuthor: boolean;
   isUserEditor: boolean;
 }) {
-  const { userId } = useAuth();
+  const { getToken } = useAuth();
   const router = useRouter();
   const { mutate: onCreateChapter } = useMutation({
     mutationFn: async () => {
+      const token = await getToken();
+      if (!token) {
+        return;
+      }
       return await honoClient.community.chapters[":bookId"].$post(
         {
           param: { bookId: bookId },
           form: {},
         },
         {
-          headers: { Authorization: `${userId}` },
+          headers: { Authorization: token },
         }
       );
     },
     onSuccess: async (res) => {
-      if (res.ok) {
+      if (res?.ok) {
         const response = await res.json();
 
         router.push(
@@ -47,7 +53,7 @@ export default function Chapters({
     <div className="flex w-full flex-col gap-4">
       <div className="flex w-full items-center justify-between gap-2">
         <p className="text-lg font-bold">Chapters</p>
-        {isUserEditor && (
+        {(isUserEditor || isUserAuthor) && (
           <Button
             variant="outline"
             className="text-xs"

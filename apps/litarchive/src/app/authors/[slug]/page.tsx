@@ -9,21 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Rating as ReactRating, StickerStar } from "@smastrom/react-rating";
-// @ts-ignore
-import { cache, unstable_ViewTransition as ViewTransition } from "react";
 import AuthorBooks from "./AuthorBooks";
-
-const cachedGetAuthor = cache(async (slug: string, userId?: string) => {
-  const res = await honoClient.authors["by-slug"][":slug"].$get(
-    {
-      param: { slug },
-    },
-    {
-      headers: { Authorization: `${userId}` },
-    }
-  );
-  return await res.json();
-});
 
 export async function generateMetadata({
   params,
@@ -31,7 +17,41 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const author = await cachedGetAuthor(slug);
+  let author;
+
+  try {
+    const res = await honoClient.authors["by-slug"][":slug"].$get({
+      param: { slug },
+    });
+    if (res.ok) {
+      author = await res.json();
+    }
+  } catch (error) {
+    console.error("Error fetching author:", error);
+  }
+
+  if (!author) {
+    return {
+      title: "Author not found",
+      openGraph: {
+        title: "Author not found",
+        description: "Author not found",
+        url: "https://litarchive.com/authors/" + slug,
+        type: "website",
+        images: [
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Tumanyan_%282%29.jpg/640px-Tumanyan_%282%29.jpg",
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Author not found",
+        description: "Author not found",
+        images: [
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Tumanyan_%282%29.jpg/640px-Tumanyan_%282%29.jpg",
+        ],
+      },
+    };
+  }
 
   return {
     title: author?.name,
@@ -59,26 +79,45 @@ export default async function AuthorPage({
   const { slug } = await params;
   const { userId } = await auth();
 
-  const author = await cachedGetAuthor(slug, userId!);
+  let author;
+
+  try {
+    const res = await honoClient.authors["by-slug"][":slug"].$get(
+      {
+        param: { slug },
+      },
+      {
+        headers: { Authorization: `${userId}` },
+      }
+    );
+
+    if (res.ok) {
+      author = await res.json();
+    }
+  } catch (error) {
+    console.error("Error fetching author:", error);
+  }
+
+  if (!author) {
+    return <div>Author not found</div>;
+  }
 
   return (
     <>
       <div className="top-20 flex w-full grow-[1] flex-col gap-4 self-start lg:sticky lg:w-auto">
-        <ViewTransition name={`${author.slug}`}>
-          <div className="relative max-h-[350px] min-h-[350px] w-fit max-w-[250px] min-w-[250px] overflow-hidden border-transparent p-1 outline-1 lg:rounded-lg lg:border-2">
-            <Image
-              src={
-                author?.imageUrl ||
-                "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Tumanyan_%282%29.jpg/640px-Tumanyan_%282%29.jpg"
-              }
-              className="h-full w-full object-cover object-top"
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              quality={30}
-              alt="author"
-            />
-          </div>
-        </ViewTransition>
+        <div className="relative max-h-[350px] min-h-[350px] w-fit max-w-[250px] min-w-[250px] overflow-hidden border-transparent p-1 outline-1 lg:rounded-lg lg:border-2">
+          <Image
+            src={
+              author?.imageUrl ||
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Tumanyan_%282%29.jpg/640px-Tumanyan_%282%29.jpg"
+            }
+            className="h-full w-full object-cover object-top"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={30}
+            alt="author"
+          />
+        </div>
         <div className="flex flex-col items-start gap-1">
           <p className="self-start text-base font-medium capitalize">
             your rating

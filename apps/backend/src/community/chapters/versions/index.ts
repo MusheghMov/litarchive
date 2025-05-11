@@ -3,6 +3,7 @@ import { createRouter } from "../../../lib/create-app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { zValidator } from "@hono/zod-validator";
 import { chapterVersions } from "@repo/db/schema";
+import { getAuth } from "@hono/clerk-auth";
 
 const router = createRouter();
 
@@ -147,7 +148,8 @@ const chapterVersionsRouter = router
       },
     }),
     async (c) => {
-      const userId = c.req.header("Authorization");
+      const auth = getAuth(c);
+      const userId = auth?.userId;
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -196,7 +198,8 @@ const chapterVersionsRouter = router
       }),
     ),
     async (c) => {
-      const userId = c.req.header("Authorization");
+      const auth = getAuth(c);
+      const userId = auth?.userId;
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -277,7 +280,8 @@ const chapterVersionsRouter = router
       }),
     ),
     async (c) => {
-      const userId = c.req.header("Authorization");
+      const auth = getAuth(c);
+      const userId = auth?.userId;
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }

@@ -21,7 +21,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@apps/*": ["../../apps/*"]
+      "@apps/*": ["../../apps/*"],
+      "react": ["./node_modules/@types/react"]
     },
     "target": "ES2017"
   },

@@ -6,13 +6,14 @@ import CommunityBookCard from "@/components/CommunityBookCard";
 import { CommunityBook } from "@/types";
 
 export default async function StudioPage() {
-  const { userId } = await auth();
+  const { getToken } = await auth();
   let userBooks;
   try {
+    const token = await getToken();
     const userBooksJson = await honoClient.community.books.$get(
       {},
       {
-        headers: { Authorization: `${userId}` },
+        headers: { ...(token && { Authorization: token }) },
       }
     );
 

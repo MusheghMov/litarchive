@@ -79,6 +79,29 @@ export const userBooks = sqliteTable("userBooks", {
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const userBookCollaborators = sqliteTable(
+  "userBookCollaborators",
+  {
+    id: integer("id").primaryKey(),
+    userBookId: integer("user_book_id")
+      .notNull()
+      .references(() => userBooks.id, { onDelete: "cascade" }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    role: text({ enum: ["editor", "viewer"] }).notNull(),
+    createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
+  },
+  (t) => ({
+    // Create a unique index to prevent duplicate collaborations
+    unq: uniqueIndex("user_book_collaborator_unique").on(
+      t.userBookId,
+      t.userId,
+    ),
+  }),
+);
+
 // UserBook chapters table
 export const userBookChapters = sqliteTable("userBookChapters", {
   id: integer("id").primaryKey(),
@@ -277,6 +300,7 @@ export const userRelations = relations(user, ({ many }) => ({
   bookLists: many(bookLists),
   authorRatings: many(authorRatings),
   userBooks: many(userBooks),
+  bookCollaborations: many(userBookCollaborators),
 }));
 
 export const articlesRelations = relations(articles, ({ one, many }) => ({
@@ -336,7 +360,22 @@ export const userBooksRelations = relations(userBooks, ({ one, many }) => ({
   }),
   chapters: many(userBookChapters),
   genres: many(userBooksToGenre),
+  collaborators: many(userBookCollaborators),
 }));
+
+export const userBookCollaboratorsRelations = relations(
+  userBookCollaborators,
+  ({ one }) => ({
+    userBook: one(userBooks, {
+      fields: [userBookCollaborators.userBookId],
+      references: [userBooks.id],
+    }),
+    user: one(user, {
+      fields: [userBookCollaborators.userId],
+      references: [user.id],
+    }),
+  }),
+);
 
 export const userBookChaptersRelations = relations(
   userBookChapters,

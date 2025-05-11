@@ -1,11 +1,12 @@
 import { zValidator } from "@hono/zod-validator";
-import { connectToDB, eq, sql } from "@repo/db";
-import { user, userBooks } from "@repo/db/schema";
+import { connectToDB, eq, and } from "@repo/db";
+import { userBookCollaborators, userBooks } from "@repo/db/schema";
 import { nanoid } from "nanoid";
 import OpenAI from "openai";
 import slugify from "slugify";
 import { createRouter } from "../../lib/create-app";
 import { createRoute, z } from "@hono/zod-openapi";
+import { getAuth } from "@hono/clerk-auth";
 
 function createUniqueSlug(title: string) {
   const baseSlug = slugify(title, { lower: true, strict: true });
@@ -70,7 +71,8 @@ const communityBooks = router
       },
     }),
     async (c) => {
-      const userId = c.req.header("Authorization");
+      const auth = getAuth(c);
+      const userId = auth?.userId;
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -232,6 +234,18 @@ const communityBooks = router
                 description: z.string().nullable(),
                 coverImageUrl: z.string().nullable(),
                 isPublic: z.boolean().nullable(),
+                collaborators: z.array(
+                  z.object({
+                    id: z.number(),
+                    role: z.string(),
+                    user: z.object({
+                      firstName: z.string().nullable(),
+                      lastName: z.string().nullable(),
+                      email: z.string().nullable(),
+                      imageUrl: z.string().nullable(),
+                    }),
+                  }),
+                ),
                 genres: z.array(
                   z.object({
                     userBookId: z.number(),
@@ -251,11 +265,34 @@ const communityBooks = router
                     imageUrl: z.string().nullable(),
                   })
                   .nullable(),
+                isUserAuthor: z.boolean().nullable(),
                 isUserEditor: z.boolean().nullable(),
+                isUserViewer: z.boolean().nullable(),
               }),
             },
           },
           description: "Retrieve community book by slug",
+        },
+        401: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Unauthorized",
+        },
+
+        404: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Not found",
         },
         500: {
           content: {
@@ -271,7 +308,6 @@ const communityBooks = router
     }),
     async (c) => {
       try {
-        const userId = c.req.header("Authorization");
         const slug = c.req.param("slug");
 
         const db = connectToDB({
@@ -279,6 +315,124 @@ const communityBooks = router
           authoToken: c.env.DATABASE_AUTH_TOKEN,
         });
 
+        const auth = getAuth(c);
+        const userId = auth?.userId;
+
+        let dbUser:
+          | {
+              id: number;
+              firstName: string | null;
+              lastName: string | null;
+              email: string | null;
+              imageUrl: string | null;
+              sub: string | null;
+            }
+          | undefined;
+        if (userId) {
+          dbUser = await db.query.user.findFirst({
+            where: (users, { eq }) => eq(users.sub, userId!),
+          });
+          if (!dbUser) {
+            return c.json({ error: "Unauthorized" }, 401);
+          }
+        }
+
+        if (dbUser) {
+          const bookId = await db.query.userBooks
+            .findFirst({
+              where: (userBooks, { eq }) => eq(userBooks.slug, slug),
+            })
+            .then((res) => res?.id);
+
+          if (!bookId) {
+            return c.json({ error: "Book not found" }, 404);
+          }
+
+          const isUserAuthor = await db.query.userBooks
+            .findFirst({
+              where: (userBooks, { eq }) =>
+                eq(userBooks.id, Number.parseInt(bookId.toString())),
+            })
+            .then((res) => res?.userId === dbUser?.id);
+
+          let isUserEditor = false;
+          let isUserViewer = false;
+
+          await db.query.userBookCollaborators
+            .findFirst({
+              where: (userBookCollaborators, { eq, and }) =>
+                and(
+                  eq(userBookCollaborators.userBookId, bookId),
+                  eq(userBookCollaborators.userId, dbUser?.id),
+                ),
+            })
+            .then((res) => {
+              if (res && res.role === "editor") {
+                isUserEditor = true;
+              }
+              if (res && res.role === "viewer") {
+                isUserViewer = true;
+              }
+            });
+
+          const res = await db.query.userBooks.findFirst({
+            where: (userBooks, { eq }) => eq(userBooks.slug, slug),
+            columns: {
+              id: true,
+              title: true,
+              slug: true,
+              description: true,
+              coverImageUrl: true,
+              isPublic: true,
+            },
+            with: {
+              collaborators: {
+                columns: {
+                  id: true,
+                  role: true,
+                },
+                with: {
+                  user: {
+                    columns: {
+                      firstName: true,
+                      lastName: true,
+                      email: true,
+                      imageUrl: true,
+                    },
+                  },
+                },
+              },
+              user: {
+                columns: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                  imageUrl: true,
+                },
+              },
+              genres: {
+                with: {
+                  genre: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      description: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          const finalRes = {
+            ...res!,
+            isUserAuthor: isUserAuthor,
+            isUserEditor: isUserEditor,
+            isUserViewer: isUserViewer,
+          };
+
+          return c.json(finalRes, 200);
+        }
         const res = await db.query.userBooks.findFirst({
           where: (userBooks, { eq }) => eq(userBooks.slug, slug),
           columns: {
@@ -310,18 +464,6 @@ const communityBooks = router
               },
             },
           },
-          extras: {
-            isUserEditor: sql`(
-      SELECT CASE 
-        WHEN ${userBooks}.user_id IN (
-          SELECT u.id 
-          FROM ${user} u 
-          WHERE u.sub = ${userId}
-        ) THEN TRUE
-        ELSE FALSE
-      END
-    )`.as("isUserEditor"),
-          },
         });
 
         return c.json(res, 200);
@@ -343,7 +485,8 @@ const communityBooks = router
       }),
     ),
     async (c) => {
-      const userId = c.req.header("Authorization");
+      const auth = getAuth(c);
+      const userId = auth?.userId;
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -462,7 +605,8 @@ const communityBooks = router
       }),
     ),
     async (c) => {
-      const userId = c.req.header("Authorization");
+      const auth = getAuth(c);
+      const userId = auth?.userId;
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -508,7 +652,8 @@ const communityBooks = router
     },
   )
   .delete("/:bookId", async (c) => {
-    const userId = c.req.header("Authorization");
+    const auth = getAuth(c);
+    const userId = auth?.userId;
     if (!userId) {
       return c.json({ error: "Unauthorized" }, 401);
     }
@@ -545,6 +690,250 @@ const communityBooks = router
     const res = await db.delete(userBooks).where(eq(userBooks.id, bookId));
 
     return c.json(res);
-  });
+  })
+  .post(
+    "/collaboration/create",
+    zValidator(
+      "query",
+      z.object({
+        bookId: z.string(),
+        collaboratorEmail: z.string(),
+        role: z.enum(["viewer", "editor"]),
+      }),
+    ),
+    async (c) => {
+      const auth = getAuth(c);
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+      const userId = auth.userId;
+
+      const db = connectToDB({
+        url: c.env.DATABASE_URL,
+        authoToken: c.env.DATABASE_AUTH_TOKEN,
+      });
+      const dbUser = await db.query.user.findFirst({
+        where: (users, { eq }) => eq(users.sub, userId),
+      });
+      if (!dbUser) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const query = c.req.query();
+
+      const bookId = query.bookId as string;
+      if (!bookId) {
+        return c.json({ error: "Book id is required" }, 400);
+      }
+
+      const collaboratorEmail = query.collaboratorEmail as string;
+      if (!collaboratorEmail) {
+        return c.json({ error: "Collaborator email is required" }, 400);
+      }
+
+      const role = query.role as string;
+      if (!role) {
+        return c.json({ error: "Role is required" }, 400);
+      }
+
+      const isUserAuthor = await db.query.userBooks
+        .findFirst({
+          where: (userBooks, { eq }) =>
+            eq(userBooks.id, Number.parseInt(bookId)),
+        })
+        .then((res) => res?.userId === dbUser.id);
+
+      if (!isUserAuthor) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const collaborator = await db.query.user.findFirst({
+        where: (users, { eq }) => eq(users.email, collaboratorEmail),
+      });
+      if (!collaborator) {
+        return c.json({ error: "Collaborator not found" }, 404);
+      }
+
+      if (role === "viewer") {
+        try {
+          const res = await db
+            .insert(userBookCollaborators)
+            .values({
+              userId: collaborator.id,
+              userBookId: Number.parseInt(bookId),
+              role: "viewer",
+            })
+            .returning({ id: userBookCollaborators.id });
+          return c.json(res);
+        } catch (error) {
+          console.error("Error adding collaborator:", error);
+          return c.json({ error: "Error adding collaborator" }, 500);
+        }
+      }
+
+      try {
+        const res = await db
+          .insert(userBookCollaborators)
+          .values({
+            userId: collaborator.id,
+            userBookId: Number.parseInt(bookId),
+            role: "editor",
+          })
+          .returning({ id: userBookCollaborators.id });
+        return c.json(res);
+      } catch (error) {
+        console.error("Error adding collaborator:", error);
+        return c.json({ error: "Error adding collaborator" }, 500);
+      }
+    },
+  )
+  .post(
+    "/collaboration/update",
+    zValidator(
+      "query",
+      z.object({
+        bookId: z.string(),
+        userBookCollaboratorsId: z.string(),
+        role: z.enum(["viewer", "editor"]),
+      }),
+    ),
+    async (c) => {
+      const auth = getAuth(c);
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+      const userId = auth.userId;
+
+      const db = connectToDB({
+        url: c.env.DATABASE_URL,
+        authoToken: c.env.DATABASE_AUTH_TOKEN,
+      });
+      const dbUser = await db.query.user.findFirst({
+        where: (users, { eq }) => eq(users.sub, userId),
+      });
+      if (!dbUser) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const query = c.req.query();
+
+      const bookId = query.bookId;
+      if (!bookId) {
+        return c.json({ error: "Book id is required" }, 400);
+      }
+
+      const userBookCollaboratorsId = query.userBookCollaboratorsId;
+      if (!userBookCollaboratorsId) {
+        return c.json({ error: "User book collaborator id is required" }, 400);
+      }
+
+      const role = query.role;
+      if ((role !== "viewer" && role !== "editor") || !role) {
+        return c.json({ error: "Role is required" }, 400);
+      }
+
+      const isUserAuthor = await db.query.userBooks
+        .findFirst({
+          where: (userBooks, { eq }) =>
+            eq(userBooks.id, Number.parseInt(bookId)),
+        })
+        .then((res) => res?.userId === dbUser.id);
+
+      if (!isUserAuthor) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      try {
+        const res = await db
+          .update(userBookCollaborators)
+          .set({
+            role: role,
+          })
+          .where(
+            eq(
+              userBookCollaborators.id,
+              Number.parseInt(userBookCollaboratorsId),
+            ),
+          )
+          .returning({
+            id: userBookCollaborators.id,
+            userId: userBookCollaborators.userId,
+            userBookId: userBookCollaborators.userBookId,
+            role: userBookCollaborators.role,
+          });
+        return c.json(res);
+      } catch (error) {
+        console.error("Error adding collaborator:", error);
+        return c.json({ error: "Error adding collaborator" }, 500);
+      }
+    },
+  )
+  .delete(
+    "/collaboration/delete",
+    zValidator(
+      "query",
+      z.object({
+        collaboratorEmail: z.string().optional(),
+        bookId: z.string(),
+      }),
+    ),
+    async (c) => {
+      const auth = getAuth(c);
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+      const userId = auth.userId;
+
+      const query = c.req.query();
+      const bookId = Number.parseInt(query.bookId);
+      if (!bookId) {
+        return c.json({ error: "Book id is required" }, 400);
+      }
+      const collaboratorEmail = query.collaboratorEmail as string;
+      if (!collaboratorEmail) {
+        return c.json({ error: "Collaborator email is required" }, 400);
+      }
+
+      const db = connectToDB({
+        url: c.env.DATABASE_URL,
+        authoToken: c.env.DATABASE_AUTH_TOKEN,
+      });
+
+      const collaborator = await db.query.user.findFirst({
+        where: (users, { eq }) => eq(users.email, collaboratorEmail),
+      });
+      if (!collaborator) {
+        return c.json({ error: "Collaborator not found" }, 404);
+      }
+
+      const dbUser = await db.query.user.findFirst({
+        where: (users, { eq }) => eq(users.sub, userId),
+      });
+
+      if (!dbUser) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const isUserAuthor = await db.query.userBooks
+        .findFirst({
+          where: (userBooks, { eq }) => eq(userBooks.id, bookId),
+        })
+        .then((res) => res?.userId === dbUser.id);
+
+      if (!isUserAuthor) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const res = await db
+        .delete(userBookCollaborators)
+        .where(
+          and(
+            eq(userBookCollaborators.userId, collaborator.id),
+            eq(userBookCollaborators.userBookId, bookId),
+          ),
+        );
+      return c.json(res);
+    },
+  );
 
 export default communityBooks;

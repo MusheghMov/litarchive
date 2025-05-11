@@ -21,10 +21,10 @@ export default function CommunityBookInfo({
   genres: Genre[] | undefined;
 }) {
   const router = useRouter();
+  const { getToken } = useAuth();
   const { openModal } = useModal();
 
   const [isPublic, setIsPublic] = useState<boolean>(book.isPublic || false);
-  const { userId } = useAuth();
   const { mutate: onUpdateTitleAndDescription } = useMutation({
     mutationFn: async ({
       title,
@@ -36,6 +36,7 @@ export default function CommunityBookInfo({
       isPublic?: string;
     }) => {
       try {
+        const token = await getToken();
         await honoClient.community.books[":bookId"].$put(
           {
             form: {
@@ -48,7 +49,7 @@ export default function CommunityBookInfo({
             },
           },
           {
-            headers: { Authorization: `${userId}` },
+            headers: { ...(token && { Authorization: token }) },
           }
         );
       } catch (error) {
@@ -59,6 +60,7 @@ export default function CommunityBookInfo({
   const { mutate: onDeleteBook } = useMutation({
     mutationFn: async () => {
       try {
+        const token = await getToken();
         await honoClient.community.books[":bookId"].$delete(
           {
             param: {
@@ -66,7 +68,7 @@ export default function CommunityBookInfo({
             },
           },
           {
-            headers: { Authorization: `${userId}` },
+            headers: { ...(token && { Authorization: token }) },
           }
         );
       } catch (error) {
@@ -82,7 +84,7 @@ export default function CommunityBookInfo({
     <div className="flex flex-1 flex-col gap-4">
       <div className="flex w-full flex-col items-start gap-1">
         <Contenteditable
-          contenteditable={!!book.isUserEditor}
+          contenteditable={!!book.isUserAuthor}
           onBlur={(e) => {
             onUpdateTitleAndDescription({ title: e.target.innerText });
           }}
@@ -95,7 +97,7 @@ export default function CommunityBookInfo({
           {book.user?.firstName + " " + book.user?.lastName}
         </p>
 
-        {!!book.isUserEditor && (
+        {!!book.isUserAuthor && (
           <div className="flex items-center gap-2">
             <Switch
               checked={isPublic}
@@ -114,13 +116,13 @@ export default function CommunityBookInfo({
       <Genres
         genres={genres}
         bookId={book.id}
-        isUserEditor={!!book.isUserEditor}
+        isUserEditor={!!book.isUserAuthor}
       />
 
       <div className="flex w-full flex-col gap-1">
         <p className="font-bold">Description</p>
         <Contenteditable
-          contenteditable={!!book.isUserEditor}
+          contenteditable={!!book.isUserAuthor}
           onBlur={(e) => {
             onUpdateTitleAndDescription({ description: e.target.innerText });
           }}
@@ -129,7 +131,7 @@ export default function CommunityBookInfo({
           placeholder="Description..."
         />
       </div>
-      {!!book.isUserEditor && (
+      {!!book.isUserAuthor && (
         <Button
           className="w-fit cursor-pointer"
           variant="destructive"

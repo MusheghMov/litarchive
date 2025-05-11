@@ -2,8 +2,9 @@ import { connectToDB, sql, eq } from "@repo/db";
 import { createRouter } from "../../lib/create-app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { zValidator } from "@hono/zod-validator";
-import { user, userBookChapters, userBooks } from "@repo/db/schema";
+import { userBookChapters } from "@repo/db/schema";
 import chapterVersionsRouter from "./versions";
+import { getAuth } from "@hono/clerk-auth";
 
 const router = createRouter();
 
@@ -58,7 +59,9 @@ const communityBooksChaptersRouter = router
     }),
     async (c) => {
       try {
-        const userId = c.req.header("Authorization");
+        const auth = getAuth(c);
+        const userId = auth?.userId;
+
         const { bookId } = c.req.valid("query");
         if (!bookId) {
           return c.json({ error: "Book id is required" }, 400);
@@ -70,18 +73,31 @@ const communityBooksChaptersRouter = router
         });
 
         let dbUser: any;
-        let isUserEditor = false;
+        let isUserAuthor = false;
+        let isUserCollaborator = false;
 
-        if (userId && userId !== "null") {
+        if (userId && userId !== "null" && userId !== "undefined") {
           dbUser = await db.query.user.findFirst({
             where: (users, { eq }) => eq(users.sub, userId),
           });
 
-          isUserEditor = await db.query.userBooks
+          isUserAuthor = await db.query.userBooks
             .findFirst({
-              where: (userBooks, { eq }) => eq(userBooks.id, +bookId!),
+              where: (userBooks, { eq }) =>
+                eq(userBooks.id, Number.parseInt(bookId.toString())),
             })
-            .then((res) => res?.userId === dbUser.id);
+            .then((res) => res?.userId === dbUser?.id);
+
+          isUserCollaborator = await db.query.userBookCollaborators
+            .findFirst({
+              where: (userBookCollaborators, { eq, and }) =>
+                and(
+                  // eq(userBookCollaborators.userBookId, bookId!),
+                  eq(userBookCollaborators.userId, dbUser?.id),
+                  eq(userBookCollaborators.userId, dbUser?.id),
+                ),
+            })
+            .then((res) => res?.userId === dbUser?.id);
         }
 
         try {
@@ -96,7 +112,7 @@ const communityBooksChaptersRouter = router
             },
             with: {
               versions: {
-                ...(!isUserEditor && {
+                ...(!(isUserAuthor || isUserCollaborator) && {
                   where: (chapterVersions, { eq }) =>
                     eq(chapterVersions.isCurrentlyPublished, true),
                 }),
@@ -104,7 +120,7 @@ const communityBooksChaptersRouter = router
             },
           });
 
-          if (isUserEditor) {
+          if (isUserAuthor || isUserCollaborator) {
             return c.json(res, 200);
           } else {
             // return only books that has published chapters
@@ -144,7 +160,9 @@ const communityBooksChaptersRouter = router
                 title: z.string().nullish(),
                 content: z.string().nullish(),
                 number: z.number(),
+                isUserAuthor: z.boolean(),
                 isUserEditor: z.boolean(),
+                isUserViewer: z.boolean(),
                 versions: z.array(
                   z.object({
                     content: z.string(),
@@ -195,9 +213,10 @@ const communityBooksChaptersRouter = router
       },
     }),
     async (c) => {
-      const userId = c.req.header("Authorization");
-
       try {
+        const auth = getAuth(c);
+        const userId = auth?.userId;
+
         const { chapterId } = c.req.valid("param");
 
         const db = connectToDB({
@@ -206,9 +225,11 @@ const communityBooksChaptersRouter = router
         });
 
         let dbUser: any;
+        let isUserAuthor = false;
         let isUserEditor = false;
+        let isUserViewer = false;
 
-        if (userId && userId !== "null") {
+        if (userId && userId !== "null" && userId !== "undefined") {
           dbUser = await db.query.user.findFirst({
             where: (users, { eq }) => eq(users.sub, userId),
           });
@@ -217,19 +238,53 @@ const communityBooksChaptersRouter = router
             return c.json({ error: "Unauthorized" }, 401);
           }
 
-          isUserEditor = await db.query.userBookChapters
-            .findFirst({
-              where: (userBookChapters, { eq }) =>
-                eq(userBookChapters.id, +chapterId),
-              with: {
-                userBook: {
-                  columns: {
-                    userId: true,
+          const userBookChapter = await db.query.userBookChapters.findFirst({
+            where: (userBookChapters, { eq }) =>
+              eq(userBookChapters.id, +chapterId),
+            with: {
+              userBook: {
+                columns: {
+                  id: true,
+                  userId: true,
+                },
+                with: {
+                  collaborators: {
+                    columns: {
+                      id: true,
+                      role: true,
+                    },
+                    with: {
+                      user: {
+                        columns: {
+                          firstName: true,
+                          lastName: true,
+                          email: true,
+                          imageUrl: true,
+                          sub: true,
+                        },
+                      },
+                    },
                   },
                 },
               },
-            })
-            .then((res) => res?.userBook?.userId === dbUser.id);
+            },
+          });
+
+          if (!userBookChapter) {
+            return c.json({ error: "Chapter not found" }, 404);
+          }
+
+          isUserAuthor = userBookChapter?.userBook?.userId === dbUser.id;
+          isUserEditor = userBookChapter?.userBook?.collaborators?.some(
+            (collaborator) =>
+              collaborator.user.sub === userId &&
+              collaborator.role === "editor",
+          );
+          isUserViewer = userBookChapter?.userBook?.collaborators?.some(
+            (collaborator) =>
+              collaborator.user.sub === userId &&
+              collaborator.role === "viewer",
+          );
         }
 
         const res = await db.query.userBookChapters.findFirst({
@@ -237,38 +292,34 @@ const communityBooksChaptersRouter = router
             eq(userBookChapters.id, +chapterId),
           columns: {
             id: true,
-            ...(isUserEditor && { title: true }),
+            ...((isUserAuthor || isUserEditor || isUserViewer) && {
+              title: true,
+            }),
             number: true,
-            ...(isUserEditor && { content: true }),
+            ...((isUserAuthor || isUserEditor || isUserViewer) && {
+              content: true,
+            }),
           },
           with: {
             versions: {
-              ...(!isUserEditor && {
+              ...(!(isUserAuthor || isUserEditor || isUserViewer) && {
                 where: (chapterVersions, { eq }) =>
                   eq(chapterVersions.isCurrentlyPublished, true),
               }),
             },
           },
-          extras: {
-            isUserEditor: sql<boolean>`(
-      SELECT CASE 
-        WHEN (
-          SELECT u.sub 
-          FROM ${user} u
-          JOIN ${userBooks} ub ON ub.user_id = u.id
-          WHERE ub.id = ${userBookChapters}.user_book_id
-        ) = ${userId} THEN TRUE
-        ELSE FALSE
-      END
-    )`.as("isUserEditor"),
-          },
         });
-
         if (!res) {
           return c.json({ error: "Chapter not found" }, 404);
         }
+        const finalRes = {
+          ...res!,
+          isUserAuthor: isUserAuthor,
+          isUserEditor: isUserEditor,
+          isUserViewer: isUserViewer,
+        };
 
-        return c.json(res, 200);
+        return c.json(finalRes, 200);
       } catch (error) {
         console.error("Error fetching community book chapters:", error);
         return c.json({ error: "Error fetching community book chapters" }, 500);
@@ -285,7 +336,8 @@ const communityBooksChaptersRouter = router
       }),
     ),
     async (c) => {
-      const userId = c.req.header("Authorization");
+      const auth = getAuth(c);
+      const userId = auth?.userId;
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -322,6 +374,23 @@ const communityBooksChaptersRouter = router
               imageUrl: true,
             },
           },
+          collaborators: {
+            columns: {
+              id: true,
+              role: true,
+            },
+            with: {
+              user: {
+                columns: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                  imageUrl: true,
+                  sub: true,
+                },
+              },
+            },
+          },
           chapters: true,
         },
         extras: {
@@ -330,8 +399,16 @@ const communityBooksChaptersRouter = router
           ),
         },
       });
+      if (!book) {
+        return c.json({ error: "Book not found" }, 404);
+      }
+      const isUserAuthor = book?.user?.sub === userId;
+      const isUserCollaborator = book?.collaborators?.some(
+        (collaborator) =>
+          collaborator.user.sub === userId && collaborator.role === "editor",
+      );
 
-      if (userId !== book?.user?.sub) {
+      if (!isUserAuthor && !isUserCollaborator) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -363,7 +440,8 @@ const communityBooksChaptersRouter = router
       }),
     ),
     async (c) => {
-      const userId = c.req.header("Authorization");
+      const auth = getAuth(c);
+      const userId = auth?.userId;
       if (!userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
