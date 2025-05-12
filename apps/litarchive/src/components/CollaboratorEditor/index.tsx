@@ -20,7 +20,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
 import { Button } from "../ui/button";
-import { Eye, Pencil, Trash } from "lucide-react";
+import {
+  Eye,
+  LoaderCircle,
+  Pencil,
+  Plus,
+  Share,
+  Share2,
+  Trash,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export function CollaboratorEditor({
@@ -47,7 +55,7 @@ export function CollaboratorEditor({
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
 
-  const { mutate: onCreateCollaborator } = useMutation({
+  const { mutate: onCreateCollaborator, isPending: isCreating } = useMutation({
     mutationFn: async ({ role }: { role: "viewer" | "editor" }) => {
       const token = await getToken();
       if (!token) {
@@ -73,11 +81,12 @@ export function CollaboratorEditor({
     onSuccess: async (res) => {
       if (res?.ok) {
         toast.success("Collborator added");
+        setEmail("");
         router.refresh();
       }
     },
   });
-  const { mutate: onUpdateCollaborator } = useMutation({
+  const { mutate: onUpdateCollaborator, isPending: isUpdating } = useMutation({
     mutationFn: async ({
       userBookCollaboratorsId,
       role,
@@ -114,7 +123,7 @@ export function CollaboratorEditor({
     },
   });
 
-  const { mutate: onDeleteCollaborator } = useMutation({
+  const { mutate: onDeleteCollaborator, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
       const token = await getToken();
       if (!token) {
@@ -146,29 +155,36 @@ export function CollaboratorEditor({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Badge variant="outline" className="cursor-pointer text-xs">
-          + add collaborator
-        </Badge>
+        <Button variant="secondary" className="w-fit">
+          Share Setting <Share2 />
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="max-h-[400px] w-fit min-w-[400px] overflow-scroll p-0">
         <Command className="overflow-scroll">
-          <CommandInput
-            className="sticky top-0"
-            placeholder="Search collaborator..."
-            value={email}
-            onValueChange={(e) => {
-              setEmail(e);
-            }}
-          />
-          <CommandEmpty>
+          <div className="relative flex w-full items-center justify-between gap-2">
+            <CommandInput
+              placeholder="Search collaborator..."
+              value={email}
+              onValueChange={(e) => {
+                setEmail(e);
+              }}
+            />
             <Button
+              variant="outline"
+              disabled={isCreating}
+              className="absolute top-0 right-2 bottom-0 m-auto w-fit cursor-pointer"
               onClick={() => {
                 onCreateCollaborator({ role: "viewer" });
               }}
             >
-              Add collaborator
+              {isCreating ? (
+                <LoaderCircle className="animate-spin" />
+              ) : (
+                <Plus />
+              )}
             </Button>
-          </CommandEmpty>
+          </div>
+          <CommandEmpty>No collaborators found</CommandEmpty>
           <CommandGroup>
             {collaborators.map((collaborator) => (
               <CommandItem
@@ -193,7 +209,7 @@ export function CollaboratorEditor({
                   </p>
                 </div>
                 {isUserAuthor ? (
-                  <div>
+                  <div className="flex gap-2">
                     <Button
                       size="icon"
                       variant="outline"
@@ -202,11 +218,16 @@ export function CollaboratorEditor({
                         onDeleteCollaborator();
                       }}
                     >
-                      <Trash />
+                      {isDeleting ? (
+                        <LoaderCircle className="animate-spin" />
+                      ) : (
+                        <Trash />
+                      )}
                     </Button>
                     <Button
                       size="icon"
                       variant="outline"
+                      disabled={isUpdating}
                       onClick={(e) => {
                         e.stopPropagation();
                         onUpdateCollaborator({
@@ -218,7 +239,13 @@ export function CollaboratorEditor({
                         });
                       }}
                     >
-                      {collaborator.role === "editor" ? <Pencil /> : <Eye />}
+                      {isUpdating ? (
+                        <LoaderCircle className="animate-spin" />
+                      ) : collaborator.role === "editor" ? (
+                        <Pencil />
+                      ) : (
+                        <Eye />
+                      )}
                     </Button>
                   </div>
                 ) : (

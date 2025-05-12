@@ -12,6 +12,8 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { useModal } from "@/providers/ModalProvider";
+import { CollaboratorEditor } from "../CollaboratorEditor";
+import { Trash } from "lucide-react";
 
 export default function CommunityBookInfo({
   book,
@@ -81,76 +83,87 @@ export default function CommunityBookInfo({
   });
 
   return (
-    <div className="flex flex-1 flex-col gap-4">
-      <div className="flex w-full flex-col items-start gap-1">
-        <Contenteditable
-          contenteditable={!!book.isUserAuthor}
-          onBlur={(e) => {
-            onUpdateTitleAndDescription({ title: e.target.innerText });
-          }}
-          text={book.title}
-          className="before:text-foreground/50 h-min min-h-0 w-full text-2xl font-bold capitalize before:pointer-events-none empty:before:content-['Title...'] focus-visible:outline-none"
-          placeholder="Title..."
+    <div className="flex w-full flex-col items-start justify-between gap-4 md:flex-row">
+      <div className="flex flex-1 flex-col gap-4">
+        <div className="flex w-full flex-col items-start gap-1">
+          <Contenteditable
+            contenteditable={!!book.isUserAuthor}
+            onBlur={(e) => {
+              onUpdateTitleAndDescription({ title: e.target.innerText });
+            }}
+            text={book.title}
+            className="before:text-foreground/50 h-min min-h-0 w-full text-2xl font-bold capitalize before:pointer-events-none empty:before:content-['Title...'] focus-visible:outline-none"
+            placeholder="Title..."
+          />
+
+          <p className="cursor-pointer text-gray-400 hover:underline">
+            {book.user?.firstName + " " + book.user?.lastName}
+          </p>
+
+          {!!book.isUserAuthor && (
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={isPublic}
+                onCheckedChange={(value) => {
+                  setIsPublic(value);
+                  onUpdateTitleAndDescription({ isPublic: value.toString() });
+                }}
+              />
+              <Badge variant="outline" className="text-xs">
+                {isPublic ? "Public" : "Private"}
+              </Badge>
+            </div>
+          )}
+        </div>
+
+        <Genres
+          genres={genres}
+          bookId={book.id}
+          isUserEditor={!!book.isUserAuthor}
         />
 
-        <p className="cursor-pointer text-gray-400 hover:underline">
-          {book.user?.firstName + " " + book.user?.lastName}
-        </p>
-
+        <div className="flex w-full flex-col gap-1">
+          <p className="font-bold">Description</p>
+          <Contenteditable
+            contenteditable={!!book.isUserAuthor}
+            onBlur={(e) => {
+              onUpdateTitleAndDescription({ description: e.target.innerText });
+            }}
+            text={book.description || undefined}
+            className="text-sm text-gray-400"
+            placeholder="Description..."
+          />
+        </div>
+      </div>
+      <div className="flex flex-row flex-wrap items-end gap-2 md:flex-col">
+        {!!book.isUserAuthor || !!book.isUserEditor || !!book.isUserViewer ? (
+          <CollaboratorEditor
+            collaborators={book.collaborators}
+            bookId={book.id}
+            isUserAuthor={!!book.isUserAuthor}
+          />
+        ) : null}
         {!!book.isUserAuthor && (
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={isPublic}
-              onCheckedChange={(value) => {
-                setIsPublic(value);
-                onUpdateTitleAndDescription({ isPublic: value.toString() });
-              }}
-            />
-            <Badge variant="outline" className="text-xs">
-              {isPublic ? "Public" : "Private"}
-            </Badge>
-          </div>
+          <Button
+            className="w-fit cursor-pointer"
+            variant="destructive"
+            onClick={() => {
+              openModal({
+                modalName: "WarningModal",
+                props: {
+                  title: "Deleting book",
+                  description: "Are you sure you want to delete this book?",
+                  onContinue: async () => {
+                    onDeleteBook();
+                  },
+                },
+              });
+            }}
+          >
+            Delete Book <Trash />
+          </Button>
         )}
       </div>
-
-      <Genres
-        genres={genres}
-        bookId={book.id}
-        isUserEditor={!!book.isUserAuthor}
-      />
-
-      <div className="flex w-full flex-col gap-1">
-        <p className="font-bold">Description</p>
-        <Contenteditable
-          contenteditable={!!book.isUserAuthor}
-          onBlur={(e) => {
-            onUpdateTitleAndDescription({ description: e.target.innerText });
-          }}
-          text={book.description || undefined}
-          className="text-sm text-gray-400"
-          placeholder="Description..."
-        />
-      </div>
-      {!!book.isUserAuthor && (
-        <Button
-          className="w-fit cursor-pointer"
-          variant="destructive"
-          onClick={() => {
-            openModal({
-              modalName: "WarningModal",
-              props: {
-                title: "Deleting book",
-                description: "Are you sure you want to delete this book?",
-                onContinue: async () => {
-                  onDeleteBook();
-                },
-              },
-            });
-          }}
-        >
-          Delete Book
-        </Button>
-      )}
     </div>
   );
 }

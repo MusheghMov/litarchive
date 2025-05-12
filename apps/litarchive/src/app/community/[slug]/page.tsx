@@ -55,13 +55,6 @@ export default async function CommunityBookPage({
 
   return (
     <div className="flex w-full flex-col gap-4">
-      {book.isUserAuthor || book.isUserEditor || book.isUserViewer ? (
-        <CollaboratorEditor
-          collaborators={book.collaborators}
-          bookId={book.id}
-          isUserAuthor={!!book.isUserAuthor}
-        />
-      ) : null}
       <div className="flex w-full flex-col gap-4 md:flex-row">
         <div className="bg-card aspect-[2/3] max-h-[600px] w-full flex-col justify-end overflow-hidden rounded border p-2 md:w-[300px]">
           {book.coverImageUrl ? (
@@ -76,6 +69,7 @@ export default async function CommunityBookPage({
             <ImageIcon className="h-full w-full object-cover" strokeWidth={1} />
           )}
         </div>
+
         <CommunityBookInfo book={book} genres={genres} />
       </div>
       <Chapters
