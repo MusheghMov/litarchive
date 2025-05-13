@@ -258,6 +258,7 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
             <TiptapEditor
               editable={true}
               content={lastSavedContent.current!}
+              id={chapter.id.toString()}
               onUpdate={({ editor }) => {
                 if (timeout.current) {
                   clearTimeout(timeout.current);
