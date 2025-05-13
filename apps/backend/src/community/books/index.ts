@@ -873,7 +873,7 @@ const communityBooks = router
     zValidator(
       "query",
       z.object({
-        collaboratorEmail: z.string().optional(),
+        collaborationId: z.string(),
         bookId: z.string(),
       }),
     ),
@@ -885,31 +885,24 @@ const communityBooks = router
       const userId = auth.userId;
 
       const query = c.req.query();
+
       const bookId = Number.parseInt(query.bookId);
       if (!bookId) {
         return c.json({ error: "Book id is required" }, 400);
       }
-      const collaboratorEmail = query.collaboratorEmail as string;
-      if (!collaboratorEmail) {
-        return c.json({ error: "Collaborator email is required" }, 400);
+
+      const collaborationId = Number.parseInt(query.collaborationId);
+      if (!collaborationId) {
+        return c.json({ error: "Collaboration id is required" }, 400);
       }
 
       const db = connectToDB({
         url: c.env.DATABASE_URL,
         authoToken: c.env.DATABASE_AUTH_TOKEN,
       });
-
-      const collaborator = await db.query.user.findFirst({
-        where: (users, { eq }) => eq(users.email, collaboratorEmail),
-      });
-      if (!collaborator) {
-        return c.json({ error: "Collaborator not found" }, 404);
-      }
-
       const dbUser = await db.query.user.findFirst({
         where: (users, { eq }) => eq(users.sub, userId),
       });
-
       if (!dbUser) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -926,12 +919,7 @@ const communityBooks = router
 
       const res = await db
         .delete(userBookCollaborators)
-        .where(
-          and(
-            eq(userBookCollaborators.userId, collaborator.id),
-            eq(userBookCollaborators.userBookId, bookId),
-          ),
-        );
+        .where(eq(userBookCollaborators.id, collaborationId));
       return c.json(res);
     },
   );

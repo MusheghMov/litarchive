@@ -124,7 +124,7 @@ export function CollaboratorEditor({
   });
 
   const { mutate: onDeleteCollaborator, isPending: isDeleting } = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (collaborationId: number) => {
       const token = await getToken();
       if (!token) {
         return;
@@ -133,7 +133,7 @@ export function CollaboratorEditor({
         {
           query: {
             bookId: bookId.toString(),
-            collaboratorEmail: "mushegh.movsisian@gmail.com",
+            collaborationId: collaborationId.toString(),
           },
         },
         {
@@ -215,7 +215,7 @@ export function CollaboratorEditor({
                       variant="outline"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onDeleteCollaborator();
+                        onDeleteCollaborator(collaborator.id);
                       }}
                     >
                       {isDeleting ? (
