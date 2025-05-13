@@ -1,4 +1,4 @@
-import { connectToDB, sql, eq } from "@repo/db";
+import { connectToDB, sql, eq, and, gt } from "@repo/db";
 import { createRouter } from "../../lib/create-app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { zValidator } from "@hono/zod-validator";
@@ -480,6 +480,79 @@ const communityBooksChaptersRouter = router
 
       return c.json(res);
     },
-  );
+  )
+  .delete("/:chapterId", async (c) => {
+    const auth = getAuth(c);
+    const userId = auth?.userId;
+    if (!userId) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const db = connectToDB({
+      url: c.env.DATABASE_URL,
+      authoToken: c.env.DATABASE_AUTH_TOKEN,
+    });
+    const dbUser = await db.query.user.findFirst({
+      where: (users, { eq }) => eq(users.sub, userId),
+    });
+    if (!dbUser) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const params = c.req.param();
+    const chapterId = Number.parseInt(params.chapterId);
+    if (!chapterId) {
+      return c.json({ error: "Chapter id is required" }, 400);
+    }
+
+    const userBookChapter = await db.query.userBookChapters.findFirst({
+      where: (userBookChapters, { eq }) => eq(userBookChapters.id, chapterId),
+      columns: {
+        userBookId: true,
+        number: true,
+      },
+      with: {
+        userBook: {
+          columns: {
+            userId: true,
+          },
+        },
+      },
+    });
+    if (!userBookChapter) {
+      return c.json({ error: "Chapter not found" }, 404);
+    }
+
+    const isUserAuthor = userBookChapter?.userBook?.userId === dbUser.id;
+    const bookId = userBookChapter?.userBookId;
+    const chapterNumber = userBookChapter?.number;
+
+    if (!isUserAuthor) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    await db.transaction(async (tx) => {
+      await tx
+        .delete(userBookChapters)
+        .where(eq(userBookChapters.id, chapterId));
+      await tx
+        .update(userBookChapters)
+
+        .set({
+          number: sql<number>`(${userBookChapters.number} - 1)`,
+        })
+        .where(
+          and(
+            eq(userBookChapters.userBookId, bookId),
+            gt(userBookChapters.number, chapterNumber),
+          ),
+        );
+    });
+
+    const res = await db
+      .delete(userBookChapters)
+      .where(eq(userBookChapters.id, chapterId));
+    return c.json(res);
+  });
 
 export default communityBooksChaptersRouter;

@@ -1,6 +1,6 @@
 import * as schema from "./schema";
 import { drizzle } from "drizzle-orm/libsql";
-import { sql, eq, and, like } from "drizzle-orm";
+import { sql, eq, and, like, gt } from "drizzle-orm";
 
 const connectToDB = ({
   url,
@@ -18,4 +18,4 @@ const connectToDB = ({
   });
 };
 
-export { sql, eq, connectToDB, and, like };
+export { sql, eq, connectToDB, and, like, gt };
