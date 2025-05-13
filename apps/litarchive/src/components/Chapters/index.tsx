@@ -6,7 +6,7 @@ import honoClient from "@/app/honoRPCClient";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LoaderCircle, Trash } from "lucide-react";
+import { LoaderCircle, Plus, Trash } from "lucide-react";
 import { useModal } from "@/providers/ModalProvider";
 import { toast } from "sonner";
 
@@ -26,7 +26,7 @@ export default function Chapters({
   const { getToken } = useAuth();
   const router = useRouter();
 
-  const { mutate: onCreateChapter } = useMutation({
+  const { mutate: onCreateChapter, isPending: isCreating } = useMutation({
     mutationFn: async () => {
       const token = await getToken();
       if (!token) {
@@ -60,12 +60,14 @@ export default function Chapters({
         {(isUserEditor || isUserAuthor) && (
           <Button
             variant="outline"
+            disabled={isCreating}
             className="text-xs"
             onClick={() => {
               onCreateChapter();
             }}
           >
             Add Chapter
+            {isCreating ? <LoaderCircle className="animate-spin" /> : <Plus />}
           </Button>
         )}
       </div>
