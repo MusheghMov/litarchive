@@ -873,7 +873,7 @@ const communityBooks = router
     zValidator(
       "query",
       z.object({
-        collaborationId: z.string(),
+        userBookCollaboratorsId: z.string(),
         bookId: z.string(),
       }),
     ),
@@ -891,9 +891,11 @@ const communityBooks = router
         return c.json({ error: "Book id is required" }, 400);
       }
 
-      const collaborationId = Number.parseInt(query.collaborationId);
-      if (!collaborationId) {
-        return c.json({ error: "Collaboration id is required" }, 400);
+      const userBookCollaboratorsId = Number.parseInt(
+        query.userBookCollaboratorsId,
+      );
+      if (!userBookCollaboratorsId) {
+        return c.json({ error: "userBookCollaboratorsId is required" }, 400);
       }
 
       const db = connectToDB({
@@ -919,7 +921,7 @@ const communityBooks = router
 
       const res = await db
         .delete(userBookCollaborators)
-        .where(eq(userBookCollaborators.id, collaborationId));
+        .where(eq(userBookCollaborators.id, userBookCollaboratorsId));
       return c.json(res);
     },
   );
