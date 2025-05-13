@@ -90,6 +90,29 @@ export async function POST(req: Request) {
 
       console.log("Deleted user:", deletedUser);
     }
+    if (eventType === "user.updated") {
+      try {
+        const updatedUser = await honoClient.user.update.$put(
+          {
+            query: {
+              sub: (payload as any)?.data.id,
+              firstName: (payload as any)?.data.first_name,
+              lastName: (payload as any)?.data.last_name,
+              email: (payload as any)?.data.email_addresses[0].email_address,
+              imageUrl: (payload as any)?.data.image_url,
+            },
+          },
+          {
+            headers: {
+              Authorization: (payload as any)?.data.id,
+            },
+          }
+        );
+        console.log("Updated user:", updatedUser);
+      } catch (error) {
+        console.error("Error updating user:", error);
+      }
+    }
     return new Response("", { status: 200 });
   } catch (error) {
     console.error("Error handling webhook:", error);

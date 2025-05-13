@@ -129,6 +129,45 @@ const userApp = router
       });
       return c.json(res);
     },
+  )
+  .put(
+    "/update",
+    zValidator(
+      "query",
+      z.object({
+        sub: z.string(),
+        firstName: z.string().optional(),
+        lastName: z.string().optional(),
+        email: z.string().optional(),
+        imageUrl: z.string().optional(),
+      }),
+    ),
+    async (c) => {
+      const db = connectToDB({
+        url: c.env.DATABASE_URL,
+        authoToken: c.env.DATABASE_AUTH_TOKEN,
+      });
+      const sub = c.req.query("sub");
+      const firstName = c.req.query("firstName");
+      const lastName = c.req.query("lastName");
+      const email = c.req.query("email");
+      const imageUrl = c.req.query("imageUrl");
+
+      if (!sub) {
+        return c.json({ error: "Sub is required" }, 400);
+      }
+
+      const res = await db
+        .update(user)
+        .set({
+          ...(firstName && { firstName: firstName }),
+          ...(lastName && { lastName: lastName }),
+          ...(email && { email: email }),
+          ...(imageUrl && { imageUrl: imageUrl }),
+        })
+        .where(eq(user.sub, sub));
+      return c.json(res);
+    },
   );
 
 export default userApp;
