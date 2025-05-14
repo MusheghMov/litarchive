@@ -283,6 +283,49 @@
 }
 
 @layer base {
+  .cl-navbar {
+    background: var(--color-accent) !important;
+  }
+  .cl-badge {
+    border: 1px solid var(--color-accent) !important;
+  }
+  .cl-footer {
+    display: none !important;
+  }
+  .cl-navbarMobileMenuRow {
+    background: var(--color-accent) !important;
+    backgroud-color: var(--color-accent) !important;
+    color: var(--color-foreground) !important;
+  }
+  .cl-userButtonPopoverActionButton {
+    border-color: var(--color-border) !important;
+  }
+  .cl-userButtonPopoverActionButton__signOut {
+    border-color: var(--color-border) !important;
+  }
+  .cl-modalBackdrop {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    .cl-signIn-start {
+      background: var(--color-accent) !important;
+      color: var(--color-foreground) !important;
+      .cl-headerTitle {
+        color: var(--color-foreground) !important;
+      }
+      .cl-socialButtonsBlockButton {
+        color: var(--color-foreground) !important;
+        background: var(--color-background) !important;
+        &:hover {
+          background: color-mix(
+            in oklab,
+            var(--color-background) 70%,
+            transparent
+          ) !important;
+        }
+      }
+    }
+  }
   * {
     @apply border-border outline-ring/50;
   }

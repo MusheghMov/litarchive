@@ -1,9 +1,9 @@
 "use client";
-import { Menu, SlidersHorizontal } from "lucide-react";
 
 const ModeToggle = dynamic(() => import("../ModeToggle"), {
   ssr: false,
 });
+import { Menu, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -25,7 +25,6 @@ export default function Header() {
   const pathname = usePathname();
   const [selected, setSelected] = useState(pathname.split("/")[1]);
   const [expanded, setExpanded] = useState(false);
-  const { theme } = useTheme();
 
   return (
     <div className="border-border/65 bg-background/35 sticky top-0 z-50 !m-0 grid w-full shrink-0 grow-0 self-center overflow-hidden rounded-none border-b backdrop-blur-lg lg:inset-0 lg:top-3 lg:m-auto lg:w-fit lg:rounded-[30px] lg:border">
@@ -148,64 +147,50 @@ export default function Header() {
           {isSignedIn && (
             <UserButton
               fallback={<SignInButton />}
-              // appearance={{
-              //   elements: {
-              //     userButtonPopoverCard:
-              //       theme !== "light" && "bg-background text-white",
-              //     userButtonPopoverMain:
-              //       theme !== "light" && "bg-background ext-white",
-              //     button: theme !== "light" && "text-white",
-              //     userPreview:
-              //       theme !== "light" && "bg-background/90 text-white",
-              //     userButtonPopoverActions:
-              //       theme !== "light" && "bg-background/90 text-white",
-              //     userPreviewMainIdentifier: theme !== "light" && "text-white",
-              //     userPreviewTextContainer: theme !== "light" && "text-white",
-              //     userButtonPopoverActionButton:
-              //       theme !== "light" && "hover:bg-background/60 hover:text-white",
-              //     userButtonPopoverFooter: "text-white bg-transparent hidden",
-              //   },
-              // }}
-              // userProfileProps={{
-              //   appearance: {
-              //     elements: {
-              //       scrollBox: theme !== "light" && "bg-slate-800",
-              //       page: theme !== "light" && "text-white",
-              //       navbarButtons: theme !== "light" && "text-white",
-              //       navbarButton:
-              //         theme !== "light" &&
-              //         "hover:bg-slate-600 focus:bg-slate-800 focus:text-white text-white hover:text-white",
-              //       formFieldLabel: theme !== "light" && "text-white",
-              //       headerTitle: theme !== "light" && "text-white",
-              //       profileSection: theme !== "light" && "bg-slate-800",
-              //       button: theme !== "light" && "text-white",
-              //       menuList:
-              //         theme !== "light" && "bg-slate-700 hover:bg-slate-600",
-              //       navbarMobileMenuRow:
-              //         theme !== "light" && "bg-slate-800 bg-none",
-              //       navbarMobileMenuButton: theme !== "light" && "text-black",
-              //       navbarMobileMenuButtonIcon:
-              //         theme !== "light" && "text-white",
-              //       badge:
-              //         theme !== "light" && "text-white border border-white",
-              //       userPreviewTextContainer: theme !== "light" && "text-white",
-              //       userPreviewMainIdentifier:
-              //         theme !== "light" && "text-white",
-              //       profileSectionPrimaryButton:
-              //         theme !== "light" && "hover:bg-slate-600",
-              //       menuButton: theme !== "light" && "hover:bg-slate-600",
-              //       cardBox: theme !== "light" && "bg-slate-600",
-              //       actionCard: theme !== "light" && "bg-slate-700",
-              //       formButtonReset: theme !== "light" && "hover:bg-slate-600",
-              //       avatarImageActionsUpload:
-              //         theme !== "light" && "hover:bg-slate-600",
-              //       avatarImageActionsRemove:
-              //         theme !== "light" && "hover:bg-slate-600",
-              //       navbar: theme !== "light" && "bg-slate-800 bg-none",
-              //       footer: "hidden",
-              //     },
-              //   },
-              // }}
+              appearance={{
+                elements: {
+                  userButtonPopoverMain: "not-light:!bg-accent text-foreground",
+                  userButtonPopoverFooter: "!hidden",
+                  userButtonPopoverActions: "!border-border",
+                  userButtonPopoverActionButton:
+                    "!text-foreground !border-border",
+                  rootBox: "!z-[10000]",
+                },
+              }}
+              userProfileProps={{
+                appearance: {
+                  elements: {
+                    scrollBox:
+                      "!bg-accent border-border !shadow-none !border-border md:!border-l !border-t md:!border-none",
+                    page: "!text-foreground",
+                    heacerTitle: "!text-foreground",
+                    profileSectionContent: "!text-foreground",
+                    userPreview: "!text-foreground",
+                    profileSectionPrimaryButton: "!text-foreground",
+                    headerTitle: "!text-foreground",
+                    menuButtonEllipsis: "!text-foreground/50",
+                    actionCard: "!text-foreground !bg-background",
+                    avatarImageActionsUpload: "!text-foreground !bg-muted",
+                    avatarImageActionsRemove: "!bg-destructive !text-white",
+                    profileSection: "!border-border",
+                    profileSectionPrimaryButton__danger:
+                      "!text-white !bg-destructive",
+                    formFieldLabel: "!text-gray-500",
+                    formButtonReset: "!bg-secondary !text-foreground",
+                    menuList: "!text-foreground !bg-background",
+                    navbar:
+                      "!bg-accent md:not-light:[&_h1]:!text-white md:[&>*:last-child]:!hidden",
+                    navbarMobileMenuRow:
+                      "not-light:!bg-accent !text-foreground",
+                    navbarMobileMenuButton: "!text-foreground",
+                    navbarButton: "!text-foreground",
+                    footer: "!hidden",
+                    badge: "!text-foreground !border-gray-500",
+                    "profileSectionPrimaryButton-danger":
+                      "!text-foreground !bg-destructive",
+                  },
+                },
+              }}
             />
           )}
           <DropdownMenu>
