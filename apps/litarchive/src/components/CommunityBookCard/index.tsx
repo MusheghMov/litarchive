@@ -14,13 +14,16 @@ import { CommunityBook } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Genre } from "@/types";
+import { cn } from "@/lib/utils";
 
 export default function CommunityBookCard({
   book,
   genres,
+  role,
 }: {
   book: CommunityBook;
   genres: Genre[] | undefined;
+  role?: "editor" | "viewer";
 }) {
   return (
     <Link href={`/community/${book.slug}`}>
@@ -29,7 +32,18 @@ export default function CommunityBookCard({
         className="flex aspect-[2/3] w-full flex-col justify-end gap-2 overflow-hidden rounded border p-2"
       >
         <div className="flex h-full flex-col gap-2 overflow-hidden">
-          <CardContent className="aspect-square overflow-hidden rounded p-0">
+          <CardContent className="relative aspect-square overflow-hidden rounded p-0">
+            {role && (
+              <Badge
+                variant="outline"
+                className={cn(
+                  "absolute top-1 right-1 bg-yellow-600 text-xs",
+                  role === "editor" && "bg-green-500"
+                )}
+              >
+                {role}
+              </Badge>
+            )}
             {book.coverImageUrl ? (
               <Image
                 src={book.coverImageUrl}

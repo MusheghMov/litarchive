@@ -127,6 +127,135 @@ const communityBooks = router
       return c.json(res, 200);
     },
   )
+
+  .openapi(
+    createRoute({
+      method: "get",
+      path: "/shared-with-me",
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: z.array(
+                z.object({
+                  id: z.number(),
+                  userBookId: z.number(),
+                  userId: z.number(),
+                  createdAt: z.string().nullable(),
+                  updatedAt: z.string().nullable(),
+                  role: z.enum(["editor", "viewer"]),
+
+                  userBook: z
+                    .object({
+                      description: z.string().nullable(),
+                      title: z.string(),
+                      id: z.number(),
+                      slug: z.string().nullable(),
+                      coverImageUrl: z.string().nullable(),
+                      isPublic: z.boolean().nullable(),
+                      user: z
+                        .object({
+                          firstName: z.string().nullable(),
+                          lastName: z.string().nullable(),
+                          email: z.string().nullable(),
+                          imageUrl: z.string().nullable(),
+                        })
+                        .nullable(),
+                      genres: z.array(
+                        z.object({
+                          userBookId: z.number(),
+                          genreId: z.number(),
+                          genre: z.object({
+                            description: z.string().nullable(),
+                            name: z.string().nullable(),
+                            id: z.number(),
+                          }),
+                        }),
+                      ),
+                    })
+                    .nullable(),
+                }),
+              ),
+            },
+          },
+
+          description: "Retrieve community books of the user",
+        },
+        401: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Unauthorized",
+        },
+      },
+    }),
+    async (c) => {
+      const auth = getAuth(c);
+      const userId = auth?.userId;
+      if (!userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const db = connectToDB({
+        url: c.env.DATABASE_URL,
+        authoToken: c.env.DATABASE_AUTH_TOKEN,
+      });
+
+      const dbUser = await db.query.user.findFirst({
+        where: (users, { eq }) => eq(users.sub, userId),
+      });
+
+      if (!dbUser) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const res = await db.query.userBookCollaborators.findMany({
+        where: (userBookCollaborator, { eq }) =>
+          eq(userBookCollaborator.userId, dbUser.id),
+        with: {
+          userBook: {
+            columns: {
+              id: true,
+              title: true,
+              slug: true,
+              description: true,
+              coverImageUrl: true,
+              isPublic: true,
+            },
+            with: {
+              user: {
+                columns: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                  imageUrl: true,
+                },
+              },
+              genres: {
+                with: {
+                  genre: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      description: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: (userBookCollaborator, { desc }) =>
+          desc(userBookCollaborator.createdAt),
+      });
+
+      return c.json(res, 200);
+    },
+  )
   .openapi(
     createRoute({
       method: "get",
