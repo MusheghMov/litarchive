@@ -1,3 +1,10 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "About Litarchive | Your Online Library for Reading, Writing & Collaboration",
+  description: "Learn about Litarchive, the ultimate online platform to discover and read books, create and publish your own stories, and collaborate with fellow writers. Join our community today!",
+};
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
