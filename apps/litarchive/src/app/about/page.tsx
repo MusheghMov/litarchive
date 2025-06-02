@@ -1,20 +1,79 @@
 export default function AboutPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-4">About Litarchive</h1>
-      <p className="text-lg mb-4">
-        Litarchive is an online library where users can find and read books in a comfortable reading experience.
-      </p>
-      <h2 className="text-2xl font-bold mb-2">Features</h2>
-      <ul className="list-disc list-inside mb-4">
-        <li>Optimized for a comfortable reading experience.</li>
-        <li>Users can create their own books and publish them in the app.</li>
-        <li>Collaboration feature: invite collaborators for your books and work together in a collaborative editor.</li>
-      </ul>
-      <h2 className="text-2xl font-bold mb-2">How to Use</h2>
-      <p className="text-lg">
-        Simply browse the library, find a book you like, and start reading. If you want to create your own book, you can use our intuitive editor and publish your work for others to enjoy. To collaborate on a book, invite other users to join your project and work together in real-time.
-      </p>
+    <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
+      {/* Headline */}
+      <section className="text-center mb-12 md:mb-16">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-primary">
+          Welcome to Litarchive: Your World of Stories Awaits
+        </h1>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+          Discover, read, create, and collaborate. Litarchive is your ultimate online library, designed for an unparalleled reading and writing experience.
+        </p>
+      </section>
+
+      {/* Mission */}
+      <section className="mb-12 md:mb-16">
+        <h2 className="text-3xl md:text-4xl font-semibold mb-6 text-center">Our Mission</h2>
+        <p className="text-lg md:text-xl text-center max-w-2xl mx-auto">
+          At Litarchive, we believe stories have the power to connect, inspire, and transform. Our mission is to provide a vibrant platform where readers can lose themselves in captivating narratives and creators can bring their literary visions to life.
+        </p>
+      </section>
+
+      {/* Features & Benefits */}
+      <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 mb-12 md:mb-16">
+        <div className="bg-card p-6 rounded-lg shadow-md">
+          <h3 className="text-2xl font-semibold mb-3">Dive Into a World of Stories</h3>
+          <p className="text-muted-foreground mb-4">
+            Explore a vast and growing collection of books across all genres. Our library is optimized for a comfortable and immersive reading experience, allowing you to get lost in the magic of words.
+          </p>
+          <a href="/books" className="text-primary hover:underline font-semibold">
+            Browse the Library &rarr;
+          </a>
+        </div>
+
+        <div className="bg-card p-6 rounded-lg shadow-md">
+          <h3 className="text-2xl font-semibold mb-3">Unleash Your Inner Author</h3>
+          <p className="text-muted-foreground mb-4">
+            Have a story to tell? Litarchive provides intuitive tools for you to write, format, and publish your own books. Share your voice with the world and connect with readers.
+          </p>
+          <a href="/studio/create" className="text-primary hover:underline font-semibold">
+            Start Writing Your Book &rarr;
+          </a>
+        </div>
+
+        <div className="bg-card p-6 rounded-lg shadow-md md:col-span-2 lg:col-span-1">
+          <h3 className="text-2xl font-semibold mb-3">Collaborate and Create Together</h3>
+          <p className="text-muted-foreground mb-4">
+            Writing doesn't have to be a solo journey. Invite collaborators to your projects and work together in our dedicated editor. Bring your collective ideas to life seamlessly.
+          </p>
+          <a href="/studio" className="text-primary hover:underline font-semibold">
+            Explore Collaboration Tools &rarr;
+          </a>
+        </div>
+      </section>
+
+      {/* How to Use / Get Started */}
+      <section className="text-center mb-12 md:mb-16">
+        <h2 className="text-3xl md:text-4xl font-semibold mb-6">Ready to Begin Your Literary Adventure?</h2>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+          Whether you're here to read captivating stories, write your next masterpiece, or collaborate with fellow creators, Litarchive has something for everyone.
+        </p>
+        <div className="space-x-4">
+          <a href="/books" className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-md text-lg font-medium">
+            Explore Books
+          </a>
+          <a href="/studio/create" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-6 py-3 rounded-md text-lg font-medium">
+            Create Your Own
+          </a>
+        </div>
+      </section>
+
+      {/* Closing Statement */}
+      <section className="text-center">
+        <p className="text-lg md:text-xl text-muted-foreground">
+          Join the Litarchive community today and be part of a world where stories thrive.
+        </p>
+      </section>
     </div>
   );
 }
