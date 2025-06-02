@@ -78,6 +78,17 @@ export default function Header() {
             Home
           </Link>
           <Link
+            href="/about"
+            prefetch
+            className={cn(
+              "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
+              selected === "about" && "text-foreground"
+            )}
+            onClick={() => setSelected("about")}
+          >
+            About
+          </Link>
+          <Link
             href="/authors"
             prefetch
             className={cn(
@@ -200,6 +211,9 @@ export default function Header() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => router.push("/")}>
                 Home
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/about")}>
+                About
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/authors")}>
                 Authors
