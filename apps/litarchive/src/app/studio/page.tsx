@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import honoClient from "../honoRPCClient";
 import Link from "next/link";
@@ -6,6 +7,37 @@ import CommunityBookCard from "@/components/CommunityBookCard";
 import { CommunityBook } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+
+export const metadata: Metadata = {
+  title: "My Studio - Manage Your Books & Collaborations",
+  description: "Access your writing studio on LitArchive. Manage your published books, work on drafts, view collaborations, and track your progress as an independent author.",
+  keywords: [
+    "author dashboard",
+    "writing studio",
+    "book management",
+    "collaboration tools",
+    "author workspace",
+    "writing progress",
+    "book drafts",
+    "publishing tools"
+  ],
+  openGraph: {
+    title: "My Studio - Manage Your Books & Collaborations",
+    description: "Access your writing studio on LitArchive. Manage your books, collaborations, and track your progress as an author.",
+    url: "https://litarchive.com/studio",
+    type: "website",
+  },
+  twitter: {
+    title: "My Studio - Author Dashboard",
+    description: "Access your writing studio on LitArchive. Manage your books, collaborations, and track your progress."
+  },
+  alternates: {
+    canonical: "/studio",
+  },
+  robots: {
+    index: false, // Private user area
+  },
+};
 
 export default async function StudioPage() {
   const { getToken } = await auth();

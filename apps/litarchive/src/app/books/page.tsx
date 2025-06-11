@@ -1,6 +1,35 @@
+import { Metadata } from "next";
 import honoClient from "../honoRPCClient";
 import CommunityBookCard from "@/components/CommunityBookCard";
 import { CommunityBook } from "@/types";
+
+export const metadata: Metadata = {
+  title: "Community Books - Discover Stories by Independent Creators",
+  description: "Browse our collection of community-created books and stories. Discover new voices, genres, and narratives from talented writers worldwide. Read, rate, and support independent authors.",
+  keywords: [
+    "community books",
+    "independent authors",
+    "self-published books",
+    "user-generated stories",
+    "indie literature",
+    "collaborative storytelling",
+    "digital books",
+    "online reading"
+  ],
+  openGraph: {
+    title: "Community Books - Discover Stories by Independent Creators",
+    description: "Browse our collection of community-created books and stories. Discover new voices, genres, and narratives from talented writers worldwide.",
+    url: "https://litarchive.com/books",
+    type: "website",
+  },
+  twitter: {
+    title: "Community Books - Discover Stories by Independent Creators",
+    description: "Browse our collection of community-created books and stories from talented writers worldwide."
+  },
+  alternates: {
+    canonical: "/books",
+  },
+};
 
 export default async function BooksPage() {
   let userBooks;
