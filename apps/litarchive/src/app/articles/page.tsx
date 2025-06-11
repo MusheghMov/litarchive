@@ -1,5 +1,34 @@
+import { Metadata } from "next";
 import ArticleCard from "@/components/ArticleCard";
 import honoClient from "../honoRPCClient";
+
+export const metadata: Metadata = {
+  title: "Articles - Writing Tips, Publishing Guides & Literary Insights",
+  description: "Explore articles about writing, publishing, and storytelling. Get expert tips, industry insights, and practical guides to improve your craft and grow your audience on LitArchive.",
+  keywords: [
+    "writing articles",
+    "publishing guides", 
+    "storytelling tips",
+    "author advice",
+    "writing techniques",
+    "literary insights",
+    "creative writing",
+    "publishing industry"
+  ],
+  openGraph: {
+    title: "Articles - Writing Tips, Publishing Guides & Literary Insights",
+    description: "Explore articles about writing, publishing, and storytelling. Get expert tips and practical guides to improve your craft.",
+    url: "https://litarchive.com/articles",
+    type: "website",
+  },
+  twitter: {
+    title: "Articles - Writing Tips & Publishing Guides",
+    description: "Explore articles about writing, publishing, and storytelling. Get expert tips to improve your craft."
+  },
+  alternates: {
+    canonical: "/articles",
+  },
+};
 export default async function ArticlesPage({
   searchParams,
 }: {

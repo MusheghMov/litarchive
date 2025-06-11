@@ -26,7 +26,7 @@ export default function CommunityBookCard({
   role?: "editor" | "viewer";
 }) {
   return (
-    <Link href={`/community/${book.slug}`}>
+    <Link href={`/books/${book.slug}`}>
       <Card
         key={book.id}
         className="flex aspect-[2/3] w-full flex-col justify-end gap-2 overflow-hidden rounded border p-2"
