@@ -17,7 +17,6 @@ import Link from "next/link";
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "../ui/button";
 import dynamic from "next/dynamic";
-import { useTheme } from "next-themes";
 
 export default function Header() {
   const { isSignedIn } = useAuth();
@@ -78,28 +77,6 @@ export default function Header() {
             Home
           </Link>
           <Link
-            href="/about"
-            prefetch
-            className={cn(
-              "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
-              selected === "about" && "text-foreground"
-            )}
-            onClick={() => setSelected("about")}
-          >
-            About
-          </Link>
-          <Link
-            href="/authors"
-            prefetch
-            className={cn(
-              "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
-              selected === "authors" && "text-foreground"
-            )}
-            onClick={() => setSelected("authors")}
-          >
-            Authors
-          </Link>
-          <Link
             href="/books"
             className={cn(
               "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
@@ -119,28 +96,18 @@ export default function Header() {
           >
             Articles
           </Link>
-          <Link
-            href="/community"
-            className={cn(
-              "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
-              selected === "community" && "text-foreground"
-            )}
-            onClick={() => setSelected("community")}
-          >
-            Community
-          </Link>
           {isSignedIn && (
             <>
-              <Link
-                href="/profile"
-                className={cn(
-                  "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
-                  selected === "profile" && "text-foreground"
-                )}
-                onClick={() => setSelected("profile")}
-              >
-                Profile
-              </Link>
+              {/* <Link */}
+              {/*   href="/profile" */}
+              {/*   className={cn( */}
+              {/*     "border-primary/80 text-foreground/60 hover:text-foreground text-sm", */}
+              {/*     selected === "profile" && "text-foreground" */}
+              {/*   )} */}
+              {/*   onClick={() => setSelected("profile")} */}
+              {/* > */}
+              {/*   Profile */}
+              {/* </Link> */}
               <Link
                 href="/studio"
                 className={cn(
@@ -153,6 +120,18 @@ export default function Header() {
               </Link>
             </>
           )}
+
+          <Link
+            href="/about"
+            prefetch
+            className={cn(
+              "border-primary/80 text-foreground/60 hover:text-foreground text-sm",
+              selected === "about" && "text-foreground"
+            )}
+            onClick={() => setSelected("about")}
+          >
+            About
+          </Link>
         </div>
         <div className="flex flex-row items-center space-x-4 lg:flex">
           {isSignedIn && (
@@ -212,31 +191,26 @@ export default function Header() {
               <DropdownMenuItem onClick={() => router.push("/")}>
                 Home
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/about")}>
-                About
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/authors")}>
-                Authors
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/books")}>
                 Books
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/articles")}>
                 Articles
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/community")}>
-                Community
-              </DropdownMenuItem>
               {isSignedIn && (
                 <>
-                  <DropdownMenuItem onClick={() => router.push("/profile")}>
-                    Profile
-                  </DropdownMenuItem>
+                  {/* <DropdownMenuItem onClick={() => router.push("/profile")}> */}
+                  {/*   Profile */}
+                  {/* </DropdownMenuItem> */}
                   <DropdownMenuItem onClick={() => router.push("/studio")}>
                     Studio
                   </DropdownMenuItem>
                 </>
               )}
+
+              <DropdownMenuItem onClick={() => router.push("/about")}>
+                About
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           {!isSignedIn && <SignInButton />}
