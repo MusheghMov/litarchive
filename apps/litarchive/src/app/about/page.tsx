@@ -1,88 +1,94 @@
-import { Metadata } from 'next';
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "About Litarchive | Community-Driven Storytelling Platform",
-  description: "Discover Litarchive - the modern platform where creators write, collaborate, and monetize their stories. Join our community of storytellers and start your literary journey today.",
+  description:
+    "Discover Litarchive - the modern platform where creators write, collaborate, and monetize their stories. Join our community of storytellers and start your literary journey today.",
 };
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { 
-  PenTool, 
-  Users, 
-  DollarSign, 
-  BookOpen, 
-  Edit3, 
+  PenTool,
+  Users,
+  DollarSign,
+  Edit3,
   Zap,
   Globe,
-  Heart,
   TrendingUp,
-  Clock,
   Award,
-  Lightbulb
 } from "lucide-react";
 
 export default function AboutPage() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-accent/10"></div>
-      <div className="absolute inset-0 bg-grid-slate-100 dark:bg-grid-slate-700/25 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]"></div>
-      
+      <div className="from-background via-background to-accent/10 absolute inset-0 bg-gradient-to-br"></div>
+      <div className="bg-grid-slate-100 dark:bg-grid-slate-700/25 absolute inset-0 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]"></div>
+
       <div className="relative">
         {/* Hero Section */}
         <section className="relative overflow-hidden">
           <div className="container mx-auto px-4 py-24 md:py-32 lg:py-40">
             <div className="text-center">
-              <Badge variant="outline" className="mb-6 border-primary/20 bg-primary/10 text-primary">
+              <Badge
+                variant="outline"
+                className="border-primary/20 bg-primary/10 text-primary mb-6"
+              >
                 Next-Generation Storytelling Platform
               </Badge>
-              
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
+
+              <h1 className="mb-6 text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
                 Where Stories
-                <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent"> Come Alive</span>
+                <span className="from-primary via-accent to-primary bg-gradient-to-r bg-clip-text text-transparent">
+                  {" "}
+                  Come Alive
+                </span>
               </h1>
-              
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto mb-12 leading-relaxed">
-                Join a vibrant community of creators who write, collaborate, and monetize their stories. 
-                Experience the future of digital storytelling with real-time collaboration and revenue opportunities.
+
+              <p className="text-muted-foreground mx-auto mb-12 max-w-4xl text-xl leading-relaxed md:text-2xl">
+                Join a vibrant community of creators who write, collaborate, and
+                monetize their stories. Experience the future of digital
+                storytelling with real-time collaboration and revenue
+                opportunities.
               </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+              <div className="flex flex-col justify-center gap-4 sm:flex-row">
                 <Button size="lg" className="px-8 py-6 text-lg" asChild>
                   <Link href="/studio/create">Start Your Story</Link>
                 </Button>
-                <Button size="lg" variant="outline" className="px-8 py-6 text-lg" asChild>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="px-8 py-6 text-lg"
+                  asChild
+                >
                   <Link href="/books">Explore Community</Link>
                 </Button>
               </div>
             </div>
           </div>
-          
+
           {/* Floating Elements */}
-          <div className="absolute top-20 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>
-          <div className="absolute bottom-20 right-10 w-32 h-32 bg-accent/10 rounded-full blur-xl"></div>
-          <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-primary/5 rounded-full blur-lg"></div>
+          <div className="bg-primary/10 absolute top-20 left-10 h-20 w-20 rounded-full blur-xl"></div>
+          <div className="bg-accent/10 absolute right-10 bottom-20 h-32 w-32 rounded-full blur-xl"></div>
+          <div className="bg-primary/5 absolute top-1/2 right-1/4 h-16 w-16 rounded-full blur-lg"></div>
         </section>
 
         {/* Mission Statement */}
-        <section className="py-24 relative">
+        <section className="relative py-24">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+            <div className="mx-auto max-w-4xl text-center">
+              <h2 className="from-foreground to-foreground/80 mb-8 bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent md:text-5xl">
                 Empowering Creative Expression
               </h2>
-              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
-                We believe every story deserves to be told and every creator deserves to thrive. 
-                Litarchive is more than a platform—it's a movement that transforms how stories are created, 
-                shared, and valued in the digital age.
+              <p className="text-muted-foreground text-xl leading-relaxed md:text-2xl">
+                We believe every story deserves to be told and every creator
+                deserves to thrive. Litarchive is more than a platform—it's a
+                movement that transforms how stories are created, shared, and
+                valued in the digital age.
               </p>
             </div>
           </div>
@@ -91,99 +97,117 @@ export default function AboutPage() {
         {/* Features Grid */}
         <section className="py-24">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Creators Choose Litarchive</h2>
-              <p className="text-xl text-muted-foreground">Powerful tools designed for modern storytellers</p>
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+                Why Creators Choose Litarchive
+              </h2>
+              <p className="text-muted-foreground text-xl">
+                Powerful tools designed for modern storytellers
+              </p>
             </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {/* Feature Cards */}
-              <Card className="group relative overflow-hidden border-0 bg-background/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
+              <Card className="group bg-background/50 relative overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <div className="from-primary/5 absolute inset-0 bg-gradient-to-br to-transparent"></div>
                 <CardHeader className="relative">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <PenTool className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110">
+                    <PenTool className="text-primary h-6 w-6" />
                   </div>
-                  <CardTitle className="text-xl">Intuitive Writing Tools</CardTitle>
+                  <CardTitle className="text-xl">
+                    Intuitive Writing Tools
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="relative">
                   <p className="text-muted-foreground leading-relaxed">
-                    Professional-grade editor with rich formatting, auto-save, and distraction-free writing modes to help you focus on your craft.
+                    Professional-grade editor with rich formatting, auto-save,
+                    and distraction-free writing modes to help you focus on your
+                    craft.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="group relative overflow-hidden border-0 bg-background/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent"></div>
+              <Card className="group bg-background/50 relative overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <div className="from-accent/5 absolute inset-0 bg-gradient-to-br to-transparent"></div>
                 <CardHeader className="relative">
-                  <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Users className="h-6 w-6 text-accent" />
+                  <div className="bg-accent/10 mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110">
+                    <Users className="text-accent h-6 w-6" />
                   </div>
-                  <CardTitle className="text-xl">Real-Time Collaboration</CardTitle>
+                  <CardTitle className="text-xl">
+                    Real-Time Collaboration
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="relative">
                   <p className="text-muted-foreground leading-relaxed">
-                    Invite co-authors and editors to work together seamlessly. See changes in real-time with our advanced collaborative editing system.
+                    Invite co-authors and editors to work together seamlessly.
+                    See changes in real-time with our advanced collaborative
+                    editing system.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="group relative overflow-hidden border-0 bg-background/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Card className="group bg-background/50 relative overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent"></div>
                 <CardHeader className="relative">
-                  <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-500/10 transition-transform duration-300 group-hover:scale-110">
                     <DollarSign className="h-6 w-6 text-green-600" />
                   </div>
                   <CardTitle className="text-xl">Monetize Your Work</CardTitle>
                 </CardHeader>
                 <CardContent className="relative">
                   <p className="text-muted-foreground leading-relaxed">
-                    Earn revenue by selling individual chapters or complete books. Set your own prices and build a sustainable writing career.
+                    Earn revenue by selling individual chapters or complete
+                    books. Set your own prices and build a sustainable writing
+                    career.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="group relative overflow-hidden border-0 bg-background/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Card className="group bg-background/50 relative overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent"></div>
                 <CardHeader className="relative">
-                  <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 transition-transform duration-300 group-hover:scale-110">
                     <Globe className="h-6 w-6 text-blue-600" />
                   </div>
                   <CardTitle className="text-xl">Global Community</CardTitle>
                 </CardHeader>
                 <CardContent className="relative">
                   <p className="text-muted-foreground leading-relaxed">
-                    Connect with readers and writers worldwide. Build your audience and discover new voices in our diverse creative community.
+                    Connect with readers and writers worldwide. Build your
+                    audience and discover new voices in our diverse creative
+                    community.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="group relative overflow-hidden border-0 bg-background/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Card className="group bg-background/50 relative overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
                 <CardHeader className="relative">
-                  <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 transition-transform duration-300 group-hover:scale-110">
                     <Zap className="h-6 w-6 text-purple-600" />
                   </div>
                   <CardTitle className="text-xl">Instant Publishing</CardTitle>
                 </CardHeader>
                 <CardContent className="relative">
                   <p className="text-muted-foreground leading-relaxed">
-                    Publish your work instantly to reach readers immediately. No gatekeepers, no delays—just your story meeting its audience.
+                    Publish your work instantly to reach readers immediately. No
+                    gatekeepers, no delays—just your story meeting its audience.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="group relative overflow-hidden border-0 bg-background/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Card className="group bg-background/50 relative overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent"></div>
                 <CardHeader className="relative">
-                  <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 transition-transform duration-300 group-hover:scale-110">
                     <Award className="h-6 w-6 text-orange-600" />
                   </div>
                   <CardTitle className="text-xl">Creator Recognition</CardTitle>
                 </CardHeader>
                 <CardContent className="relative">
                   <p className="text-muted-foreground leading-relaxed">
-                    Get discovered through our recommendation system. Quality content rises to the top in our merit-based community.
+                    Get discovered through our recommendation system. Quality
+                    content rises to the top in our merit-based community.
                   </p>
                 </CardContent>
               </Card>
@@ -192,24 +216,36 @@ export default function AboutPage() {
         </section>
 
         {/* Stats Section */}
-        <section className="py-24 relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5"></div>
-          <div className="container mx-auto px-4 relative">
-            <div className="grid md:grid-cols-3 gap-8 text-center">
+        <section className="relative py-24">
+          <div className="from-primary/5 via-accent/5 to-primary/5 absolute inset-0 bg-gradient-to-r"></div>
+          <div className="relative container mx-auto px-4">
+            <div className="grid gap-8 text-center md:grid-cols-3">
               <div className="space-y-2">
-                <div className="text-4xl md:text-5xl font-bold text-primary">∞</div>
+                <div className="text-primary text-4xl font-bold md:text-5xl">
+                  ∞
+                </div>
                 <div className="text-xl font-semibold">Stories Possible</div>
-                <div className="text-muted-foreground">Unlimited creative potential</div>
+                <div className="text-muted-foreground">
+                  Unlimited creative potential
+                </div>
               </div>
               <div className="space-y-2">
-                <div className="text-4xl md:text-5xl font-bold text-accent">24/7</div>
+                <div className="text-accent text-4xl font-bold md:text-5xl">
+                  24/7
+                </div>
                 <div className="text-xl font-semibold">Always Available</div>
-                <div className="text-muted-foreground">Write whenever inspiration strikes</div>
+                <div className="text-muted-foreground">
+                  Write whenever inspiration strikes
+                </div>
               </div>
               <div className="space-y-2">
-                <div className="text-4xl md:text-5xl font-bold text-green-600">100%</div>
+                <div className="text-4xl font-bold text-green-600 md:text-5xl">
+                  100%
+                </div>
                 <div className="text-xl font-semibold">Creator Owned</div>
-                <div className="text-muted-foreground">You retain full rights to your work</div>
+                <div className="text-muted-foreground">
+                  You retain full rights to your work
+                </div>
               </div>
             </div>
           </div>
@@ -218,39 +254,52 @@ export default function AboutPage() {
         {/* How It Works */}
         <section className="py-24">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Your Journey Starts Here</h2>
-              <p className="text-xl text-muted-foreground">Three simple steps to begin your storytelling adventure</p>
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+                Your Journey Starts Here
+              </h2>
+              <p className="text-muted-foreground text-xl">
+                Three simple steps to begin your storytelling adventure
+              </p>
             </div>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center group">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Edit3 className="h-8 w-8 text-primary" />
+
+            <div className="grid gap-8 md:grid-cols-3">
+              <div className="group text-center">
+                <div className="bg-primary/10 mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110">
+                  <Edit3 className="text-primary h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4">1. Create Your Story</h3>
+                <h3 className="mb-4 text-xl font-semibold">
+                  1. Create Your Story
+                </h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Start writing with our intuitive editor. Add chapters, format text, and bring your vision to life with professional tools.
+                  Start writing with our intuitive editor. Add chapters, format
+                  text, and bring your vision to life with professional tools.
                 </p>
               </div>
-              
-              <div className="text-center group">
-                <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Users className="h-8 w-8 text-accent" />
+
+              <div className="group text-center">
+                <div className="bg-accent/10 mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110">
+                  <Users className="text-accent h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4">2. Collaborate & Refine</h3>
+                <h3 className="mb-4 text-xl font-semibold">
+                  2. Collaborate & Refine
+                </h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Invite collaborators to help refine your work. Get feedback, co-write, and perfect your story together in real-time.
+                  Invite collaborators to help refine your work. Get feedback,
+                  co-write, and perfect your story together in real-time.
                 </p>
               </div>
-              
-              <div className="text-center group">
-                <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+
+              <div className="group text-center">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 transition-transform duration-300 group-hover:scale-110">
                   <TrendingUp className="h-8 w-8 text-green-600" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4">3. Publish & Earn</h3>
+                <h3 className="mb-4 text-xl font-semibold">
+                  3. Publish & Earn
+                </h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Release your story to the world. Build an audience, receive feedback, and start earning from your creative work.
+                  Release your story to the world. Build an audience, receive
+                  feedback, and start earning from your creative work.
                 </p>
               </div>
             </div>
@@ -258,22 +307,28 @@ export default function AboutPage() {
         </section>
 
         {/* Call to Action */}
-        <section className="py-24 relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/10 to-primary/10"></div>
-          <div className="container mx-auto px-4 relative">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl md:text-5xl font-bold mb-6">
+        <section className="relative py-24">
+          <div className="from-primary/10 via-accent/10 to-primary/10 absolute inset-0 bg-gradient-to-br"></div>
+          <div className="relative container mx-auto px-4">
+            <div className="mx-auto max-w-4xl text-center">
+              <h2 className="mb-6 text-3xl font-bold md:text-5xl">
                 Ready to Transform Your Ideas Into Stories?
               </h2>
-              <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-                Join thousands of creators who are already building their literary legacy on Litarchive. 
-                Your audience is waiting for your unique voice.
+              <p className="text-muted-foreground mb-8 text-xl leading-relaxed">
+                Join thousands of creators who are already building their
+                literary legacy on Litarchive. Your audience is waiting for your
+                unique voice.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col justify-center gap-4 sm:flex-row">
                 <Button size="lg" className="px-8 py-6 text-lg" asChild>
                   <Link href="/studio/create">Create Your First Book</Link>
                 </Button>
-                <Button size="lg" variant="outline" className="px-8 py-6 text-lg" asChild>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="px-8 py-6 text-lg"
+                  asChild
+                >
                   <Link href="/books">Explore the Community</Link>
                 </Button>
               </div>

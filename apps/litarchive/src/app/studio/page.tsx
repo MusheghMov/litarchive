@@ -10,7 +10,8 @@ import { Separator } from "@/components/ui/separator";
 
 export const metadata: Metadata = {
   title: "My Studio - Manage Your Books & Collaborations",
-  description: "Access your writing studio on LitArchive. Manage your published books, work on drafts, view collaborations, and track your progress as an independent author.",
+  description:
+    "Access your writing studio on LitArchive. Manage your published books, work on drafts, view collaborations, and track your progress as an independent author.",
   keywords: [
     "author dashboard",
     "writing studio",
@@ -19,17 +20,19 @@ export const metadata: Metadata = {
     "author workspace",
     "writing progress",
     "book drafts",
-    "publishing tools"
+    "publishing tools",
   ],
   openGraph: {
     title: "My Studio - Manage Your Books & Collaborations",
-    description: "Access your writing studio on LitArchive. Manage your books, collaborations, and track your progress as an author.",
+    description:
+      "Access your writing studio on LitArchive. Manage your books, collaborations, and track your progress as an author.",
     url: "https://litarchive.com/studio",
     type: "website",
   },
   twitter: {
     title: "My Studio - Author Dashboard",
-    description: "Access your writing studio on LitArchive. Manage your books, collaborations, and track your progress."
+    description:
+      "Access your writing studio on LitArchive. Manage your books, collaborations, and track your progress.",
   },
   alternates: {
     canonical: "/studio",
@@ -78,7 +81,7 @@ export default async function StudioPage() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <Button className="text-background w-fit cursor-pointer self-end">
+      <Button className="w-fit cursor-pointer self-end">
         <Link href="/studio/create">Create book</Link>
       </Button>
 

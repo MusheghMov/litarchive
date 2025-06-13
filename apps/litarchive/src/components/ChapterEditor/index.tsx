@@ -159,7 +159,7 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
                       onClick={() => {
                         onSaveDraftAsVersion();
                       }}
-                      className="text-background cursor-pointer capitalize"
+                      className="cursor-pointer capitalize"
                     >
                       save as a version
                     </Button>
@@ -173,7 +173,7 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
                         onClick={() => {
                           onPublishChapterVersion(selectedChapterVersion.id);
                         }}
-                        className="text-background cursor-pointer capitalize"
+                        className="cursor-pointer capitalize"
                         disabled={
                           isPublishing ||
                           !!selectedChapterVersion.isCurrentlyPublished
@@ -210,7 +210,7 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
                             },
                           });
                         }}
-                        className="text-background cursor-pointer capitalize"
+                        className="cursor-pointer capitalize"
                       >
                         create draft from this version
                       </Button>
@@ -220,7 +220,7 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
                       onClick={() => {
                         onSaveDraftAsVersion();
                       }}
-                      className="text-background cursor-pointer capitalize"
+                      className="cursor-pointer capitalize"
                     >
                       save as a version
                     </Button>
