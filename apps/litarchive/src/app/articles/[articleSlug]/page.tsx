@@ -1,5 +1,6 @@
 import honoClient from "@/app/honoRPCClient";
-import Markdown from "react-markdown";
+import ReadOnlyTiptapEditor from "@/components/ReadonlyTiptapEditor";
+import { Marked } from "marked";
 
 export default async function ArticlePage({
 	params,
@@ -23,6 +24,11 @@ export default async function ArticlePage({
 		return <p>no article found</p>;
 	}
 
+	const marked = new Marked();
+
+	const parsedContent = await marked.parse(article.content);
+	const parsedDescription = await marked.parse(article?.description || "");
+
 	const date = new Date(article.updatedAt!).toLocaleDateString(undefined, {
 		year: "numeric",
 		month: "short",
@@ -34,9 +40,9 @@ export default async function ArticlePage({
 			<h1 className="!mb-0">{article.title}</h1>
 			<p className="text-foreground/70 text-xs">updated at: {date}</p>
 			<span className="text-[17px] italic">
-				<Markdown>{article.description}</Markdown>
+				<ReadOnlyTiptapEditor content={parsedDescription} />
 			</span>
-			<Markdown>{article.content}</Markdown>
+			<ReadOnlyTiptapEditor content={parsedContent} />
 		</article>
 	);
 }
