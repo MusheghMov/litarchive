@@ -116,6 +116,7 @@ export default function Header() {
 					</Link>
 				</div>
 				<div className="flex flex-row items-center gap-4 lg:flex">
+					<ModeToggle />
 					{isSignedIn && (
 						<UserButton
 							fallback={<SignInButton />}
@@ -193,8 +194,6 @@ export default function Header() {
 					{!isSignedIn && <SignInButton />}
 				</div>
 			</div>
-
-			<ModeToggle />
 		</div>
 	);
 }

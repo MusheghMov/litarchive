@@ -24,7 +24,7 @@ export default function ModeToggle() {
 				<Button
 					variant="outline"
 					size="icon"
-					className="absolute !bg-background -right-10 top-0 bottom-0 m-auto w-fit border-border hover:bg-foreground/10 rounded-full border p-2 focus-visible:ring-0"
+					className="lg:absolute !bg-background -right-10 top-0 bottom-0 m-auto w-fit border-border hover:bg-foreground/10 rounded-full border p-2 focus-visible:ring-0"
 				>
 					<PaletteIcon className="stroke-main" />
 				</Button>
