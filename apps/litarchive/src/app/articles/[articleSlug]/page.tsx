@@ -31,11 +31,11 @@ export default async function ArticlePage({
 
 	return (
 		<article className="prose not-light:prose-invert self-center">
-			<div>
-				<h1 className="!mb-0">{article.title}</h1>
-				<p className="text-foreground/70 text-xs">updated at: {date}</p>
-			</div>
-			<p className="text-[17px] italic">{article.description}</p>
+			<h1 className="!mb-0">{article.title}</h1>
+			<p className="text-foreground/70 text-xs">updated at: {date}</p>
+			<span className="text-[17px] italic">
+				<Markdown>{article.description}</Markdown>
+			</span>
 			<Markdown>{article.content}</Markdown>
 		</article>
 	);
