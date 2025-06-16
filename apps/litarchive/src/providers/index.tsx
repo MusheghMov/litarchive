@@ -8,21 +8,21 @@ import ModalProvider from "./ModalProvider";
 const queryClient = new QueryClient();
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <ClerkProvider>
-      <QueryClientProvider client={queryClient}>
-        <ModalProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="blue"
-            enableSystem
-            disableTransitionOnChange
-            themes={["violet", "blue", "green", "pink", "dark", "light"]}
-          >
-            <JotaiProvider>{children}</JotaiProvider>
-          </ThemeProvider>
-        </ModalProvider>
-      </QueryClientProvider>
-    </ClerkProvider>
-  );
+	return (
+		<ClerkProvider>
+			<QueryClientProvider client={queryClient}>
+				<ModalProvider>
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="blue"
+						enableSystem
+						disableTransitionOnChange
+						themes={["violet", "blue", "green", "pink", "dark", "light"]}
+					>
+						<JotaiProvider>{children}</JotaiProvider>
+					</ThemeProvider>
+				</ModalProvider>
+			</QueryClientProvider>
+		</ClerkProvider>
+	);
 }

@@ -1,43 +1,42 @@
 import honoClient from "@/app/honoRPCClient";
-import ArticleContent from "@/components/ArticleContent";
+import Markdown from "react-markdown";
 
 export default async function ArticlePage({
-  params,
+	params,
 }: {
-  params: Promise<{ articleSlug: string }>;
+	params: Promise<{ articleSlug: string }>;
 }) {
-  const { articleSlug } = await params;
+	const { articleSlug } = await params;
 
-  const res = await honoClient.articles[":slug"].$get({
-    param: { slug: articleSlug },
-  });
+	const res = await honoClient.articles[":slug"].$get({
+		param: { slug: articleSlug },
+	});
 
-  if (!res.ok) {
-    console.error("error: ", res);
-    return null;
-  }
+	if (!res.ok) {
+		console.error("error: ", res);
+		return null;
+	}
 
-  const article = await res.json();
+	const article = await res.json();
 
-  if (!article) {
-    return <p>no article found</p>;
-  }
+	if (!article) {
+		return <p>no article found</p>;
+	}
 
-  return (
-    <article className="prose text-foreground/90 dark:prose-invert lg:prose-xl prose-headings:text-foreground flex w-full min-w-full flex-col items-start justify-center gap-0 whitespace-pre-wrap lg:px-24">
-      <div>
-        <h1 className="!mb-0">{article.title}</h1>
-        <p className="text-foreground/70 text-xs">
-          updated at:{" "}
-          {new Date(article.updatedAt!).toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
-        </p>
-      </div>
-      <p className="text-[17px] italic">{article.description}</p>
-      <ArticleContent content={article.content} />
-    </article>
-  );
+	const date = new Date(article.updatedAt!).toLocaleDateString(undefined, {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	});
+
+	return (
+		<article className="prose not-light:prose-invert self-center">
+			<div>
+				<h1 className="!mb-0">{article.title}</h1>
+				<p className="text-foreground/70 text-xs">updated at: {date}</p>
+			</div>
+			<p className="text-[17px] italic">{article.description}</p>
+			<Markdown>{article.content}</Markdown>
+		</article>
+	);
 }
