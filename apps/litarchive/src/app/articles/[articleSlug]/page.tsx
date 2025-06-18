@@ -1,5 +1,5 @@
 import honoClient from "@/app/honoRPCClient";
-import ReadOnlyTiptapEditor from "@/components/ReadonlyTiptapEditor";
+import ArticleContent from "@/components/ArticleContent";
 import { Marked } from "marked";
 
 export default async function ArticlePage({
@@ -36,13 +36,11 @@ export default async function ArticlePage({
 	});
 
 	return (
-		<article className="prose not-light:prose-invert self-center">
-			<h1 className="!mb-0">{article.title}</h1>
-			<p className="text-foreground/70 text-xs">updated at: {date}</p>
-			<span className="text-[17px] italic">
-				<ReadOnlyTiptapEditor content={parsedDescription} />
-			</span>
-			<ReadOnlyTiptapEditor content={parsedContent} />
-		</article>
+		<ArticleContent
+			content={parsedContent}
+			description={parsedDescription}
+			title={article.title}
+			date={date}
+		/>
 	);
 }

@@ -47,7 +47,7 @@ export default function Chapters({
         const response = await res.json();
 
         router.push(
-          `/community/${bookSlug}/${response[0].number}?chapterId=${response[0].id}`
+          `/books/${bookSlug}/${response[0].number}?chapterId=${response[0].id}`
         );
       }
     },
@@ -78,7 +78,7 @@ export default function Chapters({
             className="relative flex h-full w-full items-center justify-between"
           >
             <Link
-              href={`/community/${bookSlug}/${chapter.number}?chapterId=${chapter.id}`}
+              href={`/books/${bookSlug}/${chapter.number}?chapterId=${chapter.id}`}
               className="bg-card h-full w-full justify-end overflow-hidden rounded border p-2"
             >
               <p className="text-sm text-gray-400">Chapter {chapter.number}</p>

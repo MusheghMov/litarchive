@@ -8,16 +8,16 @@ import StructuredData from "@/components/StructuredData";
 import type { Metadata } from "next";
 
 type Props = {
-  params: Promise<{ bookId: string }>;
+  params: Promise<{ bookSlug: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { bookId } = await params;
+  const { bookSlug } = await params;
   let book;
 
   try {
     const bookJson = await honoClient.community.books[":slug"].$get({
-      param: { slug: bookId },
+      param: { slug: bookSlug },
     });
 
     if (bookJson.ok) {
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             },
           ]
         : [],
-      url: `https://litarchive.com/books/${bookId}`,
+      url: `https://litarchive.com/books/${bookSlug}`,
       type: "article",
       authors: [authorName],
       tags: Array.isArray(genres)
@@ -98,14 +98,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         : [],
     },
     alternates: {
-      canonical: `/books/${bookId}`,
+      canonical: `/books/${bookSlug}`,
     },
   };
 }
 
 export default async function BookPage({ params }: Props) {
   const { getToken } = await auth();
-  const { bookId } = await params;
+  const { bookSlug } = await params;
   let book;
   let chapters;
 
@@ -113,7 +113,7 @@ export default async function BookPage({ params }: Props) {
     const token = await getToken();
     const bookJson = await honoClient.community.books[":slug"].$get(
       {
-        param: { slug: bookId },
+        param: { slug: bookSlug },
       },
       {
         headers: { Authorization: token || "" },
@@ -142,7 +142,7 @@ export default async function BookPage({ params }: Props) {
 
   if (!book) {
     return (
-      <div className="absolute flex h-[100cqh] w-full flex-col items-center justify-center space-y-4 p-2 text-center">
+      <div className="flex h-full w-full flex-col items-center justify-center space-y-4 p-2 text-center">
         <h1 className="text-4xl font-bold">Book not found</h1>
         <p className="text-lg">The book you are looking for does not exist.</p>
       </div>
@@ -175,7 +175,7 @@ export default async function BookPage({ params }: Props) {
       "@type": "Organization",
       name: "LitArchive",
     },
-    url: `https://litarchive.com/books/${bookId}`,
+    url: `https://litarchive.com/books/${bookSlug}`,
     ...(book.coverImageUrl && {
       image: book.coverImageUrl,
       thumbnailUrl: book.coverImageUrl,

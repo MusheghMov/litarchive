@@ -1,23 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    viewTransition: true,
-  },
-  async redirects() {
-    return [
-      {
-        source: "/books/:id",
-        missing: [
-          {
-            type: "query",
-            key: "page",
-          },
-        ],
-        destination: "/books/:id?page=1",
-        permanent: true,
-      },
-    ];
-  },
   images: {
     remotePatterns: [
       {

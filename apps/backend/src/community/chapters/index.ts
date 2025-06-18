@@ -142,6 +142,170 @@ const communityBooksChaptersRouter = router
       }
     },
   )
+  // chapters by bookSlug
+  .openapi(
+    createRoute({
+      method: "get",
+      path: "/by-slug/:bookSlug",
+      request: {
+        params: z.object({
+          bookSlug: z.string(),
+        }),
+      },
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: z.array(
+                z.object({
+                  id: z.number(),
+                  title: z.string(),
+                  number: z.number(),
+                  content: z.string(),
+                  userBook: z.object({
+                    title: z.string(),
+                    slug: z.string().nullable(),
+                  }),
+                }),
+              ),
+            },
+          },
+          description: "Retrieve community book by slug",
+        },
+        400: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Bad request",
+        },
+        404: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Not found",
+        },
+        500: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Internal server error",
+        },
+      },
+    }),
+    async (c) => {
+      try {
+        const auth = getAuth(c);
+        const userId = auth?.userId;
+
+        const { bookSlug } = c.req.valid("param");
+        if (!bookSlug) {
+          return c.json({ error: "Book id is required" }, 400);
+        }
+
+        const db = connectToDB({
+          url: c.env.DATABASE_URL,
+          authoToken: c.env.DATABASE_AUTH_TOKEN,
+        });
+
+        const book = await db.query.userBooks.findFirst({
+          where: (userBooks, { eq }) => eq(userBooks.slug, bookSlug),
+          columns: {
+            id: true,
+          },
+        });
+        if (!book) {
+          return c.json({ error: "Book not found" }, 404);
+        }
+        const bookId = book.id;
+
+        let dbUser: any;
+        let isUserAuthor = false;
+        let isUserCollaborator = false;
+
+        if (userId && userId !== "null" && userId !== "undefined") {
+          dbUser = await db.query.user.findFirst({
+            where: (users, { eq }) => eq(users.sub, userId),
+          });
+
+          isUserAuthor = await db.query.userBooks
+            .findFirst({
+              where: (userBooks, { eq }) =>
+                eq(userBooks.id, Number.parseInt(bookId.toString())),
+            })
+            .then((res) => res?.userId === dbUser?.id);
+
+          isUserCollaborator = await db.query.userBookCollaborators
+            .findFirst({
+              where: (userBookCollaborators, { eq, and }) =>
+                and(
+                  // eq(userBookCollaborators.userBookId, bookId!),
+                  eq(userBookCollaborators.userId, dbUser?.id),
+                  eq(userBookCollaborators.userId, dbUser?.id),
+                ),
+            })
+            .then((res) => res?.userId === dbUser?.id);
+        }
+
+        try {
+          const res = await db.query.userBookChapters.findMany({
+            where: (userBookChapters, { eq }) =>
+              eq(userBookChapters.userBookId, +bookId),
+            columns: {
+              id: true,
+              title: true,
+              number: true,
+              content: true,
+            },
+            with: {
+              userBook: {
+                columns: {
+                  title: true,
+                  slug: true,
+                },
+              },
+              versions: {
+                ...(!(isUserAuthor || isUserCollaborator) && {
+                  where: (chapterVersions, { eq }) =>
+                    eq(chapterVersions.isCurrentlyPublished, true),
+                }),
+              },
+            },
+          });
+
+          if (isUserAuthor || isUserCollaborator) {
+            return c.json(res, 200);
+          } else {
+            // return only books that has published chapters
+            return c.json(
+              res.filter((chapter) => chapter.versions.length > 0),
+              200,
+            );
+          }
+        } catch (error: any) {
+          console.error("Error fetching community book chapters:", error);
+          return c.json(
+            { error: "Error fetching community book chapters" },
+            500,
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching community book chapters:", error);
+        return c.json({ error: "Error fetching community book chapters" }, 500);
+      }
+    },
+  )
   .openapi(
     createRoute({
       method: "get",
@@ -163,6 +327,10 @@ const communityBooksChaptersRouter = router
                 isUserAuthor: z.boolean(),
                 isUserEditor: z.boolean(),
                 isUserViewer: z.boolean(),
+                userBook: z.object({
+                  title: z.string(),
+                  slug: z.string().nullable(),
+                }),
                 versions: z.array(
                   z.object({
                     content: z.string(),
@@ -292,15 +460,22 @@ const communityBooksChaptersRouter = router
             eq(userBookChapters.id, +chapterId),
           columns: {
             id: true,
-            ...((isUserAuthor || isUserEditor || isUserViewer) && {
-              title: true,
-            }),
+            title: true,
+            // ...((isUserAuthor || isUserEditor || isUserViewer) && {
+            //   title: true,
+            // }),
             number: true,
             ...((isUserAuthor || isUserEditor || isUserViewer) && {
               content: true,
             }),
           },
           with: {
+            userBook: {
+              columns: {
+                title: true,
+                slug: true,
+              },
+            },
             versions: {
               ...(!(isUserAuthor || isUserEditor || isUserViewer) && {
                 where: (chapterVersions, { eq }) =>
