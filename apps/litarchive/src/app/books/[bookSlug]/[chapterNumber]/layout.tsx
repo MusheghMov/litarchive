@@ -56,7 +56,7 @@ export default async function CommunityLayout({
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <Breadcrumb>
+      <Breadcrumb className="bg-background sticky top-16 z-10 rounded border border-dashed p-1">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
