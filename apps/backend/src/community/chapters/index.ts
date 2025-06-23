@@ -504,10 +504,11 @@ const communityBooksChaptersRouter = router
   .openapi(
     createRoute({
       method: "get",
-      path: "/navigation/:chapterId",
+      path: "/navigation/by-book/:bookSlug/:chapterNumber",
       request: {
         params: z.object({
-          chapterId: z.string(),
+          bookSlug: z.string(),
+          chapterNumber: z.string(),
         }),
       },
       responses: {
@@ -529,11 +530,11 @@ const communityBooksChaptersRouter = router
                     title: z.string().nullable(),
                   })
                   .nullable(),
-                bookSlug: z.string().nullable(),
               }),
             },
           },
-          description: "Get previous and next chapter navigation data",
+          description:
+            "Get previous and next chapter navigation data by book slug and chapter number",
         },
         404: {
           content: {
@@ -543,7 +544,7 @@ const communityBooksChaptersRouter = router
               }),
             },
           },
-          description: "Chapter not found",
+          description: "Book or chapter not found",
         },
         500: {
           content: {
@@ -559,40 +560,35 @@ const communityBooksChaptersRouter = router
     }),
     async (c) => {
       try {
-        const { chapterId } = c.req.valid("param");
+        const { bookSlug, chapterNumber } = c.req.valid("param");
 
         const db = connectToDB({
           url: c.env.DATABASE_URL,
           authoToken: c.env.DATABASE_AUTH_TOKEN,
         });
 
-        const currentChapter = await db.query.userBookChapters.findFirst({
-          where: (userBookChapters, { eq }) =>
-            eq(userBookChapters.id, +chapterId),
+        const book = await db.query.userBooks.findFirst({
+          where: (userBooks, { eq }) => eq(userBooks.slug, bookSlug),
           columns: {
             id: true,
-            number: true,
-            userBookId: true,
-          },
-          with: {
-            userBook: {
-              columns: {
-                slug: true,
-              },
-            },
           },
         });
 
-        if (!currentChapter) {
-          return c.json({ error: "Chapter not found" }, 404);
+        if (!book) {
+          return c.json({ error: "Book not found" }, 404);
+        }
+
+        const currentChapterNumber = parseInt(chapterNumber, 10);
+        if (isNaN(currentChapterNumber)) {
+          return c.json({ error: "Invalid chapter number" }, 404);
         }
 
         const [previousChapter, nextChapter] = await Promise.all([
           db.query.userBookChapters.findFirst({
             where: (userBookChapters, { eq, and, lt }) =>
               and(
-                eq(userBookChapters.userBookId, currentChapter.userBookId),
-                lt(userBookChapters.number, currentChapter.number),
+                eq(userBookChapters.userBookId, book.id),
+                lt(userBookChapters.number, currentChapterNumber),
               ),
             columns: {
               id: true,
@@ -606,8 +602,8 @@ const communityBooksChaptersRouter = router
           db.query.userBookChapters.findFirst({
             where: (userBookChapters, { eq, and, gt }) =>
               and(
-                eq(userBookChapters.userBookId, currentChapter.userBookId),
-                gt(userBookChapters.number, currentChapter.number),
+                eq(userBookChapters.userBookId, book.id),
+                gt(userBookChapters.number, currentChapterNumber),
               ),
             columns: {
               id: true,
@@ -620,11 +616,13 @@ const communityBooksChaptersRouter = router
           }),
         ]);
 
-        return c.json({
-          previous: previousChapter || null,
-          next: nextChapter || null,
-          bookSlug: currentChapter.userBook.slug,
-        });
+        return c.json(
+          {
+            previous: previousChapter || null,
+            next: nextChapter || null,
+          },
+          200,
+        );
       } catch (error) {
         console.error("Error fetching chapter navigation:", error);
         return c.json({ error: "Error fetching chapter navigation" }, 500);

@@ -6,42 +6,47 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import honoClient from "@/app/honoRPCClient";
 
-interface ChapterNavigationProps {
-  chapterId: string;
-}
-
-export default function ChapterNavigation({ chapterId }: ChapterNavigationProps) {
+export default function ChapterNavigation({
+  bookSlug,
+  chapterNumber,
+}: {
+  bookSlug: string;
+  chapterNumber: string;
+}) {
   const { data: navigation, isLoading } = useQuery({
-    queryKey: ["chapter-navigation", chapterId],
+    queryKey: ["chapter-navigation", bookSlug, chapterNumber],
     queryFn: async () => {
-      const response = await honoClient.community.chapters.navigation[":chapterId"].$get({
-        param: { chapterId },
+      const response = await honoClient.community.chapters.navigation[
+        "by-book"
+      ][":bookSlug"][":chapterNumber"].$get({
+        param: { bookSlug, chapterNumber },
       });
       if (!response.ok) {
         throw new Error("Failed to fetch navigation data");
       }
       return response.json();
     },
+    enabled: !!(bookSlug && chapterNumber),
   });
 
-  if (isLoading || !navigation) {
+  if (isLoading || !navigation || !bookSlug) {
     return null;
   }
 
-  const { previous, next, bookSlug } = navigation;
+  const { previous, next } = navigation;
 
   return (
-    <nav 
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-full border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg"
+    <nav
+      className="bg-background/95 supports-[backdrop-filter]:bg-background/60 fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full border shadow-lg backdrop-blur"
       aria-label="Chapter navigation"
     >
       <div className="flex items-center gap-1 p-1">
-        {previous && bookSlug ? (
-          <Button 
-            variant="ghost" 
+        {previous ? (
+          <Button
+            variant="ghost"
             size="sm"
-            asChild 
-            className="h-8 px-2 rounded-full transition-all hover:bg-accent"
+            asChild
+            className="hover:bg-accent h-8 rounded-full px-2 transition-all"
           >
             <Link
               href={`/books/${bookSlug}/${previous.number}?chapterId=${previous.id}`}
@@ -49,30 +54,28 @@ export default function ChapterNavigation({ chapterId }: ChapterNavigationProps)
               aria-label={`Go to previous chapter: ${previous.title || `Chapter ${previous.number}`}`}
             >
               <ChevronLeftIcon className="size-3.5 shrink-0" />
-              <span className="text-xs font-medium max-w-20 truncate">
+              <span className="max-w-20 truncate text-xs font-medium">
                 {previous.title || `Ch ${previous.number}`}
               </span>
             </Link>
           </Button>
         ) : null}
 
-        {previous && next && (
-          <div className="w-px h-4 bg-border" />
-        )}
+        {previous && next && <div className="bg-border h-4 w-px" />}
 
-        {next && bookSlug ? (
-          <Button 
-            variant="ghost" 
+        {next ? (
+          <Button
+            variant="ghost"
             size="sm"
-            asChild 
-            className="h-8 px-2 rounded-full transition-all hover:bg-accent"
+            asChild
+            className="hover:bg-accent h-8 rounded-full px-2 transition-all"
           >
             <Link
               href={`/books/${bookSlug}/${next.number}?chapterId=${next.id}`}
               className="flex items-center gap-1"
               aria-label={`Go to next chapter: ${next.title || `Chapter ${next.number}`}`}
             >
-              <span className="text-xs font-medium max-w-20 truncate">
+              <span className="max-w-20 truncate text-xs font-medium">
                 {next.title || `Ch ${next.number}`}
               </span>
               <ChevronRightIcon className="size-3.5 shrink-0" />
@@ -83,3 +86,4 @@ export default function ChapterNavigation({ chapterId }: ChapterNavigationProps)
     </nav>
   );
 }
+

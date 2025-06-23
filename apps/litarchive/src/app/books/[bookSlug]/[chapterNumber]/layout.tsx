@@ -17,7 +17,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import honoClient from "@/app/honoRPCClient";
-import ChapterNavigationWrapper from "@/components/ChapterNavigationWrapper";
+import ChapterNavigation from "@/components/ChapterNavigation";
 
 export default async function CommunityLayout({
   params,
@@ -106,7 +106,7 @@ export default async function CommunityLayout({
           {children}
         </Suspense>
       </div>
-      <ChapterNavigationWrapper />
+      <ChapterNavigation bookSlug={bookSlug} chapterNumber={chapterNumber} />
     </>
   );
 }
