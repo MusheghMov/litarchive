@@ -501,6 +501,136 @@ const communityBooksChaptersRouter = router
       }
     },
   )
+  .openapi(
+    createRoute({
+      method: "get",
+      path: "/navigation/:chapterId",
+      request: {
+        params: z.object({
+          chapterId: z.string(),
+        }),
+      },
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                previous: z
+                  .object({
+                    id: z.number(),
+                    number: z.number(),
+                    title: z.string().nullable(),
+                  })
+                  .nullable(),
+                next: z
+                  .object({
+                    id: z.number(),
+                    number: z.number(),
+                    title: z.string().nullable(),
+                  })
+                  .nullable(),
+                bookSlug: z.string().nullable(),
+              }),
+            },
+          },
+          description: "Get previous and next chapter navigation data",
+        },
+        404: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Chapter not found",
+        },
+        500: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Internal server error",
+        },
+      },
+    }),
+    async (c) => {
+      try {
+        const { chapterId } = c.req.valid("param");
+
+        const db = connectToDB({
+          url: c.env.DATABASE_URL,
+          authoToken: c.env.DATABASE_AUTH_TOKEN,
+        });
+
+        const currentChapter = await db.query.userBookChapters.findFirst({
+          where: (userBookChapters, { eq }) =>
+            eq(userBookChapters.id, +chapterId),
+          columns: {
+            id: true,
+            number: true,
+            userBookId: true,
+          },
+          with: {
+            userBook: {
+              columns: {
+                slug: true,
+              },
+            },
+          },
+        });
+
+        if (!currentChapter) {
+          return c.json({ error: "Chapter not found" }, 404);
+        }
+
+        const [previousChapter, nextChapter] = await Promise.all([
+          db.query.userBookChapters.findFirst({
+            where: (userBookChapters, { eq, and, lt }) =>
+              and(
+                eq(userBookChapters.userBookId, currentChapter.userBookId),
+                lt(userBookChapters.number, currentChapter.number),
+              ),
+            columns: {
+              id: true,
+              number: true,
+              title: true,
+            },
+            orderBy: (userBookChapters, { desc }) => [
+              desc(userBookChapters.number),
+            ],
+          }),
+          db.query.userBookChapters.findFirst({
+            where: (userBookChapters, { eq, and, gt }) =>
+              and(
+                eq(userBookChapters.userBookId, currentChapter.userBookId),
+                gt(userBookChapters.number, currentChapter.number),
+              ),
+            columns: {
+              id: true,
+              number: true,
+              title: true,
+            },
+            orderBy: (userBookChapters, { asc }) => [
+              asc(userBookChapters.number),
+            ],
+          }),
+        ]);
+
+        return c.json({
+          previous: previousChapter || null,
+          next: nextChapter || null,
+          bookSlug: currentChapter.userBook.slug,
+        });
+      } catch (error) {
+        console.error("Error fetching chapter navigation:", error);
+        return c.json({ error: "Error fetching chapter navigation" }, 500);
+      }
+    },
+  )
   .post(
     "/:bookId",
     zValidator(
