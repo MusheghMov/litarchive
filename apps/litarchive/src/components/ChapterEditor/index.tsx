@@ -10,11 +10,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChapterVersionPicker } from "../ChapterVersionPicker";
-import Contenteditable from "../Contenteditable";
 import ReadOnlyTiptapEditor from "../ReadonlyTiptapEditor";
 import TiptapEditor from "../TiptapEditor";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { Check, XIcon, PencilIcon } from "lucide-react";
 
 export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
   const router = useRouter();
@@ -24,6 +24,10 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
   const [saved, setSaved] = useState(true);
   const [selectedChapterVersion, setSelectedChapterVersion] =
     useState<ChapterVersion | null>(null);
+  const [isTitleEditing, setIsTitleEditing] = useState(false);
+  const [titleValue, setTitleValue] = useState(
+    selectedChapterVersion?.name || chapter.title || ""
+  );
   const lastSavedContent = useRef(chapter.content);
   const timeout = useRef<NodeJS.Timeout>(null);
 
@@ -33,7 +37,7 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
       return await honoClient.community.chapters.versions[":chapterId"].$post(
         {
           param: { chapterId: chapter.id.toString() },
-          form: { name: chapter.title!, content: lastSavedContent.current! },
+          form: { name: titleValue, content: lastSavedContent.current! },
         },
         {
           headers: { ...(token && { Authorization: token }) },
@@ -90,6 +94,10 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
     onError: () => {
       toast.error("Error saving chapter title");
     },
+    onSuccess: () => {
+      setIsTitleEditing(false);
+      router.refresh();
+    },
   });
   const { mutate: onUpdateContent } = useMutation({
     mutationFn: async (content: string) => {
@@ -118,8 +126,23 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
         (prev) =>
           chapter.versions.find((version) => version.id === prev?.id) || prev
       );
+      setTitleValue(selectedChapterVersion?.name || chapter.title || "");
     }
-  }, [chapter]);
+  }, [chapter, selectedChapterVersion]);
+
+  const handleTitleSave = () => {
+    if (titleValue.trim()) {
+      onUpdateTitle(titleValue.trim());
+    } else {
+      setTitleValue(chapter.title || "");
+      setIsTitleEditing(false);
+    }
+  };
+
+  const handleTitleCancel = () => {
+    setTitleValue(selectedChapterVersion?.name || chapter.title || "");
+    setIsTitleEditing(false);
+  };
 
   return (
     <>
@@ -230,19 +253,62 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
             </div>
           )}
         </div>
-        <Contenteditable
-          contenteditable={!(selectedChapterVersion || chapter.isUserViewer)}
-          onBlur={(e) => {
-            onUpdateTitle(e.target.innerText);
-          }}
-          text={
-            selectedChapterVersion
-              ? selectedChapterVersion.name || "no title yet"
-              : chapter.title!
-          }
-          className="text-2xl font-bold capitalize"
-          placeholder="Title..."
-        />
+        <div className="flex items-center gap-2">
+          {isTitleEditing ? (
+            <div className="flex flex-1 items-center gap-2">
+              <input
+                autoFocus
+                type="text"
+                value={titleValue}
+                onChange={(e) => setTitleValue(e.target.value)}
+                onKeyDown={(e: React.KeyboardEvent) => {
+                  if (e.key === "Enter") {
+                    handleTitleSave();
+                  }
+                }}
+                onBlur={handleTitleCancel}
+                className="border-primary flex-1 border-b-2 bg-transparent text-2xl font-bold capitalize outline-none"
+                placeholder="Chapter title..."
+              />
+              <Button
+                onClick={handleTitleSave}
+                size="sm"
+                variant="ghost"
+                className="hover:text-primary hover:bg-background h-min w-min cursor-pointer rounded-full border border-dashed !p-1 text-green-600 hover:border-green-600"
+              >
+                <Check size={16} />
+              </Button>
+              <Button
+                onClick={handleTitleCancel}
+                size="sm"
+                variant="ghost"
+                className="hover:bg-background h-min w-min cursor-pointer rounded-full border border-dashed !p-1 text-red-600 hover:border-red-600 hover:text-red-700"
+              >
+                <XIcon size={16} />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex w-full flex-1 items-center gap-4">
+              <h1 className="line-clamp-2 text-2xl font-bold capitalize">
+                {selectedChapterVersion
+                  ? selectedChapterVersion.name || "no title yet"
+                  : chapter.title || "no title yet"}
+              </h1>
+              {!(selectedChapterVersion || chapter.isUserViewer) && (
+                <Button
+                  onClick={() => {
+                    setIsTitleEditing(true);
+                  }}
+                  size="sm"
+                  variant="ghost"
+                  className="text-primary hover:border-primary hover:text-primary hover:bg-background h-min w-min cursor-pointer rounded-full border border-dashed !p-1"
+                >
+                  <PencilIcon size={16} />
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {selectedChapterVersion ? (

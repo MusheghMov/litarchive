@@ -717,13 +717,14 @@ const communityBooksChaptersRouter = router
 
       const { title, content } = c.req.valid("form");
 
+      const chapterNumber = book?.chapters?.length + 1 || 1;
       const res = await db
         .insert(userBookChapters)
         .values({
           userBookId: bookId,
-          title: title || "",
+          title: title || `Chapter ${chapterNumber}`,
           content: content || "",
-          number: book?.chapters?.length + 1 || 1,
+          number: chapterNumber,
         })
         .returning({
           id: userBookChapters.id,
