@@ -72,7 +72,7 @@ export default function CommunityBooksCreatePage() {
 
       if (resJson.ok) {
         const res = await resJson.json();
-        router.push("/community/" + res[0]?.slug);
+        router.push("/books/" + res[0]?.slug);
       }
     } catch (error) {
       console.error("Error creating book:", error);

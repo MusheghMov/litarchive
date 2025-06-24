@@ -1,12 +1,13 @@
 import { zValidator } from "@hono/zod-validator";
-import { connectToDB, eq, and } from "@repo/db";
+import { connectToDB, eq } from "@repo/db";
 import { userBookCollaborators, userBooks } from "@repo/db/schema";
 import { nanoid } from "nanoid";
-import OpenAI from "openai";
 import slugify from "slugify";
 import { createRouter } from "../../lib/create-app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { getAuth } from "@hono/clerk-auth";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { generateText } from "ai";
 
 function createUniqueSlug(title: string) {
   const baseSlug = slugify(title, { lower: true, strict: true });
@@ -666,40 +667,86 @@ const communityBooks = router
 
             if (coverImageFormData && coverImageFormData.size > 0) {
               try {
-                const buffer = await coverImageFormData?.arrayBuffer();
                 const fileExtension = coverImageFormData?.type.split("/")[1];
                 const key = `${nanoid()}.${fileExtension}`;
-                const putResult = await c.env.litarchive.put(key, buffer);
                 coverImageUrl = `${c.env.IMAGE_STORAGE_URL}/${key}`;
               } catch (error) {
                 console.error("Error uploading file:", error);
               }
             } else {
-              const openai = new OpenAI({
-                apiKey: c.env.OPENAI_API_KEY,
-              });
-
               try {
-                const prompt = `Create a cover image for the book titled ${title} and description ${description}`;
+                const bookData = {
+                  bookTitle: title,
+                  bookAuthor: dbUser.firstName + " " + dbUser.lastName,
+                  genre: "",
+                  synopsis: description,
+                  moodAtmosphere: "",
+                  keyVisuals: "",
+                  artisticStyle:
+                    "Photorealistic, cinematic, anime-inspired, with a focus on the book's genre and mood.",
+                  colorPalette: "",
+                  lighting: "",
+                  fontStyleDescription: "",
+                  negativePrompts: "",
+                  aspectRatio: "1:1", // Common book cover aspect ratio
+                };
 
-                const response = await openai?.images?.generate({
-                  model: "dall-e-3",
+                const prompt = `
+You are an expert AI graphic designer and typographer specializing in creating captivating, professional book cover art. Your task is to generate a complete book cover image that is visually stunning, genre-appropriate, and includes the book's title directly on the image.
+
+## Book Details
+- **Title:** ${bookData.bookTitle}
+- **Author:** ${bookData.bookAuthor}
+- **Genre:** ${bookData.genre}
+- **Synopsis:** ${bookData.synopsis}
+
+## Art Direction
+- **Mood & Atmosphere:** ${bookData.moodAtmosphere}
+- **Key Visual Elements & Scene Description:** ${bookData.keyVisuals}
+- **Artistic Style:** ${bookData.artisticStyle}
+- **Color Palette:** ${bookData.colorPalette}
+- **Lighting:** ${bookData.lighting}
+
+## Typography Requirements
+- **Instruction:** The book title, "${bookData.bookTitle}", MUST be integrated directly and legibly into the image. The author's name, "${bookData.bookAuthor}", should be included if possible, but it is secondary to the title.
+- **Font Style:** The typography must be stylish and perfectly match the book's genre and mood. For example, use a serif font for fantasy, a sans-serif for sci-fi, or a script font for romance. The requested font style is: ${bookData.fontStyleDescription}.
+- **Placement:** Position the text in a visually appealing way that complements the artwork, such as at the top third, bottom third, or integrated into a visual element of the scene. Avoid placing text in a way that obscures the main subject.
+
+## Constraints & Quality
+- **Negative Prompts (what to avoid):** ${bookData.negativePrompts}
+- **Aspect Ratio:** ${bookData.aspectRatio}
+- **Final Output Quality:** Generate a single, finished book cover. High resolution, ultra-detailed, cinematic quality, professional, award-winning. Ensure all text is spelled correctly and is not garbled or distorted.
+`;
+                const google = createGoogleGenerativeAI({
+                  apiKey: c.env.GEMINI_API_KEY,
+                });
+
+                const result = await generateText({
+                  model: google("gemini-2.0-flash-exp"),
+                  providerOptions: {
+                    google: { responseModalities: ["TEXT", "IMAGE"] },
+                  },
                   prompt: prompt,
-                  n: 1,
-                  size: "1024x1024",
                 });
 
                 try {
-                  const imageUrl = response.data[0].url;
-                  const imageResponse = await fetch(imageUrl!);
-                  const imageBuffer = await imageResponse.arrayBuffer();
-                  const fileExtension = "png";
-                  const key = `${nanoid()}.${fileExtension}`;
-                  await c.env.litarchive.put(key, imageBuffer);
+                  for (const file of result.files) {
+                    if (file.mimeType.startsWith("image/")) {
+                      const base64Data = file.base64;
+                      const binaryString = atob(base64Data);
+                      const bytes = new Uint8Array(binaryString.length);
+                      for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                      }
 
-                  coverImageUrl = `${c.env.IMAGE_STORAGE_URL}/${key}`;
+                      const fileExtension = "png";
+                      const key = `${nanoid()}.${fileExtension}`;
+                      await c.env.litarchive.put(key, bytes); // Pass the Uint8Array directly
+                      coverImageUrl = `${c.env.IMAGE_STORAGE_URL}/${key}`;
+                    }
+                  }
                 } catch (error) {
-                  console.error("Error fetching image:", error);
+                  console.error("Error processing image:", error);
                 }
               } catch (error) {
                 console.error("Error generating cover image:", error);

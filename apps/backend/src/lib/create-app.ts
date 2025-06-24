@@ -9,6 +9,7 @@ type Bindings = {
   DATABASE_URL: string;
   DATABASE_AUTH_TOKEN: string;
   OPENAI_API_KEY: string;
+  GEMINI_API_KEY: string;
   IMAGE_STORAGE_URL: string;
   litarchive: R2Bucket;
   Y_DURABLE_OBJECTS: DurableObjectNamespace<YDurableObjects<Env>>;
