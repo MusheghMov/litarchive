@@ -676,47 +676,26 @@ const communityBooks = router
             } else {
               try {
                 const bookData = {
-                  bookTitle: title,
-                  bookAuthor: dbUser.firstName + " " + dbUser.lastName,
-                  genre: "",
+                  title: title,
+                  author: dbUser.firstName + " " + dbUser.lastName,
                   synopsis: description,
-                  moodAtmosphere: "",
-                  keyVisuals: "",
-                  artisticStyle:
-                    "Photorealistic, cinematic, anime-inspired, with a focus on the book's genre and mood.",
-                  colorPalette: "",
-                  lighting: "",
-                  fontStyleDescription: "",
-                  negativePrompts: "",
-                  aspectRatio: "1:1", // Common book cover aspect ratio
+                  genre: "",
+                  targetAudience: "",
+                  mood: "",
+                  setting: "",
+                  artStyle: "",
+                  colorScheme: "",
+                  typographyStyle: "",
+                  mainSubject: "",
+                  background: "",
+                  symbolicElements: "",
+                  aspectRatio: "1:1",
+                  textPlacement: "title at top and author name at bottom",
+                  additionalRequirements: "",
                 };
 
-                const prompt = `
-You are an expert AI graphic designer and typographer specializing in creating captivating, professional book cover art. Your task is to generate a complete book cover image that is visually stunning, genre-appropriate, and includes the book's title directly on the image.
+                const prompt = generateBookCoverPrompt(bookData);
 
-## Book Details
-- **Title:** ${bookData.bookTitle}
-- **Author:** ${bookData.bookAuthor}
-- **Genre:** ${bookData.genre}
-- **Synopsis:** ${bookData.synopsis}
-
-## Art Direction
-- **Mood & Atmosphere:** ${bookData.moodAtmosphere}
-- **Key Visual Elements & Scene Description:** ${bookData.keyVisuals}
-- **Artistic Style:** ${bookData.artisticStyle}
-- **Color Palette:** ${bookData.colorPalette}
-- **Lighting:** ${bookData.lighting}
-
-## Typography Requirements
-- **Instruction:** The book title, "${bookData.bookTitle}", MUST be integrated directly and legibly into the image. The author's name, "${bookData.bookAuthor}", should be included if possible, but it is secondary to the title.
-- **Font Style:** The typography must be stylish and perfectly match the book's genre and mood. For example, use a serif font for fantasy, a sans-serif for sci-fi, or a script font for romance. The requested font style is: ${bookData.fontStyleDescription}.
-- **Placement:** Position the text in a visually appealing way that complements the artwork, such as at the top third, bottom third, or integrated into a visual element of the scene. Avoid placing text in a way that obscures the main subject.
-
-## Constraints & Quality
-- **Negative Prompts (what to avoid):** ${bookData.negativePrompts}
-- **Aspect Ratio:** ${bookData.aspectRatio}
-- **Final Output Quality:** Generate a single, finished book cover. High resolution, ultra-detailed, cinematic quality, professional, award-winning. Ensure all text is spelled correctly and is not garbled or distorted.
-`;
                 const google = createGoogleGenerativeAI({
                   apiKey: c.env.GEMINI_API_KEY,
                 });
@@ -724,7 +703,10 @@ You are an expert AI graphic designer and typographer specializing in creating c
                 const result = await generateText({
                   model: google("gemini-2.0-flash-exp"),
                   providerOptions: {
-                    google: { responseModalities: ["TEXT", "IMAGE"] },
+                    google: {
+                      responseModalities: ["TEXT", "IMAGE"],
+                      aspectRatio: "1:1",
+                    },
                   },
                   prompt: prompt,
                 });
@@ -1102,4 +1084,51 @@ You are an expert AI graphic designer and typographer specializing in creating c
     },
   );
 
+function generateBookCoverPrompt(bookData: any) {
+  const {
+    title,
+    author,
+    synopsis,
+    genre,
+    targetAudience,
+    mood,
+    setting,
+    artStyle,
+    colorScheme,
+    typographyStyle,
+    mainSubject,
+    background,
+    symbolicElements,
+    aspectRatio = "1:1",
+    textPlacement = "title at top and author name at bottom",
+    additionalRequirements = "image should be a high quality 1024x1024 image",
+  } = bookData;
+
+  return `Generate a high quality 1024x1024 book cover image for "${title}" by ${author}.
+
+**Book Details:**
+- Genre: ${genre}
+- Synopsis: ${synopsis}
+- Target Audience: ${targetAudience}
+- Mood/Tone: ${mood}
+- Setting: ${setting}
+
+**Visual Style:**
+- Art Style: ${artStyle}
+- Color Scheme: ${colorScheme}
+- Typography Style: ${typographyStyle}
+
+**Key Visual Elements:**
+- Main Subject: ${mainSubject}
+- Background: ${background}
+- Symbolic Elements: ${symbolicElements}
+
+**Technical Specifications:**
+- Aspect Ratio: ${aspectRatio} for standard book cover
+- Image Quality: High resolution, professional publishing quality
+- Text Placement: Leave space for ${textPlacement}
+
+${additionalRequirements ? `**Specific Instructions:**\n${additionalRequirements}\n` : ""}
+Create an eye-catching, marketable book cover that would attract readers browsing an online bookstore.`;
+}
 export default communityBooks;
