@@ -18,6 +18,7 @@ import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import honoClient from "@/app/honoRPCClient";
 import ChapterNavigation from "@/components/ChapterNavigation";
+import AudioPlayer from "@/components/AudioPlayer";
 
 export default async function CommunityLayout({
   params,
@@ -58,7 +59,7 @@ export default async function CommunityLayout({
   return (
     <>
       <div className="flex w-full flex-col gap-6">
-        <Breadcrumb className="bg-background sticky top-16 z-10 rounded border border-dashed p-1">
+        <Breadcrumb className="bg-background sticky top-16 z-10 flex flex-col justify-between gap-2 rounded border border-dashed p-1 md:flex-row md:items-center">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
@@ -90,6 +91,15 @@ export default async function CommunityLayout({
               </DropdownMenu>
             </BreadcrumbItem>
           </BreadcrumbList>
+
+          {currentChapter?.audioUrl &&
+            currentChapter?.audioStatus === "completed" && (
+              <AudioPlayer
+                audioUrl={currentChapter.audioUrl}
+                title={`Chapter ${currentChapter.number}: ${currentChapter.title || "Untitled"}`}
+                className="mb-4"
+              />
+            )}
         </Breadcrumb>
         <Suspense
           fallback={
