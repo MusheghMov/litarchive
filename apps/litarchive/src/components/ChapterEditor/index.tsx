@@ -14,7 +14,7 @@ import ReadOnlyTiptapEditor from "../ReadonlyTiptapEditor";
 import TiptapEditor from "../TiptapEditor";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Check, XIcon, PencilIcon } from "lucide-react";
+import { Check, XIcon, PencilIcon, AudioLines } from "lucide-react";
 
 export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
   const router = useRouter();
@@ -119,6 +119,36 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
       toast.error("Error saving chapter content");
     },
   });
+
+  const { mutate: onGenerateAudio, isPending: isGeneratingAudio } = useMutation(
+    {
+      mutationFn: async () => {
+        const token = await getToken();
+        return await honoClient.community.chapters[":chapterId"][
+          "generate-audio"
+        ].$post(
+          {
+            param: { chapterId: chapter.id.toString() },
+            json: { language: "en" },
+          },
+          {
+            headers: { ...(token && { Authorization: token }) },
+          }
+        );
+      },
+      onError: () => {
+        toast.error("Error generating audio");
+      },
+      onSuccess: async (res) => {
+        if (res.ok) {
+          toast.success("Audio generated successfully!");
+          router.refresh();
+        } else {
+          toast.error("Failed to generate audio");
+        }
+      },
+    }
+  );
 
   useEffect(() => {
     if (chapter) {
@@ -250,6 +280,30 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
                   )}
                 </>
               )}
+
+              {(chapter.isUserAuthor || chapter.isUserEditor) &&
+                !chapter.isUserViewer && (
+                  <Button
+                    onClick={() => onGenerateAudio()}
+                    disabled={
+                      isGeneratingAudio || !lastSavedContent.current?.trim()
+                    }
+                    variant="outline"
+                    className="cursor-pointer"
+                  >
+                    {isGeneratingAudio ? (
+                      <>
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-current" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <AudioLines className="mr-2 h-4 w-4" />
+                        Generate Audio
+                      </>
+                    )}
+                  </Button>
+                )}
             </div>
           )}
         </div>

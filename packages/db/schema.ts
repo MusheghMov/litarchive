@@ -111,6 +111,9 @@ export const userBookChapters = sqliteTable("userBookChapters", {
   userBookId: integer("user_book_id")
     .notNull()
     .references(() => userBooks.id, { onDelete: "cascade" }),
+  audioUrl: text("audio_url"),
+  audioGeneratedAt: text("audio_generated_at"),
+  audioStatus: text("audio_status"),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });

@@ -29,6 +29,9 @@ const communityBooksChaptersRouter = router
                   title: z.string(),
                   number: z.number(),
                   content: z.string(),
+                  audioUrl: z.string().nullable(),
+                  audioStatus: z.string().nullable(),
+                  audioGeneratedAt: z.string().nullable(),
                 }),
               ),
             },
@@ -109,6 +112,9 @@ const communityBooksChaptersRouter = router
               title: true,
               number: true,
               content: true,
+              audioUrl: true,
+              audioStatus: true,
+              audioGeneratedAt: true,
             },
             with: {
               versions: {
@@ -162,6 +168,9 @@ const communityBooksChaptersRouter = router
                   title: z.string(),
                   number: z.number(),
                   content: z.string(),
+                  audioUrl: z.string().nullable(),
+                  audioStatus: z.string().nullable(),
+                  audioGeneratedAt: z.string().nullable(),
                   userBook: z.object({
                     title: z.string(),
                     slug: z.string().nullable(),
@@ -267,6 +276,9 @@ const communityBooksChaptersRouter = router
               title: true,
               number: true,
               content: true,
+              audioUrl: true,
+              audioStatus: true,
+              audioGeneratedAt: true,
             },
             with: {
               userBook: {
@@ -324,6 +336,9 @@ const communityBooksChaptersRouter = router
                 title: z.string().nullish(),
                 content: z.string().nullish(),
                 number: z.number(),
+                audioUrl: z.string().nullable(),
+                audioStatus: z.string().nullable(),
+                audioGeneratedAt: z.string().nullable(),
                 isUserAuthor: z.boolean(),
                 isUserEditor: z.boolean(),
                 isUserViewer: z.boolean(),
@@ -465,6 +480,9 @@ const communityBooksChaptersRouter = router
             //   title: true,
             // }),
             number: true,
+            audioUrl: true,
+            audioStatus: true,
+            audioGeneratedAt: true,
             ...((isUserAuthor || isUserEditor || isUserViewer) && {
               content: true,
             }),
@@ -859,4 +877,203 @@ const communityBooksChaptersRouter = router
     return c.json(res);
   });
 
-export default communityBooksChaptersRouter;
+const audioGenerationRouter = createRouter().openapi(
+  createRoute({
+    method: "post",
+    path: "/:chapterId/generate-audio",
+    request: {
+      params: z.object({
+        chapterId: z.string(),
+      }),
+      body: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              language: z.string().optional().default("en"),
+            }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              audioUrl: z.string(),
+              status: z.string(),
+            }),
+          },
+        },
+        description: "Audio generation initiated successfully",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              error: z.string(),
+            }),
+          },
+        },
+        description: "Unauthorized",
+      },
+      404: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              error: z.string(),
+            }),
+          },
+        },
+        description: "Chapter not found",
+      },
+      500: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              error: z.string(),
+            }),
+          },
+        },
+        description: "Internal server error",
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const auth = getAuth(c);
+      const userId = auth?.userId;
+      if (!userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const { chapterId } = c.req.valid("param");
+      const { language } = await c.req.json();
+
+      const db = connectToDB({
+        url: c.env.DATABASE_URL,
+        authoToken: c.env.DATABASE_AUTH_TOKEN,
+      });
+
+      const dbUser = await db.query.user.findFirst({
+        where: (users, { eq }) => eq(users.sub, userId),
+      });
+
+      if (!dbUser) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      // Get chapter and verify permissions
+      const chapter = await db.query.userBookChapters.findFirst({
+        where: (userBookChapters, { eq }) =>
+          eq(userBookChapters.id, +chapterId),
+        with: {
+          userBook: {
+            columns: {
+              id: true,
+              userId: true,
+            },
+            with: {
+              collaborators: {
+                columns: {
+                  role: true,
+                },
+                with: {
+                  user: {
+                    columns: {
+                      sub: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!chapter) {
+        return c.json({ error: "Chapter not found" }, 404);
+      }
+
+      const isUserAuthor = chapter.userBook?.userId === dbUser.id;
+      const isUserEditor = chapter.userBook?.collaborators?.some(
+        (collaborator) =>
+          collaborator.user.sub === userId && collaborator.role === "editor",
+      );
+
+      if (!isUserAuthor && !isUserEditor) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      // Mark chapter as generating audio
+      db.update(userBookChapters)
+        .set({
+          audioStatus: "generating",
+        })
+        .where(eq(userBookChapters.id, +chapterId));
+
+      try {
+        // Generate audio using MeloTTS
+        const audioResponse = await c.env.AI.run("@cf/myshell-ai/melotts", {
+          prompt: chapter.content,
+          lang: language || "en",
+        });
+
+        if (!(audioResponse instanceof Uint8Array)) {
+          const { audio } = audioResponse;
+
+          // Convert base64 audio to ArrayBuffer
+          const audioBuffer = Uint8Array.from(atob(audio), (c) =>
+            c.charCodeAt(0),
+          );
+
+          // Generate unique filename
+          const timestamp = Date.now();
+          const fileName = `audio/chapters/${chapterId}/chapter-${timestamp}.mp3`;
+
+          // Upload to R2
+          await c.env.litarchive.put(fileName, audioBuffer);
+
+          // Generate public URL for the audio file
+          const audioUrl = `${c.env.IMAGE_STORAGE_URL}/${fileName}`;
+
+          // Update chapter with audio URL and status
+          await db
+            .update(userBookChapters)
+            .set({
+              audioUrl: audioUrl,
+              audioGeneratedAt: new Date().toISOString(),
+              audioStatus: "completed",
+            })
+            .where(eq(userBookChapters.id, +chapterId));
+
+          return c.json(
+            {
+              audioUrl: audioUrl,
+              status: "completed",
+            },
+            200,
+          );
+        }
+        return c.json({ error: "Failed to generate audio" }, 500);
+      } catch (error) {
+        console.error("Error generating audio:", error);
+
+        // Mark as failed
+        await db
+          .update(userBookChapters)
+          .set({
+            audioStatus: "failed",
+          })
+          .where(eq(userBookChapters.id, +chapterId));
+
+        return c.json({ error: "Failed to generate audio" }, 500);
+      }
+    } catch (error) {
+      console.error("Error in audio generation endpoint:", error);
+      return c.json({ error: "Internal server error" }, 500);
+    }
+  },
+);
+
+export default communityBooksChaptersRouter.route("/", audioGenerationRouter);

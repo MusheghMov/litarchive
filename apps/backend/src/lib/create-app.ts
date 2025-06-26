@@ -1,7 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import type { R2Bucket } from "@cloudflare/workers-types";
+import type { R2Bucket, Ai } from "@cloudflare/workers-types";
 import { YDurableObjects } from "y-durableobjects";
 import { clerkMiddleware } from "@hono/clerk-auth";
 
@@ -12,6 +12,7 @@ type Bindings = {
   GEMINI_API_KEY: string;
   IMAGE_STORAGE_URL: string;
   litarchive: R2Bucket;
+  AI: Ai;
   Y_DURABLE_OBJECTS: DurableObjectNamespace<YDurableObjects<Env>>;
 };
 
