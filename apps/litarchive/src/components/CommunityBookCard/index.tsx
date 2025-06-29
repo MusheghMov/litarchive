@@ -15,6 +15,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Genre } from "@/types";
 import { cn } from "@/lib/utils";
+import CoverImageDisplay from "@/components/CoverImageDisplay";
 
 export default function CommunityBookCard({
   book,
@@ -44,20 +45,14 @@ export default function CommunityBookCard({
                 {role}
               </Badge>
             )}
-            {book.coverImageUrl ? (
-              <Image
-                src={book.coverImageUrl}
-                alt="Cover Image"
-                className="aspect-square h-full w-full object-cover"
-                width={300}
-                height={300}
-              />
-            ) : (
-              <ImageIcon
-                className="h-full w-full object-cover"
-                strokeWidth={1}
-              />
-            )}
+            <CoverImageDisplay
+              bookSlug={book.slug!}
+              initialCoverImageUrl={book.coverImageUrl}
+              initialImageStatus={book.imageStatus}
+              className="aspect-square h-full w-full object-cover"
+              width={300}
+              height={300}
+            />
           </CardContent>
           <CardHeader className="px-3 py-0">
             <TooltipContainer tooltipContent={book.title}>

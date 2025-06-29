@@ -71,6 +71,8 @@ export const userBooks = sqliteTable("userBooks", {
   title: text("title").notNull(),
   description: text("description"),
   coverImageUrl: text("cover_image_url"),
+  imageStatus: text("image_status"), // "pending" | "generating" | "completed" | "failed"
+  imageGeneratedAt: text("image_generated_at"),
   userId: integer("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),

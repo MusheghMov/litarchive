@@ -323,6 +323,13 @@
       "when": 1750893851968,
       "tag": "0045_easy_dreadnoughts",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "6",
+      "when": 1751208150391,
+      "tag": "0046_fresh_nomad",
+      "breakpoints": true
     }
   ]
 }
