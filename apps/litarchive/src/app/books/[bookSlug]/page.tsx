@@ -5,6 +5,7 @@ import Chapters from "@/components/Chapters";
 import { auth } from "@clerk/nextjs/server";
 import CommunityBookInfo from "@/components/CommunityBookInfo";
 import StructuredData from "@/components/StructuredData";
+import CoverImageDisplay from "@/components/CoverImageDisplay";
 import type { Metadata } from "next";
 
 type Props = {
@@ -190,20 +191,12 @@ export default async function BookPage({ params }: Props) {
       <div className="flex w-full flex-col gap-4">
         <div className="flex w-full flex-col gap-4 md:flex-row">
           <div className="bg-card aspect-[2/3] max-h-[600px] w-full flex-col justify-end overflow-hidden rounded border p-2 md:w-[300px]">
-            {book.coverImageUrl ? (
-              <Image
-                src={book.coverImageUrl}
-                alt="Cover Image"
-                className="aspect-square h-full w-full object-cover"
-                width={300}
-                height={300}
-              />
-            ) : (
-              <ImageIcon
-                className="h-full w-full object-cover"
-                strokeWidth={1}
-              />
-            )}
+            <CoverImageDisplay
+              bookSlug={book.slug!}
+              initialCoverImageUrl={book.coverImageUrl}
+              initialImageStatus={book.imageStatus}
+              className="aspect-square h-full w-full object-cover"
+            />
           </div>
 
           <CommunityBookInfo book={book} genres={genres} />

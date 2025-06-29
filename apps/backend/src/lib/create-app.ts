@@ -4,6 +4,7 @@ import { logger } from "hono/logger";
 import { YDurableObjects } from "y-durableobjects";
 import { clerkMiddleware } from "@hono/clerk-auth";
 import { AudioGenerationParams } from "../workflows/audio-generation";
+import { ImageGenerationParams } from "../workflows/image-generation";
 
 export type Bindings = {
   DATABASE_URL: string;
@@ -15,6 +16,7 @@ export type Bindings = {
   AI: Ai;
   Y_DURABLE_OBJECTS: DurableObjectNamespace<YDurableObjects<Env>>;
   AUDIO_GENERATION_WORKFLOW: Workflow<AudioGenerationParams>;
+  IMAGE_GENERATION_WORKFLOW: Workflow<ImageGenerationParams>;
 };
 
 export type Env = {

@@ -29,6 +29,11 @@
       "name": "audio-generation",
       "binding": "AUDIO_GENERATION_WORKFLOW",
       "class_name": "AudioGenerationWorkflow"
+    },
+    {
+      "name": "image-generation",
+      "binding": "IMAGE_GENERATION_WORKFLOW",
+      "class_name": "ImageGenerationWorkflow"
     }
   ],
   "ai": {
@@ -64,6 +69,11 @@
           "name": "audio-generation",
           "binding": "AUDIO_GENERATION_WORKFLOW",
           "class_name": "AudioGenerationWorkflow"
+        },
+        {
+          "name": "image-generation",
+          "binding": "IMAGE_GENERATION_WORKFLOW",
+          "class_name": "ImageGenerationWorkflow"
         }
       ],
       "durable_objects": {

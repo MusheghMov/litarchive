@@ -6,8 +6,6 @@ import slugify from "slugify";
 import { createRouter } from "../../lib/create-app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { getAuth } from "@hono/clerk-auth";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { generateText } from "ai";
 
 function createUniqueSlug(title: string) {
   const baseSlug = slugify(title, { lower: true, strict: true });
@@ -363,6 +361,8 @@ const communityBooks = router
                 slug: z.string().nullable(),
                 description: z.string().nullable(),
                 coverImageUrl: z.string().nullable(),
+                imageStatus: z.string().nullable(),
+                imageGeneratedAt: z.string().nullable(),
                 isPublic: z.boolean().nullable(),
                 collaborators: z.array(
                   z.object({
@@ -513,6 +513,8 @@ const communityBooks = router
               slug: true,
               description: true,
               coverImageUrl: true,
+              imageStatus: true,
+              imageGeneratedAt: true,
               isPublic: true,
             },
             with: {
@@ -571,6 +573,8 @@ const communityBooks = router
             slug: true,
             description: true,
             coverImageUrl: true,
+            imageStatus: true,
+            imageGeneratedAt: true,
             isPublic: true,
           },
           with: {
@@ -657,97 +661,59 @@ const communityBooks = router
         })
         .returning({ id: userBooks.id, slug: userBooks.slug });
 
-      c.executionCtx.waitUntil(
-        new Promise(async (resolve) => {
-          try {
-            const coverImageFormData = formData.get(
-              "coverImage",
-            ) as unknown as File;
-            let coverImageUrl;
+      const coverImageFormData = formData.get("coverImage") as unknown as File;
 
-            if (coverImageFormData && coverImageFormData.size > 0) {
-              try {
-                const fileExtension = coverImageFormData?.type.split("/")[1];
-                const key = `${nanoid()}.${fileExtension}`;
-                coverImageUrl = `${c.env.IMAGE_STORAGE_URL}/${key}`;
-              } catch (error) {
-                console.error("Error uploading file:", error);
-              }
-            } else {
-              try {
-                const bookData = {
-                  title: title,
-                  author: dbUser.firstName + " " + dbUser.lastName,
-                  synopsis: description,
-                  genre: "",
-                  targetAudience: "",
-                  mood: "",
-                  setting: "",
-                  artStyle: "",
-                  colorScheme: "",
-                  typographyStyle: "",
-                  mainSubject: "",
-                  background: "",
-                  symbolicElements: "",
-                  aspectRatio: "1:1",
-                  textPlacement: "title at top and author name at bottom",
-                  additionalRequirements: "",
-                };
+      if (coverImageFormData && coverImageFormData.size > 0) {
+        c.executionCtx.waitUntil(
+          (async () => {
+            try {
+              const fileExtension = coverImageFormData?.type.split("/")[1];
+              const key = `${nanoid()}.${fileExtension}`;
+              await c.env.litarchive.put(key, coverImageFormData);
+              const coverImageUrl = `${c.env.IMAGE_STORAGE_URL}/${key}`;
 
-                const prompt = generateBookCoverPrompt(bookData);
-
-                const google = createGoogleGenerativeAI({
-                  apiKey: c.env.GEMINI_API_KEY,
-                });
-
-                const result = await generateText({
-                  model: google("gemini-2.0-flash-exp"),
-                  providerOptions: {
-                    google: {
-                      responseModalities: ["TEXT", "IMAGE"],
-                      aspectRatio: "1:1",
-                    },
-                  },
-                  prompt: prompt,
-                });
-
-                try {
-                  for (const file of result.files) {
-                    if (file.mimeType.startsWith("image/")) {
-                      const base64Data = file.base64;
-                      const binaryString = atob(base64Data);
-                      const bytes = new Uint8Array(binaryString.length);
-                      for (let i = 0; i < binaryString.length; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
-                      }
-
-                      const fileExtension = "png";
-                      const key = `${nanoid()}.${fileExtension}`;
-                      await c.env.litarchive.put(key, bytes); // Pass the Uint8Array directly
-                      coverImageUrl = `${c.env.IMAGE_STORAGE_URL}/${key}`;
-                    }
-                  }
-                } catch (error) {
-                  console.error("Error processing image:", error);
-                }
-              } catch (error) {
-                console.error("Error generating cover image:", error);
-              }
-            }
-            if (coverImageUrl) {
               await db
                 .update(userBooks)
                 .set({
                   coverImageUrl: coverImageUrl,
                 })
                 .where(eq(userBooks.id, res[0].id));
+            } catch (error) {
+              console.error("Error uploading cover image:", error);
             }
-            resolve(res);
-          } catch (error) {
-            console.error("Error uploading file:", error);
-          }
-        }),
-      );
+          })(),
+        );
+      } else {
+        try {
+          db.update(userBooks)
+            .set({
+              imageStatus: "pending",
+            })
+            .where(eq(userBooks.id, res[0].id));
+
+          await c.env.IMAGE_GENERATION_WORKFLOW.create({
+            params: {
+              bookId: res[0].id,
+              title: title,
+              author: dbUser.firstName + " " + dbUser.lastName,
+              description: description || "",
+              databaseUrl: c.env.DATABASE_URL,
+              databaseAuthToken: c.env.DATABASE_AUTH_TOKEN,
+              imageStorageUrl: c.env.IMAGE_STORAGE_URL,
+              geminiApiKey: c.env.GEMINI_API_KEY,
+            },
+          });
+        } catch (error) {
+          console.error("Error starting image generation workflow:", error);
+
+          await db
+            .update(userBooks)
+            .set({
+              imageStatus: "failed",
+            })
+            .where(eq(userBooks.id, res[0].id));
+        }
+      }
 
       return c.json(res);
     },
@@ -848,6 +814,40 @@ const communityBooks = router
     const res = await db.delete(userBooks).where(eq(userBooks.id, bookId));
 
     return c.json(res);
+  })
+  .get("/:bookSlug/image-status", async (c) => {
+    try {
+      const bookSlug = c.req.param("bookSlug");
+
+      const db = connectToDB({
+        url: c.env.DATABASE_URL,
+        authoToken: c.env.DATABASE_AUTH_TOKEN,
+      });
+
+      const book = await db.query.userBooks.findFirst({
+        where: (userBooks, { eq }) => eq(userBooks.slug, bookSlug),
+        columns: {
+          id: true,
+          imageStatus: true,
+          coverImageUrl: true,
+          imageGeneratedAt: true,
+        },
+      });
+
+      if (!book) {
+        return c.json({ error: "Book not found" }, 404);
+      }
+
+      return c.json({
+        bookId: book.id,
+        imageStatus: book.imageStatus,
+        coverImageUrl: book.coverImageUrl,
+        imageGeneratedAt: book.imageGeneratedAt,
+      });
+    } catch (error) {
+      console.error("Error fetching image status:", error);
+      return c.json({ error: "Internal server error" }, 500);
+    }
   })
   .post(
     "/collaboration/create",

@@ -11,6 +11,7 @@ import createApp from "./lib/create-app";
 import { YDurableObjects, yRoute } from "y-durableobjects";
 import { Env } from "./lib/create-app";
 import { AudioGenerationWorkflow } from "./workflows/audio-generation";
+import { ImageGenerationWorkflow } from "./workflows/image-generation";
 
 const app = createApp();
 
@@ -49,4 +50,4 @@ app.get(
 export type AppTypes = typeof route;
 
 export default app;
-export { YDurableObjects, AudioGenerationWorkflow };
+export { YDurableObjects, AudioGenerationWorkflow, ImageGenerationWorkflow };
