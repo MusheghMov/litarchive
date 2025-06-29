@@ -23,7 +23,6 @@ export default function CoverImageDisplay({
     (initialImageStatus === "pending" ||
       initialImageStatus === "generating" ||
       initialImageStatus === null);
-  console.log("shouldPoll: ", shouldPoll);
 
   const { data: imageStatus } = useQuery({
     queryKey: ["book-image-status", bookSlug],
@@ -42,7 +41,6 @@ export default function CoverImageDisplay({
     enabled: shouldPoll,
     refetchInterval: (queryData) => {
       const status = queryData.state.data?.imageStatus;
-      console.log("status: ", status);
       if (status === "generating" || status === "pending") {
         return 2000;
       }
