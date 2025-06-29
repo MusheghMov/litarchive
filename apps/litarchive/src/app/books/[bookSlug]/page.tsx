@@ -196,8 +196,6 @@ export default async function BookPage({ params }: Props) {
               initialCoverImageUrl={book.coverImageUrl}
               initialImageStatus={book.imageStatus}
               className="aspect-square h-full w-full object-cover"
-              width={300}
-              height={300}
             />
           </div>
 

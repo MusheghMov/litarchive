@@ -6,23 +6,17 @@ import { ImageIcon, Wand2 } from "lucide-react";
 import honoClient from "@/app/honoRPCClient";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface CoverImageDisplayProps {
-  bookSlug: string;
-  initialCoverImageUrl?: string | null;
-  initialImageStatus?: string | null;
-  className?: string;
-  width?: number;
-  height?: number;
-}
-
 export default function CoverImageDisplay({
   bookSlug,
   initialCoverImageUrl,
   initialImageStatus,
   className = "aspect-square h-full w-full object-cover",
-  width = 300,
-  height = 300,
-}: CoverImageDisplayProps) {
+}: {
+  bookSlug: string;
+  initialCoverImageUrl?: string | null;
+  initialImageStatus?: string | null;
+  className?: string;
+}) {
   // Determine if we should poll
   const shouldPoll =
     !initialCoverImageUrl &&
@@ -101,8 +95,8 @@ export default function CoverImageDisplay({
         src={currentCoverImageUrl}
         alt="Cover Image"
         className={className}
-        width={width}
-        height={height}
+        width={300}
+        height={400}
       />
     );
   }

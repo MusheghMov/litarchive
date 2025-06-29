@@ -1,5 +1,3 @@
-import Image from "next/image";
-import { ImageIcon } from "lucide-react";
 import TooltipContainer from "@/components/TooltipContainer";
 import {
   Card,
@@ -33,7 +31,7 @@ export default function CommunityBookCard({
         className="flex aspect-[2/3] w-full flex-col justify-end gap-2 overflow-hidden rounded border p-2"
       >
         <div className="flex h-full flex-col gap-2 overflow-hidden">
-          <CardContent className="relative aspect-square overflow-hidden rounded p-0">
+          <CardContent className="relative aspect-[3/4] overflow-hidden rounded p-0">
             {role && (
               <Badge
                 variant="outline"
@@ -49,14 +47,12 @@ export default function CommunityBookCard({
               bookSlug={book.slug!}
               initialCoverImageUrl={book.coverImageUrl}
               initialImageStatus={book.imageStatus}
-              className="aspect-square h-full w-full object-cover"
-              width={300}
-              height={300}
+              className="h-full w-full bg-transparent object-cover object-top dark:bg-gray-900"
             />
           </CardContent>
           <CardHeader className="px-3 py-0">
             <TooltipContainer tooltipContent={book.title}>
-              <CardTitle className="line-clamp-2 text-base">
+              <CardTitle className="line-clamp-1 text-base">
                 {book.title}
               </CardTitle>
             </TooltipContainer>
