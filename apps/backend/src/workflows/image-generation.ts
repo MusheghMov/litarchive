@@ -6,8 +6,6 @@ import {
 import { connectToDB, eq } from "@repo/db";
 import { userBooks } from "@repo/db/schema";
 import { Bindings } from "../lib/create-app";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { generateText } from "ai";
 import { nanoid } from "nanoid";
 
 export interface ImageGenerationParams {
@@ -18,7 +16,6 @@ export interface ImageGenerationParams {
   databaseUrl: string;
   databaseAuthToken: string;
   imageStorageUrl: string;
-  geminiApiKey: string;
 }
 
 export class ImageGenerationWorkflow extends WorkflowEntrypoint<
@@ -34,12 +31,10 @@ export class ImageGenerationWorkflow extends WorkflowEntrypoint<
       databaseUrl,
       databaseAuthToken,
       imageStorageUrl,
-      geminiApiKey,
     } = event.payload;
 
     // Step 1: Update book status to generating
     await step.do("update-status-generating", async () => {
-      console.log("1. update-status-generating");
       const db = connectToDB({
         url: databaseUrl,
         authoToken: databaseAuthToken,
@@ -51,14 +46,10 @@ export class ImageGenerationWorkflow extends WorkflowEntrypoint<
           imageStatus: "generating",
         })
         .where(eq(userBooks.id, bookId));
-
-      console.log(`Book ${bookId}: Status updated to generating`);
     });
 
-    // Step 2: Generate cover image using Gemini 2.0
+    // Step 2: Generate cover image using Flux 1.0 (schnell)
     const imageUrl = await step.do("generate-image", async () => {
-      console.log("2. generate-image");
-
       const bookData = {
         title: title,
         author: author,
@@ -77,44 +68,24 @@ export class ImageGenerationWorkflow extends WorkflowEntrypoint<
 
       const prompt = generateBookCoverPrompt(bookData);
 
-      const google = createGoogleGenerativeAI({
-        apiKey: geminiApiKey,
-      });
-
-      const result = await generateText({
-        model: google("gemini-2.0-flash-exp"),
-        providerOptions: {
-          google: {
-            responseModalities: ["TEXT", "IMAGE"],
-            aspectRatio: "1:1",
-          },
+      const result = await this.env.AI.run(
+        "@cf/black-forest-labs/flux-1-schnell",
+        {
+          prompt: prompt,
         },
-        prompt: prompt,
-      });
+      );
 
-      console.log(`Book ${bookId}: Image generation completed`);
+      if (result.image) {
+        const key = `covers/${nanoid()}.png`;
+        // Convert from base64 string
+        const binaryString = atob(result.image);
+        // Create byte representation
+        const img = Uint8Array.from(binaryString, (m) => m.codePointAt(0)!);
+        await this.env.litarchive.put(key, img);
 
-      // Process generated image files
-      for (const file of result.files) {
-        if (file.mimeType.startsWith("image/")) {
-          const base64Data = file.base64;
-          const binaryString = atob(base64Data);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
+        const publicUrl = `${imageStorageUrl}/${key}`;
 
-          const fileExtension = "png";
-          const key = `covers/${nanoid()}.${fileExtension}`;
-          
-          console.log(`Book ${bookId}: Uploading image to R2`);
-          await this.env.litarchive.put(key, bytes);
-
-          const publicUrl = `${imageStorageUrl}/${key}`;
-          console.log(`Book ${bookId}: Image uploaded to ${publicUrl}`);
-          
-          return publicUrl;
-        }
+        return publicUrl;
       }
 
       throw new Error("No image file generated");
@@ -153,10 +124,7 @@ export class ImageGenerationWorkflow extends WorkflowEntrypoint<
   async onFailure(event: WorkflowEvent<ImageGenerationParams>, error: Error) {
     const { bookId, databaseUrl, databaseAuthToken } = event.payload;
 
-    console.error(
-      `Book ${bookId}: Image generation workflow failed:`,
-      error,
-    );
+    console.error(`Book ${bookId}: Image generation workflow failed:`, error);
 
     // Update book status to failed
     try {
@@ -227,3 +195,4 @@ function generateBookCoverPrompt(bookData: any) {
 ${additionalRequirements ? `**Specific Instructions:**\n${additionalRequirements}\n` : ""}
 Create an eye-catching, marketable book cover that would attract readers browsing an online bookstore.`;
 }
+

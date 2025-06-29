@@ -16,7 +16,6 @@
     "deploy": "wrangler deploy --minify"
   },
   "dependencies": {
-    "@ai-sdk/google": "^1.2.19",
     "@clerk/backend": "^1.31.4",
     "@hono/clerk-auth": "^2.0.0",
     "@hono/swagger-ui": "^0.5.0",
@@ -24,7 +23,6 @@
     "@hono/zod-validator": "^0.4.3",
     "@repo/db": "workspace:*",
     "@scalar/hono-api-reference": "^0.5.165",
-    "ai": "^4.3.16",
     "drizzle-orm": "^0.44.2",
     "hono": "^4.7.5",
     "js-base64": "^3.7.7",

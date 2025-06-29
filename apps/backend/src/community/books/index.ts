@@ -700,7 +700,6 @@ const communityBooks = router
               databaseUrl: c.env.DATABASE_URL,
               databaseAuthToken: c.env.DATABASE_AUTH_TOKEN,
               imageStorageUrl: c.env.IMAGE_STORAGE_URL,
-              geminiApiKey: c.env.GEMINI_API_KEY,
             },
           });
         } catch (error) {
