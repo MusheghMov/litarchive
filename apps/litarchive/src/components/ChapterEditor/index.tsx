@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useModal } from "@/providers/ModalProvider";
 import { Chapter, ChapterVersion } from "@/types";
 import { useAuth } from "@clerk/nextjs";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -14,7 +14,7 @@ import ReadOnlyTiptapEditor from "../ReadonlyTiptapEditor";
 import TiptapEditor from "../TiptapEditor";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Check, XIcon, PencilIcon, AudioLines } from "lucide-react";
+import { Check, XIcon, PencilIcon, AudioLines, Loader2 } from "lucide-react";
 
 export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
   const router = useRouter();
@@ -141,14 +141,58 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
       },
       onSuccess: async (res) => {
         if (res.ok) {
-          toast.success("Audio generated successfully!");
-          router.refresh();
+          toast.success("Audio generation started!");
+          refetchAudioStatus();
         } else {
           toast.error("Failed to generate audio");
         }
       },
     }
   );
+
+  const { data: audioStatus, refetch: refetchAudioStatus } = useQuery({
+    queryKey: ["audioStatus", chapter.id],
+    queryFn: async () => {
+      const token = await getToken();
+      const res = await honoClient.community.chapters[":chapterId"][
+        "audio-status"
+      ].$get(
+        {
+          param: { chapterId: chapter.id.toString() },
+        },
+        {
+          headers: { ...(token && { Authorization: token }) },
+        }
+      );
+
+      if (res.ok) {
+        return await res.json();
+      }
+      throw new Error("Failed to fetch audio status");
+    },
+    enabled: (queryData) => {
+      const status = queryData?.state.data;
+      if (status?.audioStatus === "completed") {
+        toast.success("Audio generation completed");
+        return false;
+      }
+      return (
+        !!(chapter.isUserAuthor || chapter.isUserEditor) &&
+        !!(
+          status?.audioStatus === "generating" ||
+          status?.audioStatus === "pending"
+        )
+      );
+    },
+    refetchInterval: (data) => {
+      const audioStatus = data.state.data?.audioStatus;
+      if (audioStatus === "pending" || "generating") {
+        return 2000;
+      }
+      return false;
+    },
+    refetchIntervalInBackground: true,
+  });
 
   useEffect(() => {
     if (chapter) {
@@ -286,15 +330,32 @@ export default function ChapterEditor({ chapter }: { chapter: Chapter }) {
                   <Button
                     onClick={() => onGenerateAudio()}
                     disabled={
-                      isGeneratingAudio || !lastSavedContent.current?.trim()
+                      isGeneratingAudio ||
+                      audioStatus?.audioStatus === "pending" ||
+                      audioStatus?.audioStatus === "generating" ||
+                      !lastSavedContent.current?.trim()
                     }
                     variant="outline"
                     className="cursor-pointer"
                   >
-                    {isGeneratingAudio ? (
+                    {isGeneratingAudio ||
+                    audioStatus?.audioStatus === "pending" ||
+                    audioStatus?.audioStatus === "generating" ? (
                       <>
-                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-current" />
-                        Generating...
+                        <Loader2 className="h-4 w-4 animate-spin rounded-full" />
+                        {audioStatus?.audioStatus === "pending"
+                          ? "starting..."
+                          : "generating..."}
+                      </>
+                    ) : audioStatus?.audioStatus === "completed" ? (
+                      <>
+                        <AudioLines className="mr-2 h-4 w-4" />
+                        Regenerate Audio
+                      </>
+                    ) : audioStatus?.audioStatus === "failed" ? (
+                      <>
+                        <AudioLines className="mr-2 h-4 w-4" />
+                        Retry Audio
                       </>
                     ) : (
                       <>
