@@ -5,7 +5,7 @@ import {
 } from "cloudflare:workers";
 import { connectToDB, eq } from "@repo/db";
 import { userBookChapters } from "@repo/db/schema";
-import { Bindings } from "@/lib/create-app";
+import { Bindings } from "../lib/create-app";
 
 export interface AudioGenerationParams {
   chapterId: number;

@@ -10,7 +10,7 @@ import { apiReference } from "@scalar/hono-api-reference";
 import createApp from "./lib/create-app";
 import { YDurableObjects, yRoute } from "y-durableobjects";
 import { Env } from "./lib/create-app";
-import { AudioGenerationWorkflow } from "@/workflows/audio-generation";
+import { AudioGenerationWorkflow } from "./workflows/audio-generation";
 
 const app = createApp();
 

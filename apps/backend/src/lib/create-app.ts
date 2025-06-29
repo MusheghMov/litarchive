@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { YDurableObjects } from "y-durableobjects";
 import { clerkMiddleware } from "@hono/clerk-auth";
-import { AudioGenerationParams } from "@/workflows/audio-generation";
+import { AudioGenerationParams } from "../workflows/audio-generation";
 
 export type Bindings = {
   DATABASE_URL: string;
