@@ -877,203 +877,325 @@ const communityBooksChaptersRouter = router
     return c.json(res);
   });
 
-const audioGenerationRouter = createRouter().openapi(
-  createRoute({
-    method: "post",
-    path: "/:chapterId/generate-audio",
-    request: {
-      params: z.object({
-        chapterId: z.string(),
-      }),
-      body: {
-        content: {
-          "application/json": {
-            schema: z.object({
-              language: z.string().optional().default("en"),
-            }),
-          },
-        },
-      },
-    },
-    responses: {
-      200: {
-        content: {
-          "application/json": {
-            schema: z.object({
-              audioUrl: z.string(),
-              status: z.string(),
-            }),
-          },
-        },
-        description: "Audio generation initiated successfully",
-      },
-      401: {
-        content: {
-          "application/json": {
-            schema: z.object({
-              error: z.string(),
-            }),
-          },
-        },
-        description: "Unauthorized",
-      },
-      404: {
-        content: {
-          "application/json": {
-            schema: z.object({
-              error: z.string(),
-            }),
-          },
-        },
-        description: "Chapter not found",
-      },
-      500: {
-        content: {
-          "application/json": {
-            schema: z.object({
-              error: z.string(),
-            }),
-          },
-        },
-        description: "Internal server error",
-      },
-    },
-  }),
-  async (c) => {
-    try {
-      const auth = getAuth(c);
-      const userId = auth?.userId;
-      if (!userId) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      const { chapterId } = c.req.valid("param");
-      const { language } = await c.req.json();
-
-      const db = connectToDB({
-        url: c.env.DATABASE_URL,
-        authoToken: c.env.DATABASE_AUTH_TOKEN,
-      });
-
-      const dbUser = await db.query.user.findFirst({
-        where: (users, { eq }) => eq(users.sub, userId),
-      });
-
-      if (!dbUser) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      // Get chapter and verify permissions
-      const chapter = await db.query.userBookChapters.findFirst({
-        where: (userBookChapters, { eq }) =>
-          eq(userBookChapters.id, +chapterId),
-        with: {
-          userBook: {
-            columns: {
-              id: true,
-              userId: true,
+const audioGenerationRouter = createRouter()
+  .openapi(
+    createRoute({
+      method: "post",
+      path: "/:chapterId/generate-audio",
+      request: {
+        params: z.object({
+          chapterId: z.string(),
+        }),
+        body: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                language: z.string().optional().default("en"),
+              }),
             },
-            with: {
-              collaborators: {
-                columns: {
-                  role: true,
-                },
-                with: {
-                  user: {
-                    columns: {
-                      sub: true,
+          },
+        },
+      },
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                workflowId: z.string(),
+                status: z.string(),
+                message: z.string(),
+              }),
+            },
+          },
+          description: "Audio generation workflow started successfully",
+        },
+        401: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Unauthorized",
+        },
+        404: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Chapter not found",
+        },
+        500: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Internal server error",
+        },
+      },
+    }),
+    async (c) => {
+      try {
+        const auth = getAuth(c);
+        const userId = auth?.userId;
+        if (!userId) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        const { chapterId } = c.req.valid("param");
+        const { language } = await c.req.json();
+
+        const db = connectToDB({
+          url: c.env.DATABASE_URL,
+          authoToken: c.env.DATABASE_AUTH_TOKEN,
+        });
+
+        const dbUser = await db.query.user.findFirst({
+          where: (users, { eq }) => eq(users.sub, userId),
+        });
+
+        if (!dbUser) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        // Get chapter and verify permissions
+        const chapter = await db.query.userBookChapters.findFirst({
+          where: (userBookChapters, { eq }) =>
+            eq(userBookChapters.id, +chapterId),
+          with: {
+            userBook: {
+              columns: {
+                id: true,
+                userId: true,
+              },
+              with: {
+                collaborators: {
+                  columns: {
+                    role: true,
+                  },
+                  with: {
+                    user: {
+                      columns: {
+                        sub: true,
+                      },
                     },
                   },
                 },
               },
             },
           },
-        },
-      });
-
-      if (!chapter) {
-        return c.json({ error: "Chapter not found" }, 404);
-      }
-
-      const isUserAuthor = chapter.userBook?.userId === dbUser.id;
-      const isUserEditor = chapter.userBook?.collaborators?.some(
-        (collaborator) =>
-          collaborator.user.sub === userId && collaborator.role === "editor",
-      );
-
-      if (!isUserAuthor && !isUserEditor) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      // Mark chapter as generating audio
-      db.update(userBookChapters)
-        .set({
-          audioStatus: "generating",
-        })
-        .where(eq(userBookChapters.id, +chapterId));
-
-      try {
-        // Generate audio using MeloTTS
-        const audioResponse = await c.env.AI.run("@cf/myshell-ai/melotts", {
-          prompt: chapter.content,
-          lang: language || "en",
         });
 
-        if (!(audioResponse instanceof Uint8Array)) {
-          const { audio } = audioResponse;
+        if (!chapter) {
+          return c.json({ error: "Chapter not found" }, 404);
+        }
 
-          // Convert base64 audio to ArrayBuffer
-          const audioBuffer = Uint8Array.from(atob(audio), (c) =>
-            c.charCodeAt(0),
+        const isUserAuthor = chapter.userBook?.userId === dbUser.id;
+        const isUserEditor = chapter.userBook?.collaborators?.some(
+          (collaborator) =>
+            collaborator.user.sub === userId && collaborator.role === "editor",
+        );
+
+        if (!isUserAuthor && !isUserEditor) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        try {
+          const workflowInstance = await c.env.AUDIO_GENERATION_WORKFLOW.create(
+            {
+              params: {
+                chapterId: +chapterId,
+                content: chapter.content,
+                language: language || "en",
+                databaseUrl: c.env.DATABASE_URL,
+                databaseAuthToken: c.env.DATABASE_AUTH_TOKEN,
+                imageStorageUrl: c.env.IMAGE_STORAGE_URL,
+              },
+            },
           );
 
-          // Generate unique filename
-          const timestamp = Date.now();
-          const fileName = `audio/chapters/${chapterId}/chapter-${timestamp}.mp3`;
-
-          // Upload to R2
-          await c.env.litarchive.put(fileName, audioBuffer);
-
-          // Generate public URL for the audio file
-          const audioUrl = `${c.env.IMAGE_STORAGE_URL}/${fileName}`;
-
-          // Update chapter with audio URL and status
+          // Update chapter status to pending
           await db
             .update(userBookChapters)
             .set({
-              audioUrl: audioUrl,
-              audioGeneratedAt: new Date().toISOString(),
-              audioStatus: "completed",
+              audioStatus: "pending",
             })
             .where(eq(userBookChapters.id, +chapterId));
 
           return c.json(
             {
-              audioUrl: audioUrl,
-              status: "completed",
+              workflowId: workflowInstance.id.toString(),
+              status: "pending",
+              message: "Audio generation started",
             },
             200,
           );
+        } catch (error) {
+          console.error("Error starting audio generation workflow:", error);
+
+          // Mark as failed
+          await db
+            .update(userBookChapters)
+            .set({
+              audioStatus: "failed",
+            })
+            .where(eq(userBookChapters.id, +chapterId));
+
+          return c.json({ error: "Failed to start audio generation" }, 500);
         }
-        return c.json({ error: "Failed to generate audio" }, 500);
       } catch (error) {
-        console.error("Error generating audio:", error);
-
-        // Mark as failed
-        await db
-          .update(userBookChapters)
-          .set({
-            audioStatus: "failed",
-          })
-          .where(eq(userBookChapters.id, +chapterId));
-
-        return c.json({ error: "Failed to generate audio" }, 500);
+        console.error("Error in audio generation endpoint:", error);
+        return c.json({ error: "Internal server error" }, 500);
       }
-    } catch (error) {
-      console.error("Error in audio generation endpoint:", error);
-      return c.json({ error: "Internal server error" }, 500);
-    }
-  },
-);
+    },
+  )
+  .openapi(
+    createRoute({
+      method: "get",
+      path: "/:chapterId/audio-status",
+      request: {
+        params: z.object({
+          chapterId: z.string(),
+        }),
+      },
+      responses: {
+        200: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                chapterId: z.number(),
+                audioStatus: z.string().nullable(),
+                audioUrl: z.string().nullable(),
+                audioGeneratedAt: z.string().nullable(),
+              }),
+            },
+          },
+          description: "Audio generation status retrieved successfully",
+        },
+        401: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Unauthorized",
+        },
+        404: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Chapter not found",
+        },
+        500: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                error: z.string(),
+              }),
+            },
+          },
+          description: "Internal server error",
+        },
+      },
+    }),
+    async (c) => {
+      try {
+        const auth = getAuth(c);
+        const userId = auth?.userId;
+        if (!userId) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        const { chapterId } = c.req.valid("param");
+
+        const db = connectToDB({
+          url: c.env.DATABASE_URL,
+          authoToken: c.env.DATABASE_AUTH_TOKEN,
+        });
+
+        const dbUser = await db.query.user.findFirst({
+          where: (users, { eq }) => eq(users.sub, userId),
+        });
+
+        if (!dbUser) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        // Get chapter and verify permissions
+        const chapter = await db.query.userBookChapters.findFirst({
+          where: (userBookChapters, { eq }) =>
+            eq(userBookChapters.id, +chapterId),
+          columns: {
+            id: true,
+            audioStatus: true,
+            audioUrl: true,
+            audioGeneratedAt: true,
+          },
+          with: {
+            userBook: {
+              columns: {
+                id: true,
+                userId: true,
+              },
+              with: {
+                collaborators: {
+                  columns: {
+                    role: true,
+                  },
+                  with: {
+                    user: {
+                      columns: {
+                        sub: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        if (!chapter) {
+          return c.json({ error: "Chapter not found" }, 404);
+        }
+
+        const isUserAuthor = chapter.userBook?.userId === dbUser.id;
+        const isUserEditor = chapter.userBook?.collaborators?.some(
+          (collaborator) =>
+            collaborator.user.sub === userId && collaborator.role === "editor",
+        );
+
+        if (!isUserAuthor && !isUserEditor) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        return c.json(
+          {
+            chapterId: chapter.id,
+            audioStatus: chapter.audioStatus,
+            audioUrl: chapter.audioUrl,
+            audioGeneratedAt: chapter.audioGeneratedAt,
+          },
+          200,
+        );
+      } catch (error) {
+        console.error("Error fetching audio status:", error);
+        return c.json({ error: "Internal server error" }, 500);
+      }
+    },
+  );
 
 export default communityBooksChaptersRouter.route("/", audioGenerationRouter);

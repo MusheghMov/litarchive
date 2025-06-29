@@ -1,11 +1,11 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import type { R2Bucket, Ai } from "@cloudflare/workers-types";
 import { YDurableObjects } from "y-durableobjects";
 import { clerkMiddleware } from "@hono/clerk-auth";
+import { AudioGenerationParams } from "../workflows/audio-generation";
 
-type Bindings = {
+export type Bindings = {
   DATABASE_URL: string;
   DATABASE_AUTH_TOKEN: string;
   OPENAI_API_KEY: string;
@@ -14,6 +14,7 @@ type Bindings = {
   litarchive: R2Bucket;
   AI: Ai;
   Y_DURABLE_OBJECTS: DurableObjectNamespace<YDurableObjects<Env>>;
+  AUDIO_GENERATION_WORKFLOW: Workflow<AudioGenerationParams>;
 };
 
 export type Env = {

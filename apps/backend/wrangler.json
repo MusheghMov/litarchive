@@ -1,0 +1,79 @@
+{
+  "name": "backend",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-11-27",
+
+  "placement": {
+    "mode": "smart"
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["YDurableObjects"]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+
+  "r2_buckets": [
+    {
+      "bucket_name": "litarchive",
+      "preview_bucket_name": "litarchive",
+      "binding": "litarchive",
+      "experimental_remote": true
+    }
+  ],
+  "workflows": [
+    {
+      "name": "audio-generation",
+      "binding": "AUDIO_GENERATION_WORKFLOW",
+      "class_name": "AudioGenerationWorkflow"
+    }
+  ],
+  "ai": {
+    "binding": "AI",
+    "experimental_remote": true
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "Y_DURABLE_OBJECTS",
+        "class_name": "YDurableObjects"
+      }
+    ]
+  },
+
+  "env": {
+    "dev": {
+      "name": "litarchive-dev",
+      "r2_buckets": [
+        {
+          "binding": "litarchive",
+          "bucket_name": "litarchive-dev",
+          "preview_bucket_name": "litarchive-dev",
+          "experimental_remote": true
+        }
+      ],
+      "ai": {
+        "binding": "AI",
+        "experimental_remote": true
+      },
+      "workflows": [
+        {
+          "name": "audio-generation",
+          "binding": "AUDIO_GENERATION_WORKFLOW",
+          "class_name": "AudioGenerationWorkflow"
+        }
+      ],
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "Y_DURABLE_OBJECTS",
+            "class_name": "YDurableObjects"
+          }
+        ]
+      }
+    }
+  }
+}

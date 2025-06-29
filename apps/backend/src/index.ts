@@ -10,6 +10,7 @@ import { apiReference } from "@scalar/hono-api-reference";
 import createApp from "./lib/create-app";
 import { YDurableObjects, yRoute } from "y-durableobjects";
 import { Env } from "./lib/create-app";
+import { AudioGenerationWorkflow } from "./workflows/audio-generation";
 
 const app = createApp();
 
@@ -48,4 +49,4 @@ app.get(
 export type AppTypes = typeof route;
 
 export default app;
-export { YDurableObjects };
+export { YDurableObjects, AudioGenerationWorkflow };
