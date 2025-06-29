@@ -185,6 +185,8 @@ export default async function BookPage({ params }: Props) {
     creativeWorkStatus: book.isPublic ? "Published" : "Draft",
   };
 
+  console.log("Book: ", book);
+
   return (
     <>
       <StructuredData data={bookSchema} />

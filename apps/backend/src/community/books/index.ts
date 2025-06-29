@@ -685,7 +685,8 @@ const communityBooks = router
         );
       } else {
         try {
-          db.update(userBooks)
+          await db
+            .update(userBooks)
             .set({
               imageStatus: "pending",
             })
